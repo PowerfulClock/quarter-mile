@@ -2037,7 +2037,11 @@ function burnoutAllowed(c){return c.drive==='rwd'&&!((IND[c.ind]||IND.na).electr
    the tree auto-starts a moment after both are in. Nothing is lock-stepped. */
 function planPreRace(cars,lanes,onStrip,amb){
   const ss=u=>u<=0?0:u>=1?1:u*u*(3-2*u);
-  const R=(a,b)=>a+Math.random()*(b-a);
+  /* The pre-race has a little human variation (how long the drivers take to roll in and
+     stage). Online, every screen uses the same seed, so the run-up plays out identically. */
+  let seed=(window.__preSeed!=null?window.__preSeed:Math.random()*4294967296)>>>0;window.__preSeed=null;
+  const rng=()=>{seed=(seed+0x6D2B79F5)>>>0;let t=seed;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};
+  const R=(a,b)=>a+rng()*(b-a);
   const anyBo=lanes.some(l=>cars[l].burnout);
   const preFt=onStrip?-0.6:0;                      // pre-stage beam is ~7 in behind stage
   const L={};
@@ -8988,7 +8992,11 @@ document.getElementById('runBtn').addEventListener('click',()=>{
   const stageMs=dig?PRE.green*1000:4200;
   window.lastRaceInfo={res,stageMs,lanes:lanes.slice(),names:lanes.map(l=>cars[l].name)};
   (window._treeTimers||[]).forEach(clearTimeout);window._treeTimers=[];
-  const later=(fn,ms)=>window._treeTimers.push(setTimeout(fn,ms));
+  /* Online races start on a shared clock: the host names a moment, every screen
+     computes the race first, then waits for (or catches up to) that moment. */
+  const mpSync=window.__mpStart||null;window.__mpStart=null;
+  const mpWait=mpSync?mpSync.at-Date.now():0;
+  const later=(fn,ms)=>window._treeTimers.push(setTimeout(fn,Math.max(0,ms+mpWait)));
   const rollFps=S/MPH_PER_MS*FT_PER_M;
   const approachFt=rollFps*(stageMs/1000);
   /* On the strip the tree runs a real sportsman sequence: pre-stage, each car
@@ -9010,7 +9018,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
   startVoicesN(cars,lanes);
   stageState={};lanes.forEach(l=>stageState[l]={ft:dig?PRE.startFt(l):-approachFt,g:0,tl:false,mph:dig?0:S,
     color:LC[l],drive:cars[l].drive,body:cars[l].body});
-  const stageT0=performance.now();
+  const stageT0=performance.now()+(mpSync?mpSync.at-Date.now():0);
   function stageFrame(now){
     // rAF stamps a frame with when it began, which can predate stageT0 after heavy set-up work
     const el=Math.max(0,(now-stageT0)/1000),dur=stageMs/1000;
@@ -9119,7 +9127,8 @@ document.getElementById('runBtn').addEventListener('click',()=>{
     // the sound's shift detector starts from the gear each car is really in
     lanes.forEach(l=>{if(dig||lastGear[l]===undefined)lastGear[l]=res[l].trace[0].gear;});
     stageState={};lanes.forEach(l=>stageState[l]={ft:0,g:0,tl:false,mph:0,color:LC[l],drive:cars[l].drive,body:cars[l].body});
-    const t0=performance.now();let slipShown=false;
+    const t0=mpSync?stageT0+stageMs:performance.now();let slipShown=false;
+    window.__raceGoAt=Date.now()-(performance.now()-t0);
     const posted={};let winLit=false;
     function frame(now){
       const t=Math.max(0,(now-t0)/1000);let done=true;
@@ -9425,7 +9434,8 @@ function mpStore(k,v){try{if(v===undefined)return localStorage.getItem(k);localS
 function mpPeers(){return MP.rm?MP.rm.peers().filter(p=>p.kind==='viewer'):[];}
 function mpPeer(id){return mpPeers().find(p=>p.peer===id);}
 function mpPres(id){if(id===MP.me)return mpSelfPres();const p=mpPeer(id);return p?p.presence||{}:{};}
-function mpSelfPres(){const o={n:MP.nick,cars:MP.myCars,my:MP.my,trk:MP.trk,b:MP.b,rdy:MP.rdy?1:0,done:MP.raceId};
+function mpSelfPres(){const o={n:MP.nick,cars:MP.myCars,my:MP.my,trk:MP.trk,b:MP.b,rdy:MP.rdy?1:0,done:MP.raceId,tq:MP.tq||0};
+  if(MP.host&&MP.ta)o.ta=MP.ta;
   if(MP.host)o.cfg=MP.cfg;if(MP.host)o.h=1;return o;}
 function mpCfg(){if(MP.host)return MP.cfg;
   const hs=mpPeers().filter(p=>p.presence&&p.presence.h&&p.presence.cfg).sort((a,b)=>a.peer<b.peer?-1:1);
@@ -9470,6 +9480,9 @@ function mpSetRacers(n){const rc=document.getElementById('racerCount');
 function mpLock(){
   const inRoom=MP.on&&!!mpCfg(),c=mpCfg()||{},my=mpMyLane();
   document.getElementById('racerCount').disabled=inRoom;
+  const rb=document.getElementById('runBtn');rb.disabled=inRoom;
+  rb.title=inRoom?'In an online room the host starts every race, so everyone sees the same race at the same time.':'';
+  document.getElementById('resetBtn').disabled=inRoom&&MP.racing;
   ['dist','startMph','tod','temp','tempSlide'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=inRoom&&!mpTrkEditable();});
   const ven=document.getElementById('venue');if(inRoom&&!mpTrkEditable())ven.disabled=true;else if(typeof syncVenue==='function'&&ven.disabled&&(window.activeRacers||2)<3)ven.disabled=false;
   const build=inRoom&&c.m==='build';
@@ -9523,6 +9536,21 @@ function mpSync(){
 }
 
 /* ---- host duties ---- */
+function mpClock(){
+  if(MP.host){MP.off=0;MP.ta=MP.ta||{};let ch=false;
+    mpPeers().forEach(p=>{const q=p.presence&&p.presence.tq;if(q&&(!MP.ta[p.peer]||MP.ta[p.peer][0]!==q)){MP.ta[p.peer]=[q,Date.now()];ch=true;}});
+    Object.keys(MP.ta).forEach(id=>{if(!mpPeer(id))delete MP.ta[id];});
+    if(ch)mpPush();return;}
+  const h=MP.hostPeer&&mpPeer(MP.hostPeer),ta=h&&h.presence&&h.presence.ta&&h.presence.ta[MP.me];
+  if(ta&&ta[0]===MP.tq&&MP.tqDone!==MP.tq){MP.tqDone=MP.tq;
+    const now=Date.now(),rtt=now-ta[0];
+    // keep the sample with the shortest round trip: it has the least delay error
+    if(rtt>=0&&rtt<5000&&(MP.rtt==null||rtt<=MP.rtt*1.5||now-MP.offAt>60000)){MP.rtt=rtt;
+      // computers' clocks are normally within a few tens of ms of each other; only correct
+      // for a difference that is clearly bigger than the measuring error
+      const o=ta[1]+rtt/2-now;MP.off=Math.abs(o)>rtt/2+150?o:0;MP.offAt=now;}}
+  if(!MP.tq||Date.now()-MP.tq>(MP.off==null?1500:15000)){MP.tq=Date.now();mpPush();}
+}
 function mpHostTick(){
   if(!MP.host||!MP.cfg)return;
   const c=MP.cfg,ids=mpPeers().map(p=>p.peer),now=Date.now();
@@ -9540,7 +9568,7 @@ function mpHostTick(){
 function mpStartRace(){
   const c=MP.cfg;if(!c)return;
   const hs={};activeLanes().forEach(L=>{const a=mpAuthCar(L);hs[L]=a?mpHash(mpJ(a[1])):'';});
-  c.race={id:(c.race?c.race.id:0)+1,hs,t:mpHash(mpJ(mpTrkRead()))};c.ph='race';MP.rdy=false;mpPush();mpRender();}
+  c.race={id:(c.race?c.race.id:0)+1,hs,t:mpHash(mpJ(mpTrkRead())),at:Date.now()+5000};c.ph='race';MP.rdy=false;mpPush();mpRender();}
 function mpRaceCheck(){
   const c=mpCfg();if(!c||!c.race)return;
   // first sight of the room: don't replay races that finished before we arrived
@@ -9550,14 +9578,17 @@ function mpRaceCheck(){
   if(!MP.pendingRace||MP.pendingRace.id!==c.race.id)MP.pendingRace={id:c.race.id,since:Date.now()};
   // wait (briefly) until we hold exactly the cars the host started with
   const ok=Object.keys(c.race.hs).every(L=>{const a=mpAuthCar(L);return (a?mpHash(mpJ(a[1])):'')===c.race.hs[L];});
-  if(!ok&&Date.now()-MP.pendingRace.since<4000){mpSyncForRace();return;}
+  if(!ok&&Date.now()-MP.pendingRace.since<2500){mpSyncForRace();return;}
   mpSyncForRace();
   MP.raceId=c.race.id;MP.rdy=false;MP.racing=true;MP.localRes=null;window.lastRaceInfo=null;mpPush();mpLock();
-  document.getElementById('runBtn').click();
+  // start on the host's clock: same moment, same simulation on every screen
+  window.__mpStart=c.race.at?{at:c.race.at-(MP.off||0)}:null;
+  window.__preSeed=parseInt(mpHash(MP.code+':'+c.race.id),36)>>>0;
+  const rbtn=document.getElementById('runBtn');rbtn.disabled=false;rbtn.click();rbtn.disabled=true;
   const info=window.lastRaceInfo;
   if(!info){MP.racing=false;mpRender();return;}
   const maxEt=Math.max(...info.lanes.map(L=>info.res[L].et||0));
-  const wait=info.stageMs+maxEt*1000+2500;
+  const wait=Math.max(0,(c.race.at?c.race.at-(MP.off||0)-Date.now():0))+info.stageMs+maxEt*1000+2500;
   const slots=mpSlots();
   const rows=info.lanes.map(L=>{const i=LANES.indexOf(L),p=slots[i]||null,pr=p?mpPres(p):{};
     return{l:L,p,n:String(pr.n||('Lane '+(i+1))).slice(0,20),c:String(info.names[i]||'').slice(0,48),
@@ -9589,12 +9620,12 @@ async function mpConnect(code,asHost){
     try{rm=await MP.room.join('qm-'+code);}catch(e){MP.view='lobby';MP.err='Could not open the room ('+(e&&e.code||'error')+'). Try again.';mpRender();return;}
   }
   MP.rm=rm;MP.on=true;MP.host=!!asHost;MP.lastAuth={};MP.myCars={};MP.my=null;MP.b=null;MP.rdy=false;MP.raceId=0;MP.lastTrk=null;MP.trk=null;MP.lastCfg=null;MP.localRes=null;
-  MP.joinedAt=Date.now();MP.lastMode=null;MP.seenRace=null;
+  MP.joinedAt=Date.now();MP.lastMode=null;MP.seenRace=null;MP.off=null;MP.rtt=null;MP.tq=0;MP.tqDone=0;MP.ta={};MP.offAt=0;
   const me=rm.peers().find(p=>p.sameTab);MP.me=me?me.peer:null;
   if(asHost){MP.cfg={m:'sandbox',bud:50000,rds:3,cls:'street12',ph:'setup',slots:[],rd:0,earn:{},pts:{},race:{id:0,hs:{}},last:null};}
   rm.onPeers(ch=>{const me2=ch.peers.find(p=>p.sameTab);if(me2)MP.me=me2.peer;
     if(MP.host&&MP.cfg&&MP.me&&MP.cfg.slots.indexOf(MP.me)<0)MP.cfg.slots.unshift(MP.me);
-    mpTick();},e=>{MP.err='Room connection lost ('+(e&&e.code)+').';mpLeave(true);});
+    mpClock();mpTick();},e=>{MP.err='Room connection lost ('+(e&&e.code)+').';mpLeave(true);});
   if(asHost&&MP.me)MP.cfg.slots=[MP.me];
   MP.view='room';mpPush();mpRender();
   if(!MP.timer)MP.timer=setInterval(mpTick,500);
@@ -9619,7 +9650,7 @@ function mpTick(){
   }
   if(c&&MP.me&&c.slots&&c.slots.indexOf(MP.me)<0&&c.slots.length>=4&&Date.now()-MP.joinedAt>3000){MP.err='That room is full (4 players).';mpLeave(true);return;}
   if(c&&c.m!==MP.lastMode){MP.lastMode=c.m;MP.lastAuth={};MP.lastTrk=null;MP.rdy=false;if(c.m!=='build')MP.b=null;}
-  mpHostTick();mpRaceCheck();mpSync();mpRender();
+  mpClock();mpHostTick();mpRaceCheck();mpSync();mpRender();
 }
 function mpLeave(keepErr){
   if(MP.rm){MP.rm.leave().catch(()=>{});}
@@ -9752,7 +9783,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='fc961a9b9c';let dismissed=null;
+(function(){const V='b60c47d21e';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
