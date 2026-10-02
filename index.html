@@ -162,6 +162,13 @@ padding-bottom:8px;margin-bottom:12px}
 .diag{margin-top:12px;padding-top:10px;border-top:1px dashed #999;font-size:12px;line-height:1.55}
 .cars{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .card{background:var(--asphalt-2);border:1px solid var(--line)}
+.card-empty{display:none;padding:22px 16px;font-family:'Roboto Mono',monospace;font-size:12px;color:var(--dim);line-height:1.6}
+.card.empty .card-empty{display:block}.card.empty .card-body,.card.empty .lane-clear{display:none}
+.lane-clear{margin-left:auto;font-size:14px;padding:4px 12px}
+.cluster-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;text-align:center}
+.cluster-empty h3{color:var(--dim)}
+.stage-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;
+font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:600;letter-spacing:.06em;color:var(--paint);text-shadow:0 2px 12px rgba(0,0,0,.8)}
 .card-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
 .chip{width:11px;height:11px;border-radius:2px;flex:none}
 .card-head input{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:500;
@@ -456,7 +463,7 @@ footer p{margin-bottom:10px}
     <div class="bulb" id="b3"></div><div class="bulb" id="b4"></div>
     <span id="treeMsg">Ready to run</span>
   </div>
-  <div id="stage3d" class="stage3d"></div>
+  <div id="stage3d" class="stage3d"><div class="stage-empty" id="stageEmpty" hidden>Nothing Selected</div></div>
   <div class="viewbar">
     <label for="viewMode">CAMERA</label>
     <select id="viewMode">
@@ -1735,7 +1742,9 @@ function opts(o,fn){return Object.entries(o).map(([k,v])=>'<option value="'+k+'"
 function buildForm(lane,color,idx){
   const L=lane;
   return '<div class="card"><div class="card-head"><span class="chip" style="background:'+color+'"></span>'+
-  '<input type="text" id="name'+L+'f" aria-label="Lane '+idx+' car name"></div><div class="card-body">'+
+  '<input type="text" id="name'+L+'f" aria-label="Lane '+idx+' car name" placeholder="Nothing Selected">'+
+  '<button type="button" class="lane-clear" id="clear'+L+'" data-lane="'+L+'" title="Take the car out of this lane">Clear</button></div>'+
+  '<div class="card-empty">Nothing Selected. Search for a car at the top of the page and load it into lane '+idx+'.</div><div class="card-body">'+
   '<fieldset><legend>ENGINE</legend><div class="grid">'+
   '<div><label for="hp'+L+'">Peak horsepower (crank)</label><input type="number" id="hp'+L+'" min="20" max="3000" step="1"></div>'+
   '<div><label for="hpRpm'+L+'">at rpm</label><input type="number" id="hpRpm'+L+'" min="1000" max="15000" step="50"></div>'+
@@ -1890,6 +1899,19 @@ for(let v=10;v<=100;v+=10){const o=document.createElement('option');o.value=v;
   o.textContent='Rolling from '+v+' mph';sm.appendChild(o);}
 
 const BODYOF={},MODESOF={},CLUSTEROF={},EXTRAOF={},BURNOUTOF={};
+/* Every lane starts empty: no car on the strip until one is loaded into it. */
+const EMPTY={A:true,B:true,C:true,D:true};
+function laneEmpty(l){return !!EMPTY[l];}
+function clearLane(l){
+  // keep valid numbers in the hidden form so nothing downstream sees NaN
+  setLane(l,PRESETS.mustang18eco);EMPTY[l]=true;
+  document.getElementById('name'+l+'f').value='';
+  emptyUI();}
+function emptyUI(){
+  LANES.forEach(l=>{const nm=document.getElementById('name'+l+'f');if(!nm)return;const card=nm.closest('.card');
+    if(card)card.classList.toggle('empty',laneEmpty(l));});
+  const ov=document.getElementById('stageEmpty');
+  if(ov)ov.hidden=!activeLanes().every(laneEmpty);}
 function carBody(l){return BODYOF[l]||'sedan';}
 function carModes(l){return MODESOF[l]||['normal'];}
 function carCluster(l){return CLUSTEROF[l]||'auto';}
@@ -1913,7 +1935,7 @@ function readCar(lane){
     sysHp:(EXTRAOF[lane]||{}).sysHp||0,sysTq:(EXTRAOF[lane]||{}).sysTq||0,vmax:(EXTRAOF[lane]||{}).vmax||0,
     burble:(EXTRAOF[lane]||{}).burble||0,
     venue:currentVenue(),burnout:!!BURNOUTOF[lane]&&s('drive')==='rwd'&&!((IND[s('ind')]||IND.na).electric),
-    temp:ambient(),gears};
+    temp:ambient(),gears,empty:laneEmpty(lane)};
 }
 function validate(c){
   const e=[],req={hp:'peak horsepower',hpRpm:'horsepower rpm',tq:'peak torque',tqRpm:'torque rpm',
@@ -3977,6 +3999,8 @@ function buildClusters(){
   const view=document.getElementById('raceView');view.innerHTML='';clusterMeta={};
   const nL=activeLanes().length;view.className='clusters'+(nL>=3?' n'+Math.min(4,nL):'');
   activeLanes().map(l=>[l,LANE_COLORS[l]]).forEach(([l,col])=>{
+    if(laneEmpty(l)){const e=document.createElement('div');e.className='cluster cluster-empty';
+      e.innerHTML='<h3>Nothing Selected</h3><div class="sub">LANE '+(LANES.indexOf(l)+1)+' · LOAD A CAR TO RACE</div>';view.appendChild(e);return;}
     const c=readCar(l);
     const rl=(!isNaN(c.redline)&&c.redline>1200)?c.redline:7000;
     const tachMax=Math.ceil((rl+400)/1000)*1000;
@@ -4285,6 +4309,7 @@ function refreshAll(){
   activeLanes().forEach(refresh);
 }
 function setLane(lane,d){
+  EMPTY[lane]=false;if(typeof emptyUI==='function')setTimeout(emptyUI,0);
   document.getElementById('name'+lane+'f').value=d.name;
   ['hp','hpRpm','tq','tqRpm','redline','disp','fd','weight','tireD','gripAdj','dist','cda','wb','cg','launchRpm']
     .forEach(k=>{const el=document.getElementById(k+lane);if(el)el.value=d[k];});
@@ -8079,7 +8104,7 @@ function initStage(){
   ready=true;
 }
 function ensureCars(st){
-  const want=Object.keys(st).filter(k=>k!=='total');
+  const want=Object.keys(st).filter(k=>k!=='total'&&!laneEmpty(k));
   Object.keys(carObj).forEach(l=>{if(want.indexOf(l)<0&&carObj[l]){scene.remove(carObj[l].grp);delete carObj[l];}});
   want.forEach((l,i)=>{
     // trim-specific bodies (e.g. Challenger hoods) key off the car's name too
@@ -8746,7 +8771,9 @@ document.getElementById('startMph').addEventListener('change',()=>{
   });
   reset();
 });
-setLane('A',PRESETS.mustang18eco);setLane('B',PRESETS.bmw230i);refreshAll();
+LANES.forEach(clearLane);refreshAll();
+document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('.lane-clear');if(!b||b.disabled)return;
+  clearLane(b.dataset.lane);reset();refreshAll();});
 initStage();resetLanes();
 document.getElementById('soundTog').addEventListener('change',()=>{if(!soundOn())stopVoices();});
 (function(){
@@ -8762,10 +8789,10 @@ document.getElementById('soundTog').addEventListener('change',()=>{if(!soundOn()
 applyRacerCount(2);
 document.getElementById('racerCount').addEventListener('change',e=>{
   const n=parseInt(e.target.value)||2;
-  applyRacerCount(n);
+  applyRacerCount(n);emptyUI();
   // seed any newly-shown lane that has no car yet
   const seeds=['mustang18eco','bmw230i','challRT23','camaro21rs'];
-  activeLanes().forEach((l,i)=>{if(!document.getElementById('name'+l+'f').value)setLane(l,PRESETS[seeds[i]]);});
+  emptyUI();
   syncVenue();reset();refreshAll();
 });
 syncVenue();
@@ -8927,6 +8954,10 @@ function sampleAt(res,time){
 }
 document.getElementById('runBtn').addEventListener('click',()=>{
   const lanes=activeLanes();
+  {const miss=lanes.filter(laneEmpty);if(miss.length){const box=document.getElementById('errBox');
+    box.textContent=miss.length===lanes.length?'Nothing Selected. Load a car into each lane to race.':
+      'Lane '+miss.map(l=>LANES.indexOf(l)+1).join(' and ')+': nothing selected. Load a car into '+(miss.length>1?'those lanes':'it')+(lanes.length>2?' or lower the number of racers.':'.');
+    box.classList.add('show');window.lastRaceInfo=null;return;}}
   const cars={};lanes.forEach(l=>{cars[l]=readCar(l);SUSPP[l]=suspProfile(cars[l]);});
   const errs=[];lanes.forEach(l=>errs.push(...validate(cars[l])));
   const box=document.getElementById('errBox');
@@ -9367,15 +9398,17 @@ function mpLegal(c,cls){
 const MP_KEYS=['name','hp','hpRpm','tq','tqRpm','redline','disp','ind','shift','fd','weight','tireD','dist','cda','eff','wb','cg',
  'gripAdj','stall','hpPerL','redFrac','stallRpm','hybHp','hybTq','launch','launchRpm','shiftMode','shiftRpm','mode','drive',
  'trans','layout','tire','engSound','body','modes','cluster','sysHp','sysTq','vmax','burble','burnout','gears'];
-function mpEnc(c){return MP_KEYS.map(k=>{let v=c[k];if(typeof v==='number'&&!isFinite(v))v=null;
+function mpEnc(c){if(c&&c.empty)return['-'];return MP_KEYS.map(k=>{let v=c[k];if(typeof v==='number'&&!isFinite(v))v=null;
   if(k==='name')v=String(v||'').slice(0,48);return v===undefined?null:v;});}
-function mpDec(a){if(!Array.isArray(a))return null;const c={};MP_KEYS.forEach((k,i)=>{c[k]=a[i];});
+function mpDec(a){if(!Array.isArray(a)||a[0]==='-')return null;const c={};MP_KEYS.forEach((k,i)=>{c[k]=a[i];});
   if(!Array.isArray(c.gears))c.gears=[];if(!Array.isArray(c.modes))c.modes=['normal'];
   c.modes=c.modes.filter(m=>MODES[m]);if(!c.modes.length)c.modes=['normal'];
   ['ind','trans','tire','layout'].forEach(k=>{const T={ind:IND,trans:TRANS,tire:TIRES,layout:LAYOUTS}[k];if(!T[c[k]])c[k]=Object.keys(T)[0];});
   if(!EFFS[c.trans])c.trans='auto';
   c.name=String(c.name||'Car').slice(0,48);c.garage=true;return c;}
 const mpJ=x=>JSON.stringify(x);
+const mpCar=a=>a?mpDec(a[1]):null;
+function mpSetLane(L,arr){if(Array.isArray(arr)&&arr[0]==='-'){if(!laneEmpty(L))clearLane(L);}else{const d=mpDec(arr);if(d)setLane(L,d);}}
 function mpHash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
 function mpTrkRead(){return{d:document.getElementById('dist').value,s:document.getElementById('startMph').value,
   v:document.getElementById('venue').value,t:document.getElementById('tod').value,a:document.getElementById('temp').value};}
@@ -9469,21 +9502,21 @@ function mpSync(){
   let changed=false;
   activeLanes().forEach(L=>{
     const a=mpAuthCar(L),aj=a?mpJ(a[1]):null;
-    if(a&&aj!==MP.lastAuth[L]){MP.lastAuth[L]=aj;setLane(L,mpDec(a[1]));changed=true;
+    if(a&&aj!==MP.lastAuth[L]){MP.lastAuth[L]=aj;mpSetLane(L,(a[1]));changed=true;
       if(c.m==='sandbox'){MP.myCars[L]=a;mpPush();}return;}
     let curE=mpEnc(readCar(L));
     if(c.m==='build'&&L===mpMyLane()){
-      if(!MP.b)return;
-      const f={};MP_FREE.forEach(k=>{f[k]=readCar(L)[k];});MP.b.f=f;
+      if(!MP.b){if(!laneEmpty(L)){clearLane(L);changed=true;}curE=mpEnc(readCar(L));}
+      else{const f={};MP_FREE.forEach(k=>{f[k]=readCar(L)[k];});MP.b.f=f;
       const d=mpDerive(MP.b);if(!d)return;const want=mpEnc(Object.assign(d,{burnout:false}));
-      if(mpJ(curE)!==mpJ(want)){setLane(L,mpDec(want));changed=true;curE=want;}
+      if(mpJ(curE)!==mpJ(want)){mpSetLane(L,(want));changed=true;curE=want;}}
     }
     const cj=mpJ(curE);
     if(cj===MP.lastAuth[L])return;
     if(mpEditable(L)){MP.lastAuth[L]=cj;MP.rdy=false;
       if(c.m==='sandbox'){MP.myCars[L]=[(a?a[0]:0)+1,curE];}else MP.my=curE;
       mpPush();changed=true;}
-    else if(a){setLane(L,mpDec(a[1]));changed=true;}
+    else if(a){mpSetLane(L,(a[1]));changed=true;}
   });
   if(changed){reset();refreshAll();}
   mpLock();
@@ -9535,7 +9568,7 @@ function mpRaceCheck(){
 }
 function mpSyncForRace(){const c=mpCfg();const keep=MP.racing;MP.racing=false;
   mpSetRacers(mpNLanes());const at=mpAuthTrk();if(at)mpApplyTrk(at[1]);
-  activeLanes().forEach(L=>{const a=mpAuthCar(L);if(a){const aj=mpJ(a[1]);if(mpJ(mpEnc(readCar(L)))!==aj){setLane(L,mpDec(a[1]));}MP.lastAuth[L]=aj;}});
+  activeLanes().forEach(L=>{const a=mpAuthCar(L);if(a){const aj=mpJ(a[1]);if(mpJ(mpEnc(readCar(L)))!==aj){mpSetLane(L,(a[1]));}MP.lastAuth[L]=aj;}});
   reset();refreshAll();MP.racing=keep;}
 
 /* ---- connection ---- */
@@ -9638,16 +9671,17 @@ function mpRender(){
   else hostCtl='<p class="mp-note">Mode: <b>'+MP_MODES[c.m]+'</b>'+(c.m==='build'?' · budget '+(c.bud>=5000000?'no limit':mpMoney(c.bud)):'')+(c.m==='cls'?' · class <b>'+mpEsc(MP_CLASSES[c.cls].label)+'</b>':'')+(c.m!=='sandbox'?' · round '+Math.min(c.rd+1,c.rds)+' of '+c.rds:'')+'</p>';
   const others=slots.filter(id=>id!==MP.me);
   const allReady=slots.length>=(c.m==='sandbox'?1:2)&&others.every(id=>mpPres(id).rdy);
-  const iLegal=c.m!=='cls'||!my||!mpAuthCar(my)||mpLegal(mpDec(mpAuthCar(my)[1]),c.cls).every(x=>x[0]);
+  const myCar=my?mpCar(mpAuthCar(my)):null;const iLegal=c.m!=='cls'||!my||(!!myCar&&mpLegal(myCar,c.cls).every(x=>x[0]));
   const iBought=c.m!=='build'||!!(MP.b&&PRESETS[MP.b.k]);
-  const legalAll=c.m!=='cls'||slots.every((id,i)=>{const a=mpAuthCar(LANES[i]);return a&&mpLegal(mpDec(a[1]),c.cls).every(x=>x[0]);});
+  const legalAll=c.m!=='cls'||slots.every((id,i)=>{const car=mpCar(mpAuthCar(LANES[i]));return !!car&&mpLegal(car,c.cls).every(x=>x[0]);});
+  const lanesFull=activeLanes().every(l=>!laneEmpty(l));
   let actions='';
   if(c.ph==='race')actions='<p class="mp-note"><b>Racing…</b></p>';
   else if(c.ph==='final'){actions=MP.host?'<button type="button" class="go" id="mpNew">New game</button>':'<p class="mp-note">Game over. Waiting for the host to start a new game.</p>';}
   else{
-    if(!MP.host)actions+='<button type="button" id="mpReady" class="'+(MP.rdy?'mp-on':'')+'"'+(iLegal&&iBought?'':' disabled')+'>'+(MP.rdy?'Ready ✓':'Ready up')+'</button>';
-    if(MP.host)actions+='<button type="button" class="go" id="mpStart"'+(allReady&&legalAll&&iLegal&&iBought?'':' disabled')+'>'+(c.m==='sandbox'?'Race!':'Start round '+(c.rd+1))+'</button>'+
-      (!allReady?'<span class="mp-note">'+(slots.length<2&&c.m!=='sandbox'?'Waiting for at least one more player…':'Waiting for everyone to ready up…')+'</span>':!legalAll?'<span class="mp-note">Every car has to be legal for the class.</span>':'');
+    if(!MP.host)actions+='<button type="button" id="mpReady" class="'+(MP.rdy?'mp-on':'')+'"'+(iLegal&&iBought&&!(my&&laneEmpty(my))?'':' disabled')+'>'+(MP.rdy?'Ready ✓':'Ready up')+'</button>';
+    if(MP.host)actions+='<button type="button" class="go" id="mpStart"'+(allReady&&legalAll&&iLegal&&iBought&&lanesFull?'':' disabled')+'>'+(c.m==='sandbox'?'Race!':'Start round '+(c.rd+1))+'</button>'+
+      (!allReady?'<span class="mp-note">'+(slots.length<2&&c.m!=='sandbox'?'Waiting for at least one more player…':'Waiting for everyone to ready up…')+'</span>':!legalAll?'<span class="mp-note">Every car has to be legal for the class.</span>':!lanesFull?'<span class="mp-note">Every lane needs a car.</span>':'');
   }
   const res=c.last&&c.last.rows?'<div class="mp-res"><h4>'+(c.ph==='final'?'FINAL RACE':'LAST RACE')+'</h4><ol>'+c.last.rows.map(r=>'<li><b>'+mpEsc(r.n)+'</b> <span>'+mpEsc(r.c)+'</span> <span class="mp-et">'+r.et.toFixed(3)+' s @ '+r.tr.toFixed(1)+' mph</span>'+(r.pay?' <span class="mp-money">+'+mpMoney(r.pay)+'</span>':'')+'</li>').join('')+'</ol></div>':'';
   let stand='';
@@ -9655,7 +9689,8 @@ function mpRender(){
     stand='<div class="mp-res"><h4>'+(c.ph==='final'?'🏁 FINAL STANDINGS':'STANDINGS')+'</h4><ol>'+st.map(id=>'<li><b>'+mpEsc(mpPres(id).n||'Player')+'</b> <span class="mp-pts">'+(c.pts[id]||0)+' pts</span>'+(c.m==='build'?' <span class="mp-money">won '+mpMoney(c.earn[id]||0)+'</span>':'')+'</li>').join('')+'</ol></div>';}
   let mine='';
   if(c.m==='build'&&my)mine=mpShopHtml(c);
-  if(c.m==='cls'&&my){const a=mpAuthCar(my),car=a?mpDec(a[1]):readCar(my);
+  if(c.m==='cls'&&my){const car=mpCar(mpAuthCar(my));
+    if(!car)mine='<div class="mp-shop"><h4>'+mpEsc(MP_CLASSES[c.cls].label.toUpperCase())+' RULES</h4><p class="mp-note">'+mpEsc(MP_CLASSES[c.cls].desc)+' Load a car into your lane to start.</p></div>';else
     mine='<div class="mp-shop"><h4>'+mpEsc(MP_CLASSES[c.cls].label.toUpperCase())+' RULES</h4><p class="mp-note">'+mpEsc(MP_CLASSES[c.cls].desc)+' Load any car into your lane and tune it in your lane card below.</p><ul class="mp-checks">'+
       mpLegal(car,c.cls).map(x=>'<li class="'+(x[0]?'ok':'bad')+'">'+(x[0]?'✓ ':'✗ ')+mpEsc(x[1])+'</li>').join('')+'</ul></div>';}
   if(c.m==='sandbox')mine='<p class="mp-note">Sandbox: anyone can change any lane or the track, and everyone sees the changes. Press Ready when you\'re set; the host starts the race.</p>';
@@ -9717,7 +9752,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='e54ec22fbd';let dismissed=null;
+(function(){const V='fc961a9b9c';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
