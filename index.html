@@ -13,6 +13,7 @@
 --paint:#e8e6e1;--dim:#8b9099;--amber:#ffa219;--go:#38d07a;--foul:#e5484d;
 --laneA:#4a9fe0;--laneB:#e07a4a;}
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{background:var(--asphalt);color:var(--paint);font-family:'Barlow Condensed',system-ui,sans-serif;
 font-size:17px;line-height:1.45;padding:24px 20px 64px}
@@ -9783,7 +9784,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='b60c47d21e';let dismissed=null;
+(function(){const V='27658d9f28';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
