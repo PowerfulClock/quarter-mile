@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script>window.QM_VER="8bff888ba2";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -886,10 +886,10 @@ function sndLoad(name){
   if(!name)return null;if(SND.packs[name])return SND.packs[name];
   const rec={ready:false,layers:null};SND.packs[name]=rec;
   (async()=>{try{
-    if(!SND.idx)SND.idx=await fetch('sounds/index.json').then(r=>{if(!r.ok)throw new Error('idx');return r.json();});
+    if(!SND.idx)SND.idx=await fetch('sounds/index.json'+(window.QM_VER?'?v='+window.QM_VER:'')).then(r=>{if(!r.ok)throw new Error('idx');return r.json();});
     const meta=SND.idx[name];if(!meta)throw new Error('pack');
     const file=meta.file||name,base=SND.idx[file];if(!base)throw new Error('file');
-    const ab=await fetch('sounds/'+file+'.wav').then(r=>{if(!r.ok)throw new Error('flac');return r.arrayBuffer();});
+    const ab=await fetch('sounds/'+file+'.wav'+(window.QM_VER?'?v='+window.QM_VER:'')).then(r=>{if(!r.ok)throw new Error('flac');return r.arrayBuffer();});
     const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
     const dec=await new Promise((res,rej)=>{const p=new OC(1,1,base.sr).decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(rej);});
     const data=dec.getChannelData(0),layers={};
@@ -9947,7 +9947,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='9c44736505';let dismissed=null;
+(function(){const V='8bff888ba2';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
