@@ -854,8 +854,80 @@ function noiseBuffer(ctx){
   for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
   return b;
 }
+/* ---- Recorded engine sounds (Dodge 3.6 Pentastar, 5.7 / 6.4 Hemi, 6.2 Hellcat) ----
+   Each pack is a set of steady-state loops recorded at fixed rpm, on and off throttle,
+   plus a mechanical "engine" layer. The player keeps the two recordings either side of
+   the current rpm running, re-pitches them to the exact rpm and crossfades between them,
+   the same way game engines play car audio. Packs load in the background; until one is
+   ready (or if it can't be fetched, e.g. a saved copy opened from disk) the car uses the
+   synthesized voice. */
+const SND={idx:null,packs:{}};
+function sndPackFor(c){
+  const n=(c.name||'').toLowerCase();if(!/challenger|charger|durango|dodge/.test(n))return null;
+  const d=+c.disp||0,near=v=>Math.abs(d-v)<0.15;
+  if((c.ind==='roots'||c.ind==='centri')&&near(6.2))return 'hellcat';
+  if(c.ind==='na'){if(near(6.4))return 'hemi64';if(near(5.7))return 'hemi57';if(near(3.6))return 'pentastar';}
+  return null;}
+function sndLoad(name){
+  if(!name)return null;if(SND.packs[name])return SND.packs[name];
+  const rec={ready:false,layers:null};SND.packs[name]=rec;
+  (async()=>{try{
+    if(!SND.idx)SND.idx=await fetch('sounds/index.json').then(r=>{if(!r.ok)throw new Error('idx');return r.json();});
+    const meta=SND.idx[name];if(!meta)throw new Error('pack');
+    const ab=await fetch('sounds/'+name+'.flac').then(r=>{if(!r.ok)throw new Error('flac');return r.arrayBuffer();});
+    const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+    const dec=await new Promise((res,rej)=>{const p=new OC(1,1,meta.sr).decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(rej);});
+    const data=dec.getChannelData(0),layers={};
+    for(const L in meta.layers)layers[L]=meta.layers[L].map(([rpm,st,len])=>{
+      const b=new AudioBuffer({length:len,sampleRate:dec.sampleRate,numberOfChannels:1});
+      b.copyToChannel(data.subarray(st,st+len),0);return{rpm,buf:b};});
+    rec.layers=layers;rec.gain=meta.gain||1;rec.ready=true;
+  }catch(e){rec.failed=true;}})();
+  return rec;}
+class SampleEngine{
+  constructor(ctx,pack,dest){
+    this.ctx=ctx;this.out=ctx.createGain();this.out.gain.value=0.9*(pack.gain||1);this.out.connect(dest);this.L={};
+    for(const k in pack.layers){const g=ctx.createGain();g.gain.value=0;g.connect(this.out);
+      const list=pack.layers[k];this.L[k]={list,g,act:new Map(),grain:list.length>40,cur:null};}
+  }
+  voice(Ly,s){let v=Ly.act.get(s);if(v)return v;
+    const ctx=this.ctx,src=ctx.createBufferSource(),g=ctx.createGain();
+    src.buffer=s.buf;src.loop=true;g.gain.value=0;src.connect(g);g.connect(Ly.g);
+    // start loops at a random point so stacked layers don't phase together
+    src.start(ctx.currentTime,Math.random()*s.buf.duration);v={src,g};Ly.act.set(s,v);return v;}
+  layer(k,rpm,level){
+    const Ly=this.L[k];if(!Ly)return;const ctx=this.ctx,t=ctx.currentTime,list=Ly.list;
+    Ly.g.gain.setTargetAtTime(level,t,0.035);
+    const want=new Map();
+    if(Ly.grain){
+      // one-cycle grains: hold the current grain while it's within 3% of the rpm
+      let cur=Ly.cur;
+      if(!cur||Math.abs(rpm/cur.rpm-1)>0.03){let best=list[0];for(const s of list)if(Math.abs(s.rpm-rpm)<Math.abs(best.rpm-rpm))best=s;cur=best;}
+      Ly.cur=cur;want.set(cur,1);
+    }else{
+      let i=0;while(i<list.length&&list[i].rpm<rpm)i++;
+      if(i===0)want.set(list[0],1);else if(i>=list.length)want.set(list[list.length-1],1);
+      else{const a=list[i-1],b=list[i],w=(rpm-a.rpm)/(b.rpm-a.rpm);
+        want.set(a,Math.cos(w*Math.PI/2));want.set(b,Math.sin(w*Math.PI/2));}
+    }
+    want.forEach((gn,s)=>{const v=this.voice(Ly,s);
+      v.src.playbackRate.setTargetAtTime(Math.max(0.25,Math.min(4,rpm/s.rpm)),t,0.012);
+      v.g.gain.setTargetAtTime(gn,t,Ly.grain?0.012:0.03);});
+    Ly.act.forEach((v,s)=>{if(!want.has(s)){v.g.gain.setTargetAtTime(0,t,Ly.grain?0.012:0.03);
+      Ly.act.delete(s);const src=v.src;setTimeout(()=>{try{src.stop();}catch(e){}},250);}});
+  }
+  update(rpm,load,shifting){
+    const r=Math.max(500,rpm),hasOff=!!this.L.off;
+    const on=shifting?0.22:(hasOff?0.30+0.70*load:0.55+0.45*load);
+    this.layer('on',r,on);
+    if(hasOff)this.layer('off',r,shifting?0.55:Math.max(0,0.85*(1-load*1.4)));
+    this.layer('eng',r,0.38*(0.45+0.55*load));
+  }
+  stop(){const t=this.ctx.currentTime;this.out.gain.setTargetAtTime(0,t,0.1);
+    setTimeout(()=>{for(const k in this.L)this.L[k].act.forEach(v=>{try{v.src.stop();}catch(e){}});},500);}
+}
 class EngineVoice{
-  constructor(ctx,cfg,pan,boosted,indKind){
+  constructor(ctx,cfg,pan,boosted,indKind,pack){
     this.ctx=ctx;this.cfg=cfg;this.boosted=boosted;this.ind=indKind;this.dead=false;
     this.hasValve=!!cfg.activeExhaust;this.valve=0;this.valveWasOpen=false;
     this.electric=!!cfg.electric;
@@ -928,6 +1000,7 @@ class EngineVoice{
     [this.osc,this.osc2,this.sub,this.whine].forEach(o=>o.start(t));
     this.noise.start(t);this.scr.start(t);
     this.out.gain.setTargetAtTime(0.9,t,0.05);
+    this.smp=(pack&&pack.ready&&!this.electric)?new SampleEngine(ctx,pack,this.out):null;
   }
   update(rpm,load,boost,slipAmt,shifting){
     if(this.dead)return;
@@ -969,11 +1042,14 @@ class EngineVoice{
     this.lp.frequency.setTargetAtTime(cut,t,0.04);
     this.body.frequency.setTargetAtTime(Math.min(400,f*2.1),t,0.05);
     const lvl=(shifting?0.12:(0.30+0.70*load))*(this.hasValve?(0.42+0.58*vOpen):1);
-    this.oscG.gain.setTargetAtTime(0.55*lvl,t,0.03);
-    this.osc2G.gain.setTargetAtTime(0.30*lvl,t,0.03);
-    this.subG.gain.setTargetAtTime(cfg.half*0.6*lvl*(this.hasValve?(0.5+0.5*vOpen):1),t,0.03);
+    // a recorded engine replaces the synthesized combustion tone
+    const syn=this.smp?0:1;
+    if(this.smp)this.smp.update(rpm,load,shifting);
+    this.oscG.gain.setTargetAtTime(0.55*lvl*syn,t,0.03);
+    this.osc2G.gain.setTargetAtTime(0.30*lvl*syn,t,0.03);
+    this.subG.gain.setTargetAtTime(cfg.half*0.6*lvl*syn*(this.hasValve?(0.5+0.5*vOpen):1),t,0.03);
     this.nf.frequency.setTargetAtTime(600+f*6,t,0.05);
-    this.nG.gain.setTargetAtTime(0.035*lvl*(0.4+load*0.8)*(1+cfg.rough),t,0.05);
+    this.nG.gain.setTargetAtTime(0.035*lvl*syn*(0.4+load*0.8)*(1+cfg.rough),t,0.05);
     if(this.boosted&&!this.blown){
       this.whine.frequency.setTargetAtTime(2600+boost*4200+f*3,t,0.05);
       this.wG.gain.setTargetAtTime(shifting?0.004:0.016*boost*load,t,0.06);
@@ -990,7 +1066,8 @@ class EngineVoice{
       const rev=Math.min(1,rpm/5200);
       const lvl=this.roots?(0.020+0.052*load)*(0.35+0.65*rev)
                           :(0.008+0.040*load)*rev*rev;
-      this.scG.gain.setTargetAtTime(shifting?lvl*0.25:lvl,t,0.05);
+      const scm=this.smp?0.35:1;   // the recordings already carry most of the blower whine
+      this.scG.gain.setTargetAtTime((shifting?lvl*0.25:lvl)*scm,t,0.05);
     }
     this.sG.gain.setTargetAtTime(slipAmt>0?0.42*slipAmt:0,t,0.04);
     if(slipAmt>0){
@@ -1073,6 +1150,7 @@ class EngineVoice{
   }
   stop(){
     if(this.dead)return;this.dead=true;
+    if(this.smp)this.smp.stop();
     const t=this.ctx.currentTime;
     this.out.gain.setTargetAtTime(0,t,0.12);
     setTimeout(()=>{try{[this.osc,this.osc2,this.sub,this.whine,this.wob].forEach(o=>o.stop());
@@ -1098,7 +1176,7 @@ function startVoicesN(cars,lanes){
   lanes.forEach((l,i)=>{
     const pan=(n===1)?0:(-0.6+1.2*i/(n-1));   // spread across the stereo field
     const c=cars[l];
-    voices[l]=new EngineVoice(ctx,ENGINES[c.engSound]||ENGINES.i4,pan,(IND[c.ind]||IND.na).boosted,c.ind);
+    voices[l]=new EngineVoice(ctx,ENGINES[c.engSound]||ENGINES.i4,pan,(IND[c.ind]||IND.na).boosted,c.ind,sndLoad(sndPackFor(c)));
   });
 }
 const P0={gripAdj:1.0,stall:2.0,launch:'lc',launchRpm:2800,shiftMode:'fastest',shiftRpm:0};
@@ -4314,6 +4392,7 @@ function refreshAll(){
   activeLanes().forEach(refresh);
 }
 function setLane(lane,d){
+  try{sndLoad(sndPackFor(d));}catch(e){}
   EMPTY[lane]=false;if(typeof emptyUI==='function')setTimeout(emptyUI,0);
   document.getElementById('name'+lane+'f').value=d.name;
   ['hp','hpRpm','tq','tqRpm','redline','disp','fd','weight','tireD','gripAdj','dist','cda','wb','cg','launchRpm']
@@ -9784,7 +9863,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='27658d9f28';let dismissed=null;
+(function(){const V='b39ed7ca35';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
