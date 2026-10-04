@@ -838,6 +838,20 @@ function volSetting(){
 }
 function volGain(v){const f=v/100;return f*f;}      // squared: slider steps sound even
 function audioOut(ctx){return (ctx&&ctx.master)||ctx.destination;}
+function setAP(p,v,t){if(p&&p.setTargetAtTime)p.setTargetAtTime(v,t,0.03);}
+/* Put the listener at the camera and each engine at its car, every frame. */
+function audio3D(){
+  if(typeof AC==='undefined'||!AC||typeof cam==='undefined'||!cam||typeof TH==='undefined')return;
+  const t=AC.currentTime,L=AC.listener,p=cam.position;
+  const f=new TH.Vector3();cam.getWorldDirection(f);const u=new TH.Vector3(0,1,0).applyQuaternion(cam.quaternion);
+  if(L.positionX){setAP(L.positionX,p.x,t);setAP(L.positionY,p.y,t);setAP(L.positionZ,p.z,t);
+    setAP(L.forwardX,f.x,t);setAP(L.forwardY,f.y,t);setAP(L.forwardZ,f.z,t);setAP(L.upX,u.x,t);setAP(L.upY,u.y,t);setAP(L.upZ,u.z,t);}
+  else if(L.setPosition){L.setPosition(p.x,p.y,p.z);L.setOrientation(f.x,f.y,f.z,u.x,u.y,u.z);}
+  for(const l in voices){const v=voices[l],o=typeof carObj!=='undefined'?carObj[l]:null;
+    if(!v||!v.is3d||!o||!o.grp)continue;const P=v.panner,q=o.grp.position;
+    if(P.positionX){setAP(P.positionX,q.x,t);setAP(P.positionY,q.y+0.6,t);setAP(P.positionZ,q.z,t);}
+    else if(P.setPosition)P.setPosition(q.x,q.y+0.6,q.z);}
+}
 function audioCtx(){
   if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;AC=new C();
     AC.master=AC.createGain();AC.master.gain.value=volGain(volSetting());AC.master.connect(AC.destination);}
@@ -874,19 +888,23 @@ function sndLoad(name){
   (async()=>{try{
     if(!SND.idx)SND.idx=await fetch('sounds/index.json').then(r=>{if(!r.ok)throw new Error('idx');return r.json();});
     const meta=SND.idx[name];if(!meta)throw new Error('pack');
-    const ab=await fetch('sounds/'+name+'.wav').then(r=>{if(!r.ok)throw new Error('flac');return r.arrayBuffer();});
+    const file=meta.file||name,base=SND.idx[file];if(!base)throw new Error('file');
+    const ab=await fetch('sounds/'+file+'.wav').then(r=>{if(!r.ok)throw new Error('flac');return r.arrayBuffer();});
     const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
-    const dec=await new Promise((res,rej)=>{const p=new OC(1,1,meta.sr).decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(rej);});
+    const dec=await new Promise((res,rej)=>{const p=new OC(1,1,base.sr).decodeAudioData(ab,res,rej);if(p&&p.catch)p.catch(rej);});
     const data=dec.getChannelData(0),layers={};
-    for(const L in meta.layers)layers[L]=meta.layers[L].map(([rpm,st,len])=>{
+    for(const L in base.layers)layers[L]=base.layers[L].map(([rpm,st,len])=>{
       const b=new AudioBuffer({length:len,sampleRate:dec.sampleRate,numberOfChannels:1});
       b.copyToChannel(data.subarray(st,st+len),0);return{rpm,buf:b};});
-    rec.layers=layers;rec.gain=meta.gain||1;rec.grain=!!meta.grain;rec.ready=true;
+    rec.layers=layers;rec.gain=meta.gain||1;rec.tone=meta.tone||1;rec.grain=!!base.grain;rec.ready=true;
   }catch(e){rec.failed=true;}})();
   return rec;}
 class SampleEngine{
   constructor(ctx,pack,dest){
-    this.ctx=ctx;this.out=ctx.createGain();this.out.gain.value=0.9*(pack.gain||1);this.out.connect(dest);this.L={};
+    this.ctx=ctx;this.out=ctx.createGain();this.out.gain.value=0.9*(pack.gain||1);this.L={};
+    this.tone=pack.tone||1;
+    if(this.tone<1){this.lp=ctx.createBiquadFilter();this.lp.type='lowpass';this.lp.Q.value=0.6;this.lp.frequency.value=6000;
+      this.out.connect(this.lp);this.lp.connect(dest);}else this.out.connect(dest);
     for(const k in pack.layers){const g=ctx.createGain();g.gain.value=0;g.connect(this.out);
       const list=pack.layers[k];this.L[k]={list,g,act:new Map(),grain:list.length>40,cur:null};}
   }
@@ -919,6 +937,7 @@ class SampleEngine{
   update(rpm,load,shifting){
     const r=Math.max(500,rpm),hasOff=!!this.L.off;
     const on=shifting?0.22:(hasOff?0.30+0.70*load:0.55+0.45*load);
+    if(this.lp)this.lp.frequency.setTargetAtTime((2200+load*8000)*this.tone,this.ctx.currentTime,0.05);
     this.layer('on',r,on);
     if(hasOff)this.layer('off',r,shifting?0.55:Math.max(0,0.85*(1-load*1.4)));
     this.layer('eng',r,0.38*(0.45+0.55*load));
@@ -991,8 +1010,13 @@ class EngineVoice{
     this.electric=!!cfg.electric;
     const t=ctx.currentTime;
     this.out=ctx.createGain();this.out.gain.value=0;
-    this.panner=ctx.createStereoPanner?ctx.createStereoPanner():null;
-    if(this.panner){this.panner.pan.value=pan;this.out.connect(this.panner);this.panner.connect(audioOut(ctx));}
+    /* The voice sits at the car in 3D: louder close by, fading with distance, and heard
+       from the side it's on relative to the camera (the listener). */
+    this.is3d=!!ctx.createPanner;
+    if(this.is3d){const P=ctx.createPanner();P.panningModel='HRTF';P.distanceModel='inverse';
+      P.refDistance=14;P.rolloffFactor=1.0;P.maxDistance=5000;this.panner=P;}
+    else this.panner=ctx.createStereoPanner?ctx.createStereoPanner():null;
+    if(this.panner){if(!this.is3d)this.panner.pan.value=pan;this.out.connect(this.panner);this.panner.connect(audioOut(ctx));}
     else this.out.connect(audioOut(ctx));
     this.lp=ctx.createBiquadFilter();this.lp.type='lowpass';
     this.lp.frequency.value=900;this.lp.Q.value=0.9;this.lp.connect(this.out);
@@ -8745,6 +8769,7 @@ function drawStage(st){
     scene._sun.target.position.set(cam.position.x,0,0);
     scene._sun.target.updateMatrixWorld();}
   rend.render(scene,cam);
+  audio3D();
 }
 function blankStage(){
   const D=raceDist();
@@ -9921,7 +9946,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='c85c8f05cc';let dismissed=null;
+(function(){const V='e15e1431d2';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
