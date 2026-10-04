@@ -941,6 +941,7 @@ class SampleEngine{
     this.layer('on',r,on);
     if(hasOff)this.layer('off',r,shifting?0.55:Math.max(0,0.85*(1-load*1.4)));
     this.layer('eng',r,0.38*(0.45+0.55*load));
+    if(this.L.intake)this.layer('intake',r,(shifting?0.08:0.32)*(0.2+0.8*load));
     // supercharger recordings: rotor whine rides crank speed and climbs with boost
     if(this.L.sc)this.layer('sc',r,(shifting?0.25:0.85)*(0.25+0.75*load)*Math.min(1,0.35+r/5000));
   }
@@ -9946,7 +9947,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='e15e1431d2';let dismissed=null;
+(function(){const V='9c44736505';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
