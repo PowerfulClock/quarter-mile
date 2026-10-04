@@ -881,7 +881,7 @@ function sndLoad(name){
     for(const L in meta.layers)layers[L]=meta.layers[L].map(([rpm,st,len])=>{
       const b=new AudioBuffer({length:len,sampleRate:dec.sampleRate,numberOfChannels:1});
       b.copyToChannel(data.subarray(st,st+len),0);return{rpm,buf:b};});
-    rec.layers=layers;rec.gain=meta.gain||1;rec.ready=true;
+    rec.layers=layers;rec.gain=meta.gain||1;rec.grain=!!meta.grain;rec.ready=true;
   }catch(e){rec.failed=true;}})();
   return rec;}
 class SampleEngine{
@@ -922,9 +922,67 @@ class SampleEngine{
     this.layer('on',r,on);
     if(hasOff)this.layer('off',r,shifting?0.55:Math.max(0,0.85*(1-load*1.4)));
     this.layer('eng',r,0.38*(0.45+0.55*load));
+    // supercharger recordings: rotor whine rides crank speed and climbs with boost
+    if(this.L.sc)this.layer('sc',r,(shifting?0.25:0.85)*(0.25+0.75*load)*Math.min(1,0.35+r/5000));
   }
   stop(){const t=this.ctx.currentTime;this.out.gain.setTargetAtTime(0,t,0.1);
     setTimeout(()=>{for(const k in this.L)this.L[k].act.forEach(v=>{try{v.src.stop();}catch(e){}});},500);}
+}
+/* The 6.4 Hemi set is 500 single engine cycles recorded in order through a rev sweep.
+   Stepping through consecutive cycles reproduces the real recording seamlessly, so the
+   player walks forward cycle by cycle, re-pitched to the exact rpm, and only jumps back
+   (with a 2 ms crossfade) when the walk has drifted 1.5% from the target revs. Below
+   the lowest cycle it blends into the recorded idle loop. */
+class GrainEngine{
+  constructor(ctx,pack,dest){
+    this.ctx=ctx;this.g=pack.layers.grains;this.idle=pack.layers.idle[0];
+    this.out=ctx.createGain();this.out.gain.value=0.9*(pack.gain||1);
+    this.lp=ctx.createBiquadFilter();this.lp.type='lowpass';this.lp.frequency.value=8000;this.lp.Q.value=0.5;
+    this.lp.connect(this.out);this.out.connect(dest);
+    this.gg=ctx.createGain();this.gg.gain.value=0;this.gg.connect(this.lp);
+    this.ig=ctx.createGain();this.ig.gain.value=0;this.ig.connect(this.lp);
+    this.isrc=ctx.createBufferSource();this.isrc.buffer=this.idle.buf;this.isrc.loop=true;
+    this.isrc.connect(this.ig);this.isrc.start(ctx.currentTime);
+    this.rpm=800;this.cur=-1;this.next=ctx.currentTime+0.03;this.lastE=null;
+    this.timer=setInterval(()=>this.pump(),20);
+  }
+  nearest(r){const g=this.g;let lo=0,hi=g.length-1;
+    while(lo<hi){const m=(lo+hi)>>1;if(g[m].rpm<r)lo=m+1;else hi=m;}return lo;}
+  pump(){
+    const ctx=this.ctx,g=this.g,low=g[0].rpm;
+    if(this.next<ctx.currentTime)this.next=ctx.currentTime+0.005;
+    let guard=0;
+    while(this.next<ctx.currentTime+0.1&&guard++<40){
+      const r=Math.max(low*0.6,this.rpm),rr=Math.max(low,r);
+      let k=this.cur+1,seam=false;
+      if(this.cur<0||k>=g.length||Math.abs(g[k].rpm/rr-1)>0.015){
+        k=Math.max(0,this.nearest(rr)-4);seam=(k!==this.cur+1);
+      }
+      const s=g[k],rate=Math.max(0.3,Math.min(3,r/s.rpm)),dur=s.buf.duration/rate;
+      const src=ctx.createBufferSource(),e=ctx.createGain();
+      src.buffer=s.buf;src.playbackRate.value=rate;src.connect(e);e.connect(this.gg);
+      const X=0.002;
+      if(seam&&this.lastE){
+        const t0=Math.max(ctx.currentTime,this.next-X);
+        e.gain.setValueAtTime(0,t0);e.gain.linearRampToValueAtTime(1,t0+X);
+        this.lastE.gain.setValueAtTime(1,t0);this.lastE.gain.linearRampToValueAtTime(0,t0+X);
+        src.start(t0);src.stop(t0+X+dur+0.01);
+      }else{src.start(this.next);src.stop(this.next+dur+0.01);}
+      this.lastE=e;this.cur=k;this.next+=dur;
+    }
+  }
+  update(rpm,load,shifting){
+    const t=this.ctx.currentTime,low=this.g[0].rpm;this.rpm=Math.max(500,rpm);
+    const wi=Math.max(0,Math.min(1,(low-this.rpm)/(low*0.45)));   // idle loop below the sweep
+    const lv=shifting?0.4:(0.45+0.55*load);
+    this.gg.gain.setTargetAtTime(lv*Math.cos(wi*Math.PI/2),t,0.03);
+    this.ig.gain.setTargetAtTime(lv*Math.sin(wi*Math.PI/2),t,0.03);
+    this.isrc.playbackRate.setTargetAtTime(Math.max(0.5,Math.min(3.2,this.rpm/this.idle.rpm)),t,0.02);
+    // off throttle the exhaust note goes duller
+    this.lp.frequency.setTargetAtTime(shifting?2600:2200+load*9800,t,0.05);
+  }
+  stop(){clearInterval(this.timer);const t=this.ctx.currentTime;this.out.gain.setTargetAtTime(0,t,0.1);
+    setTimeout(()=>{try{this.isrc.stop();}catch(e){}},500);}
 }
 class EngineVoice{
   constructor(ctx,cfg,pan,boosted,indKind,pack){
@@ -1000,7 +1058,7 @@ class EngineVoice{
     [this.osc,this.osc2,this.sub,this.whine].forEach(o=>o.start(t));
     this.noise.start(t);this.scr.start(t);
     this.out.gain.setTargetAtTime(0.9,t,0.05);
-    this.smp=(pack&&pack.ready&&!this.electric)?new SampleEngine(ctx,pack,this.out):null;
+    this.smp=(pack&&pack.ready&&!this.electric)?(pack.grain?new GrainEngine(ctx,pack,this.out):new SampleEngine(ctx,pack,this.out)):null;
   }
   update(rpm,load,boost,slipAmt,shifting){
     if(this.dead)return;
@@ -1066,7 +1124,7 @@ class EngineVoice{
       const rev=Math.min(1,rpm/5200);
       const lvl=this.roots?(0.020+0.052*load)*(0.35+0.65*rev)
                           :(0.008+0.040*load)*rev*rev;
-      const scm=this.smp?0.35:1;   // the recordings already carry most of the blower whine
+      const scm=this.smp?0.2:1;   // the recordings already carry most of the blower whine
       this.scG.gain.setTargetAtTime((shifting?lvl*0.25:lvl)*scm,t,0.05);
     }
     this.sG.gain.setTargetAtTime(slipAmt>0?0.42*slipAmt:0,t,0.04);
@@ -9863,7 +9921,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='0e25965522';let dismissed=null;
+(function(){const V='c85c8f05cc';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
