@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="81e44eeb94";</script>
+<head><script>window.QM_VER="2f17efe281";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -881,6 +881,13 @@ function sndPackFor(c){
   if((IND[c.ind]||{}).electric)return null;
   // every V6 uses the recorded 3.6 Pentastar until a car gets its own recording
   if(c.engSound==='v6'||c.engSound==='v6p')return 'pentastar';
+  // Ford Mustang V8s: supercharged Shelbys get the GT500 recording, the GT350 the louder
+  // aftermarket-exhaust Mustang, every other V8 Mustang the 5.0 Coyote
+  {const nm=(c.name||'').toLowerCase();
+    if(/mustang|shelby/.test(nm)&&/^v8/.test(c.engSound||'')){
+      if(c.ind==='roots'||c.ind==='centri'||c.ind==='twin'||c.ind==='single')return 'shelby54';
+      if(/gt350/.test(nm))return 'mustangam';
+      return 'coyote';}}
   const n=(c.name||'').toLowerCase();if(!/challenger|charger|durango|dodge/.test(n))return null;
   const d=+c.disp||0,near=v=>Math.abs(d-v)<0.15;
   if((c.ind==='roots'||c.ind==='centri')&&near(6.2))return 'hellcat';
@@ -10136,7 +10143,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='81e44eeb94';let dismissed=null;
+(function(){const V='2f17efe281';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
