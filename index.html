@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="9da84166d5";</script>
+<head><script>window.QM_VER="9e69ed98c6";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1699,6 +1699,37 @@ Object.assign(PRESETS,{
     (the 8-speed only reached V8 Chargers for 2015), 3.06 axle, 235/55R19 all-seasons,
     no launch control. The RWD R/T tested 5.2-5.3 s and 13.8-13.9 s at ~104 mph;
     the AWD car is ~150 lb heavier and owners run high-13s to 14.0 at ~100 mph. */
+ /* 2019 Dodge Charger (LD), every trim plus the police Pursuit. Curb weights. */
+ charger19sxt:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger SXT",hp:292,hpRpm:6350,tq:260,tqRpm:4800,redline:6400,
+  ind:"na",disp:3.6,engSound:"v6p",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:2.62,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3934,dist:52,tireD:28.2,cda:7.4,wb:120.2,cg:21,launch:'bb',launchRpm:2200,modes:['normal','sport'],mode:'normal'}),
+ charger19sxtawd:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger SXT AWD",hp:300,hpRpm:6350,tq:264,tqRpm:4800,redline:6400,
+  ind:"na",disp:3.6,engSound:"v6p",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.07,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4150,dist:54,tireD:28.2,cda:7.5,wb:120.2,cg:21.5,launch:'bb',launchRpm:2200,modes:['normal','sport'],mode:'normal'}),
+ charger19gt:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger GT",hp:300,hpRpm:6350,tq:264,tqRpm:4800,redline:6400,
+  ind:"na",disp:3.6,engSound:"v6p",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.07,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3965,dist:52,tireD:28.7,cda:7.4,wb:120.2,cg:21,launch:'bb',launchRpm:2400,modes:['normal','sport'],mode:'normal'}),
+ charger19gtawd:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger GT AWD",hp:300,hpRpm:6350,tq:264,tqRpm:4800,redline:6400,
+  ind:"na",disp:3.6,engSound:"v6p",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.07,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4170,dist:54,tireD:28.2,cda:7.5,wb:120.2,cg:21.5,launch:'bb',launchRpm:2400,modes:['normal','sport'],mode:'normal'}),
+ charger19rt:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger R/T",hp:370,hpRpm:5250,tq:395,tqRpm:4200,redline:5800,
+  ind:"na",disp:5.7,engSound:"v8h",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.07,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4100,dist:54,tireD:28.7,cda:7.5,wb:120.2,cg:21,launch:'bb',launchRpm:2400,modes:['normal','sport'],mode:'normal'}),
+ charger19scat:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger Scat Pack",hp:485,hpRpm:6100,tq:475,tqRpm:4100,redline:6400,
+  ind:"na",disp:6.4,engSound:"v8h",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.09,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:4240,dist:54,tireD:28.7,cda:7.6,wb:120.2,cg:21,launchRpm:2000,modes:['normal','sport','track'],mode:'normal'}),
+ charger19hellcat:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger SRT Hellcat",hp:707,hpRpm:6000,tq:650,tqRpm:4800,redline:6200,
+  ind:"roots",disp:6.2,engSound:"v8h",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:2.62,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:4575,dist:56,tireD:28.7,cda:7.8,wb:120.2,cg:21,launchRpm:2200,modes:['normal','sport','track'],mode:'normal'}),
+ charger19pursuitv6:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger Pursuit V6 AWD (Police)",hp:292,hpRpm:6350,tq:260,tqRpm:4800,redline:6400,
+  ind:"na",disp:3.6,engSound:"v6p",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.07,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4450,dist:54,tireD:28.6,cda:8.0,wb:120.2,cg:21.5,launch:'none',launchRpm:1500,vmax:140,modes:['normal'],mode:'normal'}),
+ charger19pursuitv8:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger Pursuit 5.7 V8 AWD (Police)",hp:370,hpRpm:5250,tq:395,tqRpm:4200,redline:5800,
+  ind:"na",disp:5.7,engSound:"v8h",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.07,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4600,dist:55,tireD:28.6,cda:8.0,wb:120.2,cg:21.5,launch:'none',launchRpm:1500,vmax:140,modes:['normal'],mode:'normal'}),
+ charger19pursuitrwd:Object.assign({},P1,{body:"charger",name:"2019 Dodge Charger Pursuit 5.7 V8 RWD (Police)",hp:370,hpRpm:5250,tq:395,tqRpm:4200,redline:5800,
+  ind:"na",disp:5.7,engSound:"v8h",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:2.62,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4400,dist:54,tireD:28.6,cda:8.0,wb:120.2,cg:21,launch:'none',launchRpm:1500,vmax:152,modes:['normal'],mode:'normal'}),
  charger14rt:Object.assign({},P1,{body:"charger",name:"2014 Dodge Charger R/T AWD",mfr:"Dodge",hp:370,hpRpm:5250,tq:395,tqRpm:4200,redline:5800,
   ind:"na",disp:5.7,engSound:"v8h",gears:[3.59,2.19,1.41,1.00,0.83],fd:3.06,drive:"awd",trans:"auto",
   layout:"front",tire:"allseason",weight:4300,dist:55,tireD:29.2,cda:8.4,wb:120.2,cg:21,
@@ -1904,7 +1935,7 @@ Object.assign(PRESETS,{
 const MFR_MAP={mustang25eco:"Ford",mustang18eco:"Ford",mustang25gt:"Ford",mustang09v6:"Ford",
  bmw230i:"BMW",bmwM2:"BMW",challSXT11:"Dodge",challRT23:"Dodge",scatpack23:"Dodge",
  hellcat23:"Dodge",demon170:"Dodge",z06:"Chevrolet",porsche911:"Porsche",camaro16v6:"Chevrolet",
- elantraN:"Hyundai",sq5:"Audi",urus:"Lamborghini",durangoHC:"Dodge",mustang18gt:"Ford",challGT19rwd:"Dodge",m3comp:"BMW",m4comp:"BMW",m5comp:"BMW",m8comp:"BMW",x3m:"BMW",x5m:"BMW",x7m60i:"BMW",sq5_2018:"Audi",r8v10:"Audi",gti_mk8:"Volkswagen",golfr_mk8:"Volkswagen",m3_srp:"Tesla",m3_lr:"Tesla",m3_perf:"Tesla",ms_lr:"Tesla",ms_perf:"Tesla",mx_perf:"Tesla",my_perf:"Tesla",p911_carrera:"Porsche",p911_4s:"Porsche",p911_turbos:"Porsche",mazda3turbo:"Mazda",mx5_2024:"Mazda",focusrs:"Ford",fusionsport:"Ford",taurussho:"Ford",g80_25t:"Genesis",g80_35t:"Genesis",g80_33t:"Genesis",g70_20t:"Genesis",g70_33t:"Genesis",g70_25t:"Genesis",mkz_20t:"Lincoln",mkz_30t:"Lincoln",mkz_hyb:"Lincoln",s60_t5:"Volvo",s60_t6:"Volvo",s60_t8:"Volvo",tlx_24:"Acura",tlx_35:"Acura",tlx_20t:"Acura",tlx_types:"Acura",viper_acr:"Dodge",viper_gts:"Dodge",veyron:"Bugatti",veyron_ss:"Bugatti",chiron:"Bugatti",agera_rs:"Koenigsegg",jesko:"Koenigsegg",regera:"Koenigsegg",venom_gt:"Hennessey",crownvic_lx:"Ford",crownvic_sport:"Ford",crownvic_p71:"Ford",impala_ls06:"Chevrolet",impala_ss06:"Chevrolet",impala_ltz14:"Chevrolet",accord_v6:"Honda",accord_20t:"Honda",camaro12ss:"Chevrolet",camaro12v6:"Chevrolet",camaro19_20t:"Chevrolet",camaro21rs:"Chevrolet",chall11rt:"Dodge",chall11srt8:"Dodge",charger14rt:"Dodge",mustang16v6:"Ford",mustang16eco:"Ford",mustang14gt:"Ford",mustang08gt:"Ford",m340i:"BMW",m440i:"BMW",m550i:"BMW",m850i:"BMW",x3m40i:"BMW",x5m50i:"BMW",rs7_2026:"Audi"};
+ elantraN:"Hyundai",sq5:"Audi",urus:"Lamborghini",durangoHC:"Dodge",mustang18gt:"Ford",challGT19rwd:"Dodge",m3comp:"BMW",m4comp:"BMW",m5comp:"BMW",m8comp:"BMW",x3m:"BMW",x5m:"BMW",x7m60i:"BMW",sq5_2018:"Audi",r8v10:"Audi",gti_mk8:"Volkswagen",golfr_mk8:"Volkswagen",m3_srp:"Tesla",m3_lr:"Tesla",m3_perf:"Tesla",ms_lr:"Tesla",ms_perf:"Tesla",mx_perf:"Tesla",my_perf:"Tesla",p911_carrera:"Porsche",p911_4s:"Porsche",p911_turbos:"Porsche",mazda3turbo:"Mazda",mx5_2024:"Mazda",focusrs:"Ford",fusionsport:"Ford",taurussho:"Ford",g80_25t:"Genesis",g80_35t:"Genesis",g80_33t:"Genesis",g70_20t:"Genesis",g70_33t:"Genesis",g70_25t:"Genesis",mkz_20t:"Lincoln",mkz_30t:"Lincoln",mkz_hyb:"Lincoln",s60_t5:"Volvo",s60_t6:"Volvo",s60_t8:"Volvo",tlx_24:"Acura",tlx_35:"Acura",tlx_20t:"Acura",tlx_types:"Acura",viper_acr:"Dodge",viper_gts:"Dodge",veyron:"Bugatti",veyron_ss:"Bugatti",chiron:"Bugatti",agera_rs:"Koenigsegg",jesko:"Koenigsegg",regera:"Koenigsegg",venom_gt:"Hennessey",crownvic_lx:"Ford",crownvic_sport:"Ford",crownvic_p71:"Ford",impala_ls06:"Chevrolet",impala_ss06:"Chevrolet",impala_ltz14:"Chevrolet",accord_v6:"Honda",accord_20t:"Honda",camaro12ss:"Chevrolet",camaro12v6:"Chevrolet",camaro19_20t:"Chevrolet",camaro21rs:"Chevrolet",chall11rt:"Dodge",chall11srt8:"Dodge",charger14rt:"Dodge",charger19sxt:"Dodge",charger19sxtawd:"Dodge",charger19gt:"Dodge",charger19gtawd:"Dodge",charger19rt:"Dodge",charger19scat:"Dodge",charger19hellcat:"Dodge",charger19pursuitv6:"Dodge",charger19pursuitv8:"Dodge",charger19pursuitrwd:"Dodge",mustang16v6:"Ford",mustang16eco:"Ford",mustang14gt:"Ford",mustang08gt:"Ford",m340i:"BMW",m440i:"BMW",m550i:"BMW",m850i:"BMW",x3m40i:"BMW",x5m50i:"BMW",rs7_2026:"Audi"};
 for(const k in MFR_MAP)if(PRESETS[k])PRESETS[k].mfr=MFR_MAP[k];
 
 function opts(o,fn){return Object.entries(o).map(([k,v])=>'<option value="'+k+'">'+(fn?fn(v):v.label)+'</option>').join('');}
@@ -2016,7 +2047,7 @@ function hasCustomCluster(body,name){
   if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0/i.test(nm))return true;
   if(/corvette/i.test(nm)&&/\bC[78]\b/.test(nm))return true;
   if(/mustang|shelby/i.test(nm)&&yr>=2005)return true;
-  if(/charger/i.test(nm)&&yr>=2011&&yr<=2014)return true;
+  if(/charger/i.test(nm)&&yr>=2011)return true;
   if(/challenger/i.test(nm)&&yr>=2008&&yr<=2014)return true;
   if(/camaro/i.test(nm)&&yr>=2010)return true;
   if(/acura/i.test(nm)&&yr)return true;
@@ -4180,7 +4211,7 @@ function buildClusters(){
     clusterMeta[l]={tachMax,spdMax:220,boosted:(IND[c.ind]||IND.na).boosted,psi:boostInfo(c).psi};
     // a saved car can pick its cluster; otherwise it follows the body / make
     const cs=(c.cluster&&c.cluster!=='auto')?c.cluster:null;
-    const muscle=cs?cs==='challenger':(c.body==='challenger');
+    const muscle=cs?cs==='challenger':(c.body==='challenger'||(c.body==='charger'&&(parseInt(c.name,10)||0)>=2015));
     const chevy=cs?cs==='camaro':(c.body==='camaro');
     const pony=cs?cs==='mustang':(c.body==='mustang');
     const porsche=cs?cs==='porsche':/porsche/i.test(c.name||'');
@@ -4874,6 +4905,13 @@ function wheelSpec(body,name){
     else if(/\bgt\b/.test(n)){f=ty(19,255,40);r=ty(19,275,40);style='split5';finish=yr>=2018?'black':'silver';cal=yr>=2018?'red':'silver';}
     else if(/ecoboost/.test(n)){f=r=ty(18,235,50);style='five';}
     else{f=r=ty(17,235,55);style='ten';}
+  }else if(body==='charger'&&yr>=2015){
+    if(/pursuit|police/.test(n)){f=r=ty(18,245,55);style='steel';}
+    else if(/hellcat/.test(n)){f=r=ty(20,275,40);style='split5';finish='black';cal='red';}
+    else if(/scat/.test(n)){f=r=ty(20,245,45);style='five';finish='black';cal='red';}
+    else if(/r\/t/.test(n)){f=r=ty(20,245,45);style='split5';finish='silver';}
+    else if(/\bgt\b/.test(n)){f=r=/awd/.test(n)?ty(19,235,55):ty(20,245,45);style='ten';finish='black';}
+    else{f=r=/awd/.test(n)?ty(19,235,55):ty(18,235,55);style='split5';finish='silver';}
   }else if(body==='charger'){f=r=yr>=2011&&yr<=2014?ty(19,235,55):ty(18,235,55);style='split5';finish='silver';
   }else if(body==='tesla3'){if(/performance/.test(n)){f=r=ty(20,235,35);style='multi';finish='gunmetal';cal='red';}else{f=r=ty(18,235,45);style='ten';finish='silver';}
   }else if(body==='teslay'){f=r=ty(21,255,35);style='multi';finish='gunmetal';cal='red';
@@ -6388,6 +6426,7 @@ function buildDurangoBP(colorHex,name){
 /* ---------- Dodge Charger (2011-14), from a scaled 2011 Charger blueprint ----------
    5077 mm long, 3050 mm wheelbase, 1905 mm wide, 1491 mm tall. */
 function buildChargerBP(colorHex,name){
+  if((parseInt(name,10)||0)>=2015)return buildCharger15(colorHex,name);
   const n=(name||'').toLowerCase(),rt=/r\/t|srt/.test(n);
   return bpCar(colorHex,name,{body:'charger',NOSE:62.0,TAIL:-67.0,W:24.2,wx:38.74,wr:9.4,AR:10.4,
     plan:[[62.4,2],[60.9,4.6],[58.7,13.4],[56.5,17.9],[54.2,20.5],[52,22.3],[49.8,23.0],[47.6,23.8],[45.4,24.2],[-51.1,24.2],[-53.3,23.8],[-55.5,23.4],[-57.7,23.0],[-60,22.7],[-62.2,21.9],[-64.4,20.4],[-66.6,14.2],[-67,10]],
@@ -6425,6 +6464,94 @@ function buildChargerBP(colorHex,name){
       ribbon(-1,-20,20,26,()=>[6.3,9.8],0.16,M.dark);
       [1,-1].forEach(s=>disc(-1,s*15,8.2,1.3,M.chrome,0.5));
       if(rt)box(2.4,0.7,2*planW(-62)-3,M.paint,-62,29.4,0,0.2);
+    }});
+}
+/* ---------- Dodge Charger (2015-23 LD facelift), from a scaled 2015 blueprint ----------
+   5039 mm long, 3053 mm wheelbase, 1905 mm wide, 1478 mm tall.
+   Trims: SXT / GT (3.6 V6), R/T (5.7), Scat Pack (6.4), SRT Hellcat (6.2 SC), Pursuit (police). */
+function buildCharger15(colorHex,name){
+  const n=(name||'').toLowerCase();
+  const hell=/hellcat/.test(n),scat=/scat|392/.test(n),rt=/r\/t/.test(n),gt=/\bgt\b/.test(n),
+        cop=/pursuit|police/.test(n),v8=hell||scat||rt||/v8|5\.7|hemi/.test(n);
+  const ghTop=[[26.5,25.9],[25.9,26.3],[24.9,27.0],[23.8,27.7],[22.7,28.4],[21.7,28.9],[20.6,29.4],[19.5,30.0],[17.4,31.0],[15.2,32.0],[13.1,33.0],[11,33.8],[8.8,34.8],[6.7,35.4],[4.5,35.9],[2.4,36.3],[0.3,36.6],[-4,36.9],[-10,37.0],[-15,36.8],[-19,36.6],[-22,36.2],[-24,35.9],[-26.5,35.5],[-28.6,35.2],[-30.8,34.8],[-32.9,34.1],[-35,33.5],[-37.2,32.8],[-39.3,32.1],[-41.5,31.4],[-43.6,30.7],[-45.8,29.7],[-47.9,28.8],[-49,28.3]];
+  const gt0=bpTab(ghTop);
+  return bpCar(colorHex,name,{body:'charger',NOSE:61.6,TAIL:-66.4,W:24.2,wx:38.77,wr:9.5,AR:10.6,
+    plan:[[61.6,4],[60.9,10.5],[60.3,12.6],[59.2,15.1],[58.2,16.9],[57.1,18.7],[56,19.8],[54.9,20.9],[53.9,21.5],[52.8,22.0],[51.7,22.7],[50.6,23.1],[49.5,23.5],[47.4,23.8],[41,24.0],[39.9,24.2],[-44.7,24.2],[-45.8,23.9],[-49,23.6],[-52.2,23.5],[-55.5,22.8],[-57.6,22.4],[-58.7,22.0],[-59.8,21.3],[-60.9,20.6],[-61.9,19.5],[-63,18.4],[-64.1,16.6],[-65.2,13.6],[-66.4,6]],
+    top:[[61.6,14],[61.0,18.4],[60.3,19.9],[59.2,20.6],[57.1,21.9],[54.9,22.6],[52.8,23.2],[50.6,23.6],[48.5,24.0],[46.3,24.3],[44.2,24.6],[42,25.0],[39.9,25.3],[36.6,25.5],[33,25.7],[27,25.8],[24,26.0],[12,26.2],[0,26.4],[-12,26.7],[-24,27.1],[-36,27.5],[-46,27.8],[-52,27.9],[-58,27.9],[-62,28.0],[-63.4,28.5],[-64.3,27.8],[-65,25.5],[-65.6,22],[-66.0,19.5],[-66.4,16.5]],
+    bot:[[61.6,9],[61.0,7.4],[60.3,6.6],[58.2,5.9],[56,4.9],[50,4.9],[30,4.9],[0,5.3],[-28,5.3],[-30,5.9],[-48,6.6],[-52,7.0],[-61.9,7.3],[-63,7.4],[-64.1,8.0],[-65.2,9.0],[-66.2,11.4],[-66.4,13]],
+    crown:[57,26,0.6],
+    creases:[
+      // the door "scallop": a recessed sweep from the front door, tapering to a point on the rear door
+      {x0:-30,x1:17,fill:true,y:x=>{const t=Math.min(1,Math.max(0,(17-x)/47));
+        const lo=10.8+Math.pow(t,1.7)*9.6,hi=22.1+t*0.4,f=x>12?Math.sqrt(Math.max(0.02,(17-x)/5)):1,m=(lo+hi)/2;
+        return[m-(m-lo)*f,m+(hi-m)*f];}},
+      {x0:17,x1:49,y:x=>22.3+(x-17)*0.012},                  // shoulder line along the front fender
+      {x0:-62,x1:-30,y:x=>22.6+(-30-x)*0.03}],               // rear quarter line into the tail lamp
+    gh:{x0:-49,x1:26.5,GB:20.4,GT:16.6,roof:[0.5,-22.5],top:ghTop,
+      side:(x,y)=>{const top=gt0(x)-1.5;
+        if(y>top)return 0;
+        if(x>13.6-(y-26.3)*1.25)return 0;                     // A-pillar
+        if(x<-36.2+(y-27.4)*0.95)return 0;                    // C-pillar behind the small quarter glass
+        if(x<-8.3&&x>-11.6)return 2;                          // black B-pillar
+        if(x<-26.1&&x>-27.5)return 2;                         // divider ahead of the quarter glass
+        return 1;}},
+    mirror:[14.8,26.9],cuts:[[16.6,6,25.8],[-9.9,6,26.6],[-34.4,7,27.3]],handles:[[-3.7,21.6],[-29.2,22.6]],
+    rocker:[-28,28],rockerY:5.8,
+    trim:({M,ribbon,disc,box,onHood,planW,gTop,yTop})=>{
+      // ---- front: wide grille between slim headlamps ----
+      ribbon(1,-12.2,12.2,18,()=>[15.1,19.4],0.12,M.dark);                         // grille surround
+      ribbon(1,-11.6,11.6,18,()=>[15.5,19.0],0.18,hell?M.dark:M.gloss);             // mesh
+      for(let i=1;i<5;i++){const y=15.5+i*0.7;ribbon(1,-11.5,11.5,14,()=>[y-0.05,y+0.05],0.22,M.satin);}
+      ribbon(1,-12.2,12.2,18,()=>[19.3,19.6],0.22,cop?M.dark:M.satin);              // top trim strip
+      if(!cop){ribbon(1,6.6,7.4,1,()=>[16.4,18.2],0.26,M.redL);ribbon(1,7.9,8.7,1,()=>[16.4,18.2],0.26,M.redL);}  // Dodge stripes
+      [1,-1].forEach(s=>{
+        // slim headlamp: lower edge flat, upper edge rising toward the outer corner
+        const ly=z=>{const a=Math.min(1,Math.max(0,(Math.abs(z)-12.3)/(21.6-12.3)));return[16.3+a*0.3,19.2+a*0.7];};
+        ribbon(1,s*12.2,s*21.9,12,z=>{const b=ly(z);return[b[0]-0.3,b[1]+0.3];},0.12,M.dark);
+        ribbon(1,s*12.4,s*21.6,12,ly,0.2,M.chrome);                                 // chrome reflector housing
+        ribbon(1,s*12.6,s*17.2,8,z=>{const r=ly(z);return[r[0]+0.4,r[1]-0.9];},0.24,M.lens);   // inner lens
+        disc(1,s*19.1,17.9,1.3,M.dark,0.28);
+        disc(1,s*19.1,17.9,1.0,M.head,0.36);                                        // projector
+        disc(1,s*19.1,17.9,1.75,M.drl,0.32,0.84);                                   // LED ring ("C" halo)
+        ribbon(1,s*12.8,s*17.4,8,z=>{const b=ly(z);return[b[1]-0.55,b[1]-0.25];},0.28,M.drl);   // LED strip
+        ribbon(1,s*20.6,s*21.4,2,()=>[16.5,17.4],0.28,M.amber);                     // turn signal
+        // fog lamps in the lower corners: three small LED blocks
+        ribbon(1,s*12.4,s*18.9,8,()=>[8.4,10.4],0.12,M.dark);
+        [13.6,15.4,17.2].forEach(z=>ribbon(1,s*z,s*(z+1.1),1,()=>[9.0,9.8],0.24,cop?M.dark:M.head));
+      });
+      ribbon(1,-9.6,9.6,14,()=>[7.7,11.1],0.12,M.dark);                             // lower intake
+      for(let i=1;i<4;i++){const y=7.7+i*0.85;ribbon(1,-9.2,9.2,12,()=>[y-0.05,y+0.05],0.2,M.satin);}
+      ribbon(1,-21,21,30,()=>[4.9,6.2],0.1,M.dark);                                 // chin spoiler
+      // ---- hood ----
+      if(hell){onHood(8,0.9,7.6,M.paint,46,0,0.35);onHood(5.6,0.5,6.4,M.dark,48.6,0,0.75);       // centre scoop
+        [1,-1].forEach(s=>{onHood(6.5,0.25,2.6,M.dark,40,s*9.6,0.12);});}           // heat extractors
+      else if(scat||gt){onHood(9,0.8,7.0,M.paint,44,0,0.3);onHood(4.4,0.45,5.6,M.dark,48,0,0.65);}  // performance hood scoop
+      // ---- rear: full-width "racetrack" lamp ----
+      ribbon(-1,-20.9,20.9,44,()=>[21.6,26.6],0.12,M.dark);
+      ribbon(-1,-20.5,20.5,44,()=>[22.0,26.2],0.2,M.tail);
+      ribbon(-1,-19.9,19.9,40,()=>[25.4,25.8],0.28,M.led);                           // LED outline, top
+      ribbon(-1,-19.9,19.9,40,()=>[22.4,22.8],0.28,M.led);                           // and bottom
+      [1,-1].forEach(s=>{ribbon(-1,s*19.5,s*19.9,1,()=>[22.4,25.8],0.28,M.led);
+        ribbon(-1,s*4.6,s*8.2,4,()=>[22.9,23.6],0.3,M.rev);});                        // reverse lamps
+      [-3.9,-2,0,2,3.9].forEach(z=>ribbon(-1,z-0.6,z+0.6,1,()=>[23.6,24.6],0.32,M.dark));  // DODGE lettering
+      ribbon(-1,-4.7,4.7,6,()=>[13.4,18.3],0.12,M.dark);ribbon(-1,-4.3,4.3,6,()=>[13.7,18.0],0.2,M.plate);
+      ribbon(-1,-18.4,18.4,26,()=>[6.2,11.2],0.12,M.dark);                           // lower valance
+      if(hell||scat)box(1.6,0.9,2*planW(-63.6)-3,M.paint,-63.6,29.0,0,0.15);          // taller SRT spoiler
+      // exhausts
+      const tip=hell||scat?1.35:v8?1.15:0.95;
+      [1,-1].forEach(s=>{disc(-1,s*15.4,8.4,tip,hell?M.gloss:M.chrome,0.5);disc(-1,s*15.4,8.4,tip*0.72,M.dark,0.62);});
+      // ---- police equipment ----
+      if(cop){
+        const xb=-4,yb=gTop(xb);box(5.6,1.2,31,M.dark,xb,yb+0.8,0);
+        [1,-1].forEach(s=>{box(5.0,1.0,13.4,s>0?M.redL:M.blue,xb,yb+1.3,s*7.6);});
+        // push bumper
+        [1,-1].forEach(s=>{box(1.2,13.5,1.2,M.dark,63.6,13.2,s*9.2);box(3.6,1.2,1.2,M.dark,62.3,19.4,s*9.2);box(3.6,1.2,1.2,M.dark,62.3,7.6,s*9.2);});
+        box(1.2,1.2,19.6,M.dark,63.6,17.6,0);box(1.2,1.2,19.6,M.dark,63.6,10.2,0);
+        [1,-1].forEach(s=>ribbon(1,s*3.8,s*7.6,2,()=>[11.3,12.1],0.4,s>0?M.redL:M.blue));   // grille flashers
+        box(1.6,1.0,1.0,M.chrome,14.6,29.4,22.6);                                    // A-pillar spotlight
+        box(1.0,1.6,1.0,M.dark,14.6,28.6,22.0);
+        box(0.25,4.2,0.25,M.dark,-30,gTop(-30)+2.2,0);box(0.25,3.0,0.25,M.dark,-34,gTop(-34)+1.6,0);  // antennas
+      }
     }});
 }
 /* ---------- Dodge Challenger (2008-14 / 2015-23), from scaled blueprints ----------
@@ -9492,7 +9619,7 @@ const MP_PRICE={mustang25eco:32500,mustang18eco:26000,mustang25gt:43000,mustang0
  viper_gts:105000,agera_rs:2500000,jesko:3000000,regera:2000000,venom_gt:1200000,crownvic_lx:27000,
  crownvic_sport:30000,crownvic_p71:25000,impala_ls06:22000,impala_ss06:28000,impala_ltz14:36000,accord_v6:34000,
  accord_20t:31000,camaro12ss:33000,camaro12v6:24000,camaro19_20t:26000,camaro21rs:30000,chall11rt:31000,
- chall11srt8:44000,charger14rt:33000,mustang16v6:25000,mustang16eco:27000,mustang14gt:31000,mustang08gt:26000,
+ chall11srt8:44000,charger14rt:33000,charger19sxt:29500,charger19sxtawd:32500,charger19gt:31000,charger19gtawd:33500,charger19rt:37000,charger19scat:40000,charger19hellcat:69000,charger19pursuitv6:30000,charger19pursuitv8:34000,charger19pursuitrwd:32500,mustang16v6:25000,mustang16eco:27000,mustang14gt:31000,mustang08gt:26000,
  m340i:58000,m440i:60000,m550i:80000,m850i:102000,x3m40i:61000,x5m50i:86000,rs7_2026:135000,mclarenP1:1150000,
  ms_plaid:130000,mx_plaid:120000,lucidDreamP:170000,mustangDarkHorse:60000,mustang16gt:33000,mustangGTD:325000,
  corvetteERay:105000,corvetteZR1:175000,corvetteZR1X:210000,corvetteGS:95000,corvetteGSX:120000,
@@ -9960,7 +10087,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='9da84166d5';let dismissed=null;
+(function(){const V='9e69ed98c6';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
