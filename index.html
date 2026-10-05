@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="ff66ac6b11";</script>
+<head><script>window.QM_VER="4df30117da";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -815,7 +815,7 @@ function torqueAtRaw(c,rpm){
 /* ================= ENGINE AUDIO ================= */
 const ENGINES={
  i3:{label:'Inline 3',cyl:3,harm:[1,.62,.5,.34,.24,.16,.1],half:.28,bright:1.05,rough:.5},
- i4:{label:'Inline 4',cyl:4,harm:[1,.72,.46,.32,.22,.14,.09],half:.08,bright:1.15,rough:.34},
+ i4:{label:'Inline 4',cyl:4,harm:[1,.72,.46,.32,.22,.14,.09],half:.08,bright:1.15,rough:.34,vol:.5},
  i5:{label:'Inline 5',cyl:5,harm:[1,.55,.48,.3,.22,.15,.1],half:.34,bright:1.0,rough:.42},
  i6:{label:'Inline 6',cyl:6,harm:[1,.48,.36,.26,.18,.12,.08],half:.05,bright:.95,rough:.16},
  ev:{label:'Electric motor',cyl:2,harm:[1,.30,.15,.08,.04],half:0,bright:2.6,rough:.05,electric:true},
@@ -1098,7 +1098,7 @@ class EngineVoice{
     this.wob.start(t);
     [this.osc,this.osc2,this.sub,this.whine].forEach(o=>o.start(t));
     this.noise.start(t);this.scr.start(t);
-    this.out.gain.setTargetAtTime(0.9,t,0.05);
+    this.out.gain.setTargetAtTime(0.9*(cfg.vol||1),t,0.05);
     this.smp=(pack&&pack.ready&&!this.electric)?(pack.grain?new GrainEngine(ctx,pack,this.out):new SampleEngine(ctx,pack,this.out)):null;
   }
   update(rpm,load,boost,slipAmt,shifting,mph){
@@ -10148,7 +10148,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='ff66ac6b11';let dismissed=null;
+(function(){const V='4df30117da';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
