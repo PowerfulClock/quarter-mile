@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="6078ba0f91";</script>
+<head><script>window.QM_VER="6a8f011c4f";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -9124,9 +9124,12 @@ function sampleAt(res,time){
   return tr[Math.max(0,Math.min(tr.length-1,Math.floor(time/DT)))];
 }
 document.getElementById('runBtn').addEventListener('click',()=>{
-  const lanes=activeLanes();
+  /* Single player can test-run one car: empty lanes simply sit out. Online, every lane
+     needs a car (the host's Start button already checks that). */
+  const solo=!(typeof MP!=='undefined'&&MP.on);
+  const lanes=solo&&activeLanes().some(l=>!laneEmpty(l))?activeLanes().filter(l=>!laneEmpty(l)):activeLanes();
   {const miss=lanes.filter(laneEmpty);if(miss.length){const box=document.getElementById('errBox');
-    box.textContent=miss.length===lanes.length?'Nothing Selected. Load a car into each lane to race.':
+    box.textContent=miss.length===lanes.length?'Nothing Selected. Load a car into a lane to run.':
       'Lane '+miss.map(l=>LANES.indexOf(l)+1).join(' and ')+': nothing selected. Load a car into '+(miss.length>1?'those lanes':'it')+(lanes.length>2?' or lower the number of racers.':'.');
     box.classList.add('show');window.lastRaceInfo=null;return;}}
   const cars={};lanes.forEach(l=>{cars[l]=readCar(l);SUSPP[l]=suspProfile(cars[l]);});
@@ -9138,7 +9141,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
   lanes.forEach(l=>{cars[l].raceFt=D;cars[l].startMph=S;});
   document.getElementById('treeMsg').textContent='Computing shift points…';
   const res={};
-  const onStrip=(currentVenue()==='strip'&&lanes.length===2);
+  const onStrip=(currentVenue()==='strip'&&activeLanes().length===2);
   const PRE=(S===0)?planPreRace(cars,lanes,onStrip,ambient()):null;
   lanes.forEach(l=>{
     const c=cars[l];
@@ -9431,7 +9434,10 @@ function showSlipN(res,lanes){
   const order=lanes.slice().sort((a,b)=>res[a].et-res[b].et);
   const win=res[order[0]].car.name;
   let v;
-  if(lanes.length===2){
+  if(lanes.length===1){
+    const r=res[order[0]];
+    v='Test run: '+win+' — '+r.et.toFixed(3)+' s @ '+r.trap.toFixed(1)+' mph';
+  }else if(lanes.length===2){
     const d=Math.abs(res[order[0]].et-res[order[1]].et);
     v=d<0.02?'Too close to call — dead heat at the stripe.':
       win+' takes it by '+d.toFixed(3)+' s'+(d<0.15?' — a fender.':d<0.5?'.':' — comfortably.');
@@ -9950,7 +9956,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='6078ba0f91';let dismissed=null;
+(function(){const V='6a8f011c4f';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
