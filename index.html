@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="2f17efe281";</script>
+<head><script>window.QM_VER="ff66ac6b11";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -907,15 +907,20 @@ function sndLoad(name){
     for(const L in base.layers)layers[L]=base.layers[L].map(([rpm,st,len])=>{
       const b=new AudioBuffer({length:len,sampleRate:dec.sampleRate,numberOfChannels:1});
       b.copyToChannel(data.subarray(st,st+len),0);return{rpm,buf:b};});
-    rec.layers=layers;rec.gain=meta.gain||1;rec.tone=meta.tone||1;rec.grain=!!base.grain;rec.ready=true;
+    rec.layers=layers;rec.gain=meta.gain||1;rec.tone=meta.tone||1;rec.bright=meta.bright!=null?meta.bright:(base.bright||0);rec.grain=!!base.grain;rec.ready=true;
   }catch(e){rec.failed=true;}})();
   return rec;}
 class SampleEngine{
   constructor(ctx,pack,dest){
     this.ctx=ctx;this.out=ctx.createGain();this.out.gain.value=0.9*(pack.gain||1);this.L={};
     this.tone=pack.tone||1;
+    // packs recorded a little dull get their top end lifted back (exhaust rasp and crackle)
+    let tail=dest;
+    if(pack.bright){this.hs=ctx.createBiquadFilter();this.hs.type='highshelf';this.hs.frequency.value=2200;this.hs.gain.value=pack.bright;
+      this.pk=ctx.createBiquadFilter();this.pk.type='peaking';this.pk.frequency.value=1400;this.pk.Q.value=0.8;this.pk.gain.value=pack.bright*0.5;
+      this.hs.connect(this.pk);this.pk.connect(dest);tail=this.hs;}
     if(this.tone<1){this.lp=ctx.createBiquadFilter();this.lp.type='lowpass';this.lp.Q.value=0.6;this.lp.frequency.value=6000;
-      this.out.connect(this.lp);this.lp.connect(dest);}else this.out.connect(dest);
+      this.out.connect(this.lp);this.lp.connect(tail);}else this.out.connect(tail);
     for(const k in pack.layers){const g=ctx.createGain();g.gain.value=0;g.connect(this.out);
       const list=pack.layers[k];this.L[k]={list,g,act:new Map(),grain:list.length>40,cur:null};}
   }
@@ -10143,7 +10148,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='2f17efe281';let dismissed=null;
+(function(){const V='ff66ac6b11';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
