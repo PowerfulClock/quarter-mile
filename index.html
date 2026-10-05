@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="9e69ed98c6";</script>
+<head><script>window.QM_VER="81e44eeb94";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -382,6 +382,7 @@ footer p{margin-bottom:10px}
             <option value="bmwcurved">BMW curved display (2022+)</option>
             <option value="viper">Dodge Viper</option>
             <option value="charger11">Dodge Charger (2011-14)</option>
+            <option value="charger15">Dodge Charger (2015-23)</option>
             <option value="chall11">Dodge Challenger (2008-14)</option>
             <option value="crownvic">Ford Crown Victoria</option>
             <option value="focusrs">Ford Focus RS</option>
@@ -3983,6 +3984,50 @@ function displayCharger11(l,c,tk,rf){
     '<rect x="2" y="2" width="436" height="176" rx="30" fill="#18191c"/>');
 }
 
+/* Dodge Charger (2015-23): two deep dials lit by a glowing red outer ring, red ticks and
+   white numerals, amber needles; tach left with a solid red block from the redline,
+   speedo right (160 / 180 / 200 by trim, SRT badge on the fast ones); a 7-inch screen
+   between them: compass, outside temp and range across the top, a big digital speed
+   over a honeycomb, oil temperature on the left, PRND M on the right. */
+function displayCharger15(l,c,tk,rf){
+  const o=[],nm=(c.name||'').toLowerCase(),srt=/hellcat|scat|srt/.test(nm),smax=clusterMeta[l].spdMax||160;
+  const face=x=>'<circle cx="'+x+'" cy="94" r="80" fill="url(#c15f'+l+')" stroke="#2a2b2e" stroke-width="5"/>'+
+    '<circle cx="'+x+'" cy="94" r="74" fill="none" stroke="#ff2a1f" stroke-width="2.4" filter="url(#c15g'+l+')" opacity="0.9"/>';
+  o.push(face(92),face(348));
+  const dial=(cx,id,sc,red,lab)=>gDial({cx,cy:94,R:70,a0:-125,span:250,redFrac:red,scale:sc,
+    red:{r:64,col:'#e0201a',w:7},rings:[{r:70.5,col:'#ff3a2a',w:0.8,op:0.8}],
+    ticks:{lM:8,wM:1.8,lm:4,wm:1,cm:'#ff3a2a',cM:'#ff5a40',red:'#ffd0c8'},lab:Object.assign({r:51,sz:12.5,w:600,col:'#f4f4f4',red:'#fff'},lab||{}),
+    needle:{id,col:'#ff9a2a',r0:-8,r1:66,w:3.2,tw:1.1,glow:'c15n'+l,hub:{r:9,fill:'#141416',stroke:'#ff3a2a',w:1.6}}});
+  o.push(dial(92,'nd-rpm-'+l,uniScale(tk,4,i=>i),rf));
+  o.push(T(92,138,'RPM',7,'#fff',{w:600}),T(92,145,'x 1000',5,'#ddd'));
+  const n=smax/20;
+  o.push(dial(348,'nd-spd-'+l,uniScale(n,1,i=>i*20),0,{sz:10.5,r:52}));
+  o.push(T(348,145,'MPH',7,'#fff',{w:600}));
+  if(srt)o.push(T(348,135,'SRT',8,'#e8241c',{w:800,it:1}));
+  // centre screen
+  o.push('<rect x="173" y="24" width="94" height="132" rx="6" fill="#08090b" stroke="#2c2d31" stroke-width="2"/>',
+    T(184,37,'SE',7,'#fff',{w:600}),T(220,37,Math.round(ambient())+'°F',7.5,'#fff',{w:500}),
+    T(255,34,'53',7,'#fff',{w:600}),T(255,40,'Range mi',3.6,'#ccc'),
+    '<line x1="180" y1="44" x2="260" y2="44" stroke="#3a3c42" stroke-width="0.8"/>');
+  // honeycomb under the speed
+  const hex=(x,y,r)=>{let p='';for(let k=0;k<6;k++){const a=Math.PI/3*k+Math.PI/6;p+=(k?' ':'')+(x+r*Math.cos(a)).toFixed(1)+','+(y+r*Math.sin(a)).toFixed(1);}
+    return '<polygon points="'+p+'" fill="none" stroke="#4a4e57" stroke-width="0.6" opacity="0.7"/>';};
+  for(let i=0;i<5;i++)for(let j=0;j<2;j++)o.push(hex(201+i*9.5+(j?4.75:0),108+j*8.2,4.9));
+  o.push(T(220,90,'0',30,'#fff',{id:'cl-mph-'+l,w:600}),T(220,101,'MPH',6.5,'#fff',{w:600}));
+  // oil temperature (left) and gear (right)
+  o.push('<line x1="182" y1="58" x2="182" y2="122" stroke="#666" stroke-width="0.8"/>');
+  for(let i=0;i<=6;i++)o.push('<line x1="182" y1="'+(58+i*10.6)+'" x2="'+(i%3?184.5:186)+'" y2="'+(58+i*10.6)+'" stroke="#aaa" stroke-width="0.7"/>');
+  o.push(T(191,61,'260',4.2,'#bbb'),T(191,124,'170',4.2,'#bbb'),'<path d="M180 94 l-4 -2.5 v5 z" fill="#ff9a2a"/>',T(182,132,'OIL °F',3.8,'#aaa'));
+  ['P','R','N','D','M'].forEach((g,i)=>o.push(T(258,64+i*11,g,7,g==='D'?'#fff':'#777',{w:g==='D'?700:500})));
+  o.push('<rect x="252" y="90" width="12" height="11" rx="1.5" fill="none" stroke="#fff" stroke-width="0.8"/>');
+  o.push(T(220,128,'<tspan id="cl-g-'+l+'">0.00</tspan> g · <tspan id="cl-gear2-'+l+'" data-pre="D">D1</tspan>',5.5,'#bbb'),
+    T(220,146,'38001 mi',5.5,'#ddd'));
+  return svgWrap(o.join(''),
+    '<radialGradient id="c15f'+l+'"><stop offset="0.55" stop-color="#0d0d0f"/><stop offset="0.9" stop-color="#1a1b1e"/><stop offset="1" stop-color="#2e2f33"/></radialGradient>'+
+    glowDef('c15g'+l,2.2)+glowDef('c15n'+l,1.1),
+    '<path d="M14 22 Q14 8 30 8 H410 Q426 8 426 22 V150 Q426 176 400 176 H40 Q14 176 14 150 Z" fill="#111214" stroke="#26272a" stroke-width="2"/>');
+}
+
 /* Ford Crown Victoria (2006-11): speedo left, tach right (6 and 7 in red),
    orange needles on black, fuel and coolant between, PRND21 strip. */
 function displayCrownVic(l,c,tk,rf){
@@ -4228,12 +4273,13 @@ function buildClusters(){
       venom:/venom/i,focusrs:/focus rs/i,agera:/agera|jesko/i,regera:/regera/i,lucid:/lucid/i,tesla:/tesla/i,taurus:/taurus/i,
       mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i};
     let nstyle=null;
-    const EXTRA=['charger11','chall11','accord','accord9','s650','mustangD','mustang6','mustang5','camaro6','camaro5','acura17','acura21','bmwm5','bmwcurved'];
+    const EXTRA=['charger11','charger15','chall11','accord','accord9','s650','mustangD','mustang6','mustang5','camaro6','camaro5','acura17','acura21','bmwm5','bmwcurved'];
     if(cs){if(NEWC[cs]||EXTRA.indexOf(cs)>=0)nstyle=cs;}
     else{for(const k in NEWC)if(NEWC[k].test(nm)){nstyle=k;break;}
       if(!nstyle&&isAcc)nstyle=(yr&&yr<=2017)?'accord9':'accord';
       if(!nstyle&&/mustang|shelby/i.test(nm)&&yr)nstyle=yr>=2024?'s650':(yr>=2021||/gt500/i.test(nm))?'mustangD':yr>=2015?'mustang6':yr>=2005?'mustang5':null;
       if(!nstyle&&/charger/i.test(nm)&&yr>=2011&&yr<=2014)nstyle='charger11';
+      if(!nstyle&&/charger/i.test(nm)&&yr>=2015)nstyle='charger15';
       if(!nstyle&&/challenger/i.test(nm)&&yr>=2008&&yr<=2014)nstyle='chall11';
       if(!nstyle&&/camaro/i.test(nm)&&yr)nstyle=yr>=2016?'camaro6':yr>=2010?'camaro5':null;
       if(!nstyle&&/acura/i.test(nm)&&yr)nstyle=yr>=2021?'acura21':'acura17';
@@ -4243,6 +4289,7 @@ function buildClusters(){
     const durSpd=/srt|hellcat|392/i.test(nm)?200:140;
     // needle scale must match the numbers printed on each style of speedo
     clusterMeta[l].spdMax=nstyle?({g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
+    if(nstyle==='charger15')clusterMeta[l].spdMax=/hellcat/i.test(nm)?200:/scat|392/i.test(nm)?180:160;
     const d=document.createElement('div');d.className='cluster'+(darkCluster?' cluster-muscle':'');
     // Build mode buttons from the car's available modes
     const ms=c.modes||['normal'];
@@ -4293,7 +4340,7 @@ function buildClusters(){
       const F={r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
         golf:displayGolf,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,g70:displayG70,g80:displayG80,
         mustangD:displayMustangDigital,mustang6:displayMustangS550,mustang5:displayMustangS197,camaro6:(a,b,cc,dd)=>displayCamaro6(a,b,cc,dd,clusterMeta[l].boosted),
-        camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
+        camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,charger15:displayCharger15,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
         venom:displayVenom,focusrs:displayFocusRS,agera:displayAgera,regera:displayRegera,lucid:displayLucid,tesla:displayTesla,taurus:displayTaurus,acura17:displayAcura17,acura21:displayAcura21,bmwm5:displayBMWM5,bmwcurved:displayBMWCurved}[nstyle];
       const svgH=F(l,c,tk,rf);
       // the race loop updates gear / feet / slip alongside the digital speed, so
@@ -6272,7 +6319,7 @@ function bpCar(colorHex,name,C){
   const gxs=[];for(let x=G.x0;x<=G.x1;x+=0.4)gxs.push(x);gxs.push(G.x1);
   shell.add(loftMesh(gxs,x=>{const yb=yTop(x)-0.7,yt=Math.max(yb+0.2,gTop(x));return rrSection(G.GB,G.GT,yb,yt,0.1,G.rr||2.0,6);},
     (x,y,z)=>{const top=gTop(x),az=Math.abs(z);
-      if(y<yTop(x)+0.5)return 0;
+      if(y<yTop(x)+(G.sill!=null?G.sill:0.5))return 0;
       const wr=G.wrap&&x>G.roof[0];
       if(y>top-0.9&&az<G.GT-0.3){if(wr)return 1;if(x<G.roof[0]&&x>G.roof[1])return G.roofMat||0;return az>G.GT-(x<G.roof[1]?(G.rearSide||3.0):1.8)?0:1;}
       if(y>top-1.2&&!wr)return 0;
@@ -6487,11 +6534,13 @@ function buildCharger15(colorHex,name){
         return[m-(m-lo)*f,m+(hi-m)*f];}},
       {x0:17,x1:49,y:x=>22.3+(x-17)*0.012},                  // shoulder line along the front fender
       {x0:-62,x1:-30,y:x=>22.6+(-30-x)*0.03}],               // rear quarter line into the tail lamp
-    gh:{x0:-49,x1:26.5,GB:20.4,GT:16.6,roof:[0.5,-22.5],top:ghTop,
-      side:(x,y)=>{const top=gt0(x)-1.5;
-        if(y>top)return 0;
-        if(x>13.6-(y-26.3)*1.25)return 0;                     // A-pillar
-        if(x<-36.2+(y-27.4)*0.95)return 0;                    // C-pillar behind the small quarter glass
+    gh:{x0:-49,x1:26.5,GB:20.4,GT:16.6,roof:[0.5,-22.5],top:ghTop,wrap:true,sill:-0.9,
+      /* Window edges run straight up and down (or follow the black frame), so the paint never
+         steps into the glass along the steep windscreen and backlight. */
+      side:(x,y)=>{
+        if(x<-32.6)return 0;                                  // body-colour C-pillar sail
+        if(x>12.6)return 2;                                   // black mirror sail at the A-pillar
+        if(y>gt0(x)-2.3)return 2;                             // black window frame under the roof edge
         if(x<-8.3&&x>-11.6)return 2;                          // black B-pillar
         if(x<-26.1&&x>-27.5)return 2;                         // divider ahead of the quarter glass
         return 1;}},
@@ -10087,7 +10136,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='9e69ed98c6';let dismissed=null;
+(function(){const V='81e44eeb94';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
