@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="4df30117da";</script>
+<head><script>window.QM_VER="52ac3dd100";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -888,6 +888,12 @@ function sndPackFor(c){
       if(c.ind==='roots'||c.ind==='centri'||c.ind==='twin'||c.ind==='single')return 'shelby54';
       if(/gt350/.test(nm))return 'mustangam';
       return 'coyote';}}
+  {const nm=(c.name||'').toLowerCase();
+    if(/\bbmw\b/.test(nm)){const es=c.engSound||'';
+      if(/\bm2\b/.test(nm))return 'bmwm2';                                  // S58 (M2 mod)
+      if(es==='i6')return c.ind==='single'?'bmwb58':'bmwm4';                 // B58 M40i/M340i; S58 M3/M4/X3 M
+      if(/^v8/.test(es))return /\b(m5|m8|x5 m) comp/.test(nm)||/\bm8\b|\bm5\b|x5 m\b/.test(nm)&&!/m50i|m60i|m550i|m850i/.test(nm)?'bmwm8':'bmwn63';
+      return null;}}
   const n=(c.name||'').toLowerCase();if(!/challenger|charger|durango|dodge/.test(n))return null;
   const d=+c.disp||0,near=v=>Math.abs(d-v)<0.15;
   if((c.ind==='roots'||c.ind==='centri')&&near(6.2))return 'hellcat';
@@ -10148,7 +10154,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='4df30117da';let dismissed=null;
+(function(){const V='52ac3dd100';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
