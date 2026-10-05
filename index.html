@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="6a8f011c4f";</script>
+<head><script>window.QM_VER="d9e1544853";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1088,24 +1088,28 @@ class EngineVoice{
     this.out.gain.setTargetAtTime(0.9,t,0.05);
     this.smp=(pack&&pack.ready&&!this.electric)?(pack.grain?new GrainEngine(ctx,pack,this.out):new SampleEngine(ctx,pack,this.out)):null;
   }
-  update(rpm,load,boost,slipAmt,shifting){
+  update(rpm,load,boost,slipAmt,shifting,mph){
     if(this.dead)return;
     const ctx=this.ctx,t=ctx.currentTime,cfg=this.cfg;
     if(this.electric){
-      // motor + reduction-gear whine: pitch rides shaft speed, no combustion pulse
-      const fe=Math.max(40,rpm*0.16);
-      this.osc.frequency.setTargetAtTime(fe,t,0.02);
-      this.osc2.frequency.setTargetAtTime(fe*1.5,t,0.02);
-      this.sub.frequency.setTargetAtTime(fe*0.5,t,0.03);
-      this.lp.frequency.setTargetAtTime(Math.min(12000,1800+fe*4),t,0.05);
-      const lv=0.10+0.42*load;
-      this.oscG.gain.setTargetAtTime(0.30*lv,t,0.03);
-      this.osc2G.gain.setTargetAtTime(0.22*lv,t,0.03);
-      this.subG.gain.setTargetAtTime(0.05*lv,t,0.03);
-      this.nf.frequency.setTargetAtTime(900+rpm*0.05,t,0.06);
-      this.nG.gain.setTargetAtTime(0.010*lv,t,0.06);
-      this.whine.frequency.setTargetAtTime(Math.min(13000,420+rpm*0.62),t,0.03);
-      this.wG.gain.setTargetAtTime(0.022*(0.3+0.7*load),t,0.05);
+      /* A real EV is nearly silent. By law it plays a soft pedestrian-warning hum
+         (AVAS) at low speed, which rises gently in pitch and fades out by about
+         10-12 mph; past that you only hear a faint motor whine, tyres and wind. */
+      const v=Math.max(0,mph||0);
+      const avas=v<10?1:Math.max(0,1-(v-10)/3);           // gone by ~13 mph
+      const fe=210+v*14;                                    // two soft tones, a fifth apart
+      this.osc.frequency.setTargetAtTime(fe,t,0.05);
+      this.osc2.frequency.setTargetAtTime(fe*1.5,t,0.05);
+      this.sub.frequency.setTargetAtTime(fe*0.5,t,0.05);
+      this.lp.frequency.setTargetAtTime(1400,t,0.1);
+      this.oscG.gain.setTargetAtTime(0.022*avas,t,0.08);
+      this.osc2G.gain.setTargetAtTime(0.012*avas,t,0.08);
+      this.subG.gain.setTargetAtTime(0.004*avas,t,0.08);
+      // faint inverter / reduction-gear whine under power, and a whisper of road noise
+      this.whine.frequency.setTargetAtTime(Math.min(9000,900+rpm*0.45),t,0.05);
+      this.wG.gain.setTargetAtTime(0.0025*load,t,0.08);
+      this.nf.frequency.setTargetAtTime(500+v*6,t,0.1);
+      this.nG.gain.setTargetAtTime(Math.min(0.006,0.00008*v),t,0.1);
       this.sG.gain.setTargetAtTime(slipAmt>0?0.42*slipAmt:0,t,0.04);
       return;
     }
@@ -9280,7 +9284,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
       if(sw){sw.textContent=dig?stage[l]._label:'ROLLING · GEAR '+(gearIdx+1);
         sw.className='slipwarn'+(dig&&stage[l]._slip>0?' hot':'');}
       const vo=voices[l];
-      if(vo)vo.update(rpm,dig?stage[l]._load:0.55,boost,dig?stage[l]._slip:0,false);
+      if(vo)vo.update(rpm,dig?stage[l]._load:0.55,boost,dig?stage[l]._slip:0,false,mph);
     });
     const st={total:D};lanes.forEach(l=>st[l]=stageState[l]);drawStage(st);
     anim=requestAnimationFrame(stageFrame);
@@ -9359,7 +9363,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
           // overrun crackle while braking, for the cars that do it
           if(t>r.et+0.3&&(r.car.burble||0)>0.5&&mph>12&&Math.random()<0.012*r.car.burble)vo.burble(0.35*r.car.burble);
           const load=s.tl?1:Math.max(0.25,Math.min(1,Math.abs(s.a)/6+0.35));
-          vo.update(s.rpm,load,s.boost||0,s.tl?Math.min(1,0.5+Math.abs(gF)*0.45):0,shifting);
+          vo.update(s.rpm,load,s.boost||0,s.tl?Math.min(1,0.5+Math.abs(gF)*0.45):0,shifting,mph);
         }
         if(s.tt!=null)setTyreReadout(l,s.tt,r.car.tire);
         const meta=clusterMeta[l]||{tachMax:8000,spdMax:220};
@@ -9956,7 +9960,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='6a8f011c4f';let dismissed=null;
+(function(){const V='d9e1544853';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
