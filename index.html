@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="b11c525715";</script>
+<head><script>window.QM_VER="db2331e577";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -40,6 +40,25 @@ margin-left:auto;text-align:right;line-height:1.5}
 font-family:'Roboto Mono',monospace;font-size:13px;margin-bottom:5px}
 .lane-name{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:500}
 .lane-live{color:var(--dim)}.lane-live b{color:var(--paint);font-weight:500}
+.rc-panel{background:var(--asphalt-2);border:1px solid var(--line);border-top:none;font-family:'Roboto Mono',monospace;font-size:12px;color:var(--paint)}
+.rc-tabs{display:flex;border-bottom:1px solid var(--line)}.rc-tabs button,.rc-sub button{background:none;border:none;color:var(--dim);padding:10px 16px;font:600 12px 'Roboto Mono',monospace;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent}
+.rc-tabs button.on,.rc-sub button.on{color:var(--amber);border-bottom-color:var(--amber)}
+.rc-sub{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:10px;border-bottom:1px solid var(--line)}.rc-sub button{padding:7px 10px;font-size:11px}
+.rc-body{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:0}.rc-main{padding:12px 14px;min-width:0;overflow-x:auto}.rc-side{padding:12px;border-left:1px solid var(--line);background:var(--asphalt)}
+@media(max-width:860px){.rc-body{grid-template-columns:1fr}.rc-side{border-left:none;border-top:1px solid var(--line)}}
+.rc-parts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}.rc-part{background:var(--asphalt-3);padding:8px 10px;border-radius:4px}
+.rc-part label{display:block;color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}.rc-part select{width:100%}.rc-desc{color:var(--dim);font-size:11px;margin-top:5px;line-height:1.35}
+.rc-note{color:var(--dim);font-size:11px;line-height:1.45;margin:8px 0}.rc-row{margin:10px 0;display:flex;flex-wrap:wrap;gap:10px;align-items:center}.rc-row input[type=number]{width:70px}
+.rc-tbl{border-collapse:collapse;font-size:11px}.rc-tbl th,.rc-tbl td{padding:3px 5px;border:1px solid var(--line);text-align:right;white-space:nowrap}.rc-tbl th{color:var(--dim);font-weight:500}
+.rc-tbl input{width:52px;padding:2px 3px;font-size:11px;background:var(--asphalt);color:var(--paint);border:1px solid var(--line)}.rc-tbl td.bad{color:var(--foul);font-weight:700}.rc-tbl td.good{color:var(--go)}
+.rc-perf td,.rc-perf th{padding:6px 10px;font-size:12px}
+#rcChart{width:100%;height:auto;display:block}#rcMini{width:100%;height:auto;display:block;margin:6px 0}
+.rc-big{font-size:13px;color:var(--dim)}.rc-big span{font-size:30px;font-weight:700;color:#e8504a}.rc-big.tq span{color:#4aa3e8}.rc-big small{color:var(--go);font-size:12px;margin-left:4px}
+.rc-kv{color:var(--dim);font-size:11px;margin:6px 0;line-height:1.4}.rc-kv b{color:var(--paint)}
+.rc-rel{display:flex;align-items:center;gap:8px;margin:8px 0}.rc-rel div{flex:1;height:8px;background:var(--asphalt-3);border-radius:4px;overflow:hidden}.rc-rel i{display:block;height:100%}
+.rc-warns div{border-left:3px solid var(--foul);background:rgba(229,72,77,.08);padding:5px 8px;margin:5px 0}.rc-warns b{display:block;color:var(--foul);font-size:11px}.rc-warns span{color:var(--dim);font-size:10.5px}
+.rc-ov{display:block;font-size:11px;color:var(--dim);margin:8px 0}.rc-btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.rc-btns button,.rc-save button,.rc-row button{padding:6px 10px;font-size:11px}
+.rc-save{display:flex;gap:6px;margin-top:10px}.rc-save input{flex:1;min-width:0}.rc-empty{padding:30px;text-align:center;color:var(--dim)}
 .dyno-panel{background:#0b0e12;border:1px solid var(--line);border-top:none}.dyno-panel canvas{display:block;width:100%;height:auto}
 .stage3d{position:relative;width:100%;height:340px;background:#11151b;border:1px solid var(--line);overflow:hidden}
 .stage3d canvas{display:block;width:100%;height:100%}
@@ -445,6 +464,7 @@ footer p{margin-bottom:10px}
       <option value="road" selected>Country road</option>
       <option value="strip">Drag strip (prepped)</option>
       <option value="dyno">Dyno test (1 car)</option>
+      <option value="rc">Real Customization (build &amp; tune)</option>
       <option value="highway" disabled>Highway (3–4 racers)</option>
     </select>
     <span class="venue-note" id="venueNote"></span></div>
@@ -469,6 +489,10 @@ footer p{margin-bottom:10px}
   </div>
   <div id="stage3d" class="stage3d"><div class="stage-empty" id="stageEmpty" hidden>Nothing Selected</div></div>
   <div id="dynoPanel" class="dyno-panel" hidden><canvas id="dynoCanvas" width="1100" height="470"></canvas></div>
+  <div id="rcPanel" class="rc-panel" hidden>
+    <div class="rc-tabs" id="rcTabs"><button type="button" data-t="mech" class="on">Mechanical</button><button type="button" data-t="tune">Tuning</button><button type="button" data-t="dyno">Dyno</button><button type="button" data-t="perf">Performance</button></div>
+    <div class="rc-body"><div id="rcMain" class="rc-main"></div><div id="rcSide" class="rc-side"></div></div>
+  </div>
   <div class="viewbar">
     <label for="viewMode">CAMERA</label>
     <select id="viewMode">
@@ -762,7 +786,7 @@ function startMph(){return parseFloat(document.getElementById('startMph').value)
    three or four racers always go to the highway (a lane per car). */
 function timeOfDay(){const e=document.getElementById('tod');return e?e.value:'day';}
 function currentVenue(){
-  {const e=document.getElementById('venue');if(e&&e.value==='dyno')return 'dyno';}
+  {const e=document.getElementById('venue');if(e&&(e.value==='dyno'||e.value==='rc'))return 'dyno';}
   const n=(typeof activeLanes==='function')?activeLanes().length:2;
   if(n>=3)return 'highway';
   const e=document.getElementById('venue');
@@ -772,6 +796,7 @@ function currentVenue(){
 
 function boostInfo(c){
   const I=IND[c.ind]||IND.na;
+  if(c.bPsi!=null&&I.boosted&&!I.electric)return{psi:c.bPsi,naHp:c.hp*(c.bNaFrac||0.6),naFrac:Math.max(0.1,Math.min(1,c.bNaFrac||0.6)),specific:c.hp/(c.disp||1)};
   if(I.electric)return{psi:0,naHp:c.hp,naFrac:1,specific:0};
   const hpPerL=c.hpPerL||I.hpPerL;
   const naHp=Math.max(20,(c.disp||2.0)*hpPerL);
@@ -791,7 +816,14 @@ function torqueAt(c,rpm){
   }
   return t;
 }
+/* a car built in Real Customization carries its own computed curves: crank torque at full boost,
+   the same engine with no boost, and the boost pressure, each as [rpm, value] points */
+function curveAt(pts,rpm){if(!pts||!pts.length)return 0;if(rpm<=pts[0][0])return pts[0][1];
+  for(let i=1;i<pts.length;i++)if(rpm<=pts[i][0]){const a=pts[i-1],b=pts[i],t=(rpm-a[0])/Math.max(1,b[0]-a[0]);return a[1]+(b[1]-a[1])*t;}
+  return pts[pts.length-1][1];}
+function naTorqueAt(c,rpm){return (c.naCurve&&c.naCurve.length)?curveAt(c.naCurve,rpm):torqueAt(c,rpm)*boostInfo(c).naFrac;}
 function torqueAtRaw(c,rpm){
+  if(c.curve&&c.curve.length)return curveAt(c.curve,rpm);
   const I=IND[c.ind]||IND.na;
   if(I.electric){
     // A traction motor holds peak torque from a standstill up to its corner
@@ -2198,6 +2230,12 @@ function emptyUI(){
 function carBody(l){return BODYOF[l]||'sedan';}
 function carModes(l){return MODESOF[l]||['normal'];}
 function carCluster(l){return CLUSTEROF[l]||'auto';}
+/* fields a Real Customization build adds to a car; they ride along with the lane while its
+   power figures still match the build (edit the hp/torque by hand and they are dropped) */
+const BUILD_KEYS=['curve','naCurve','psiCurve','tau','bPsi','bNaFrac','gearBoost','gearTq','ie','build','base'];
+function buildExtras(lane,hp,tq){const E=EXTRAOF[lane]||{},o={};
+  if(!E.curve)return o;if(E.build&&(Math.abs(E.build.hp-hp)>0.6||Math.abs(E.build.tq-tq)>0.6))return o;
+  BUILD_KEYS.forEach(k=>{if(E[k]!=null)o[k]=E[k];});return o;}
 function readCar(lane){
   const n=id=>parseFloat(document.getElementById(id+lane).value);
   const s=id=>document.getElementById(id+lane).value;
@@ -2217,6 +2255,7 @@ function readCar(lane){
     modes:carModes(lane),cluster:carCluster(lane),
     sysHp:(EXTRAOF[lane]||{}).sysHp||0,sysTq:(EXTRAOF[lane]||{}).sysTq||0,vmax:(EXTRAOF[lane]||{}).vmax||0,
     burble:(EXTRAOF[lane]||{}).burble||0,
+    ...buildExtras(lane,n('hp'),n('tq')),
     venue:currentVenue(),burnout:!!BURNOUTOF[lane]&&s('drive')==='rwd'&&!((IND[s('ind')]||IND.na).electric),
     temp:ambient(),gears,empty:laneEmpty(lane)};
 }
@@ -2462,7 +2501,7 @@ function simulate(c){
   const tBase=tyreBase(c.temp);
   let tyreT=(c.tireTemp0!=null)?c.tireTemp0:tBase;
   const stallRpm=c.stallRpm||Math.max(1800,Math.min(2500,c.redline*0.45));
-  const IE=0.16,IW=5.0;
+  const IE=c.ie||0.16,IW=5.0;
   const target=(c.raceFt||1320)/FT_PER_M;
   const v0=(c.startMph||0)/MPH_PER_MS;
   const rolling=v0>0.1;
@@ -2576,12 +2615,15 @@ function simulate(c){
     if(coasting&&!isEV&&!isECVT&&rpm<760)rpm=760;   // clutch/converter lets it idle as the car stops
     if(rpm>c.redline)rpm=c.redline;
     if(I.boosted&&boost<1){
-      const tau=Math.max(0.05,I.tau*Math.min(2,Math.max(0.4,2600/Math.max(900,rpm))));
+      const tau=Math.max(0.05,(c.tau||I.tau)*Math.min(2,Math.max(0.4,2600/Math.max(900,rpm))));
       boost+=(1-boost)*(DT/tau);
     }
     let F=0,shifting=false;
-    const full0=torqueAt(c,rpm),na0=full0*bi.naFrac;
-    const eng0=(na0+(full0-na0)*Math.min(1,boost))*MD.powerMul;
+    const full0=torqueAt(c,rpm),na0=c.naCurve?Math.min(full0,naTorqueAt(c,rpm)):full0*bi.naFrac;
+    // a tune can trim boost in the low gears and cap torque per gear
+    const gB=(c.gearBoost&&c.gearBoost[gear]!=null)?c.gearBoost[gear]:1;
+    let eng0=(na0+(full0-na0)*Math.min(1,boost)*gB)*MD.powerMul;
+    if(c.gearTq&&c.gearTq[gear]!=null)eng0=Math.min(eng0,c.tq*c.gearTq[gear]*MD.powerMul);
     let driveF=(eng0*pf*mult*ov*c.eff*1.35582)/r;   // ov, so the CVT's live ratio is used
     if(isECVT){
       /* Power-split: the engine's torque reaches the wheels through the planetary
@@ -4685,6 +4727,7 @@ function setLane(lane,d){
   CLUSTEROF[lane]=d.cluster||'auto';
   BURNOUTOF[lane]=!!d.burnout;
   EXTRAOF[lane]={sysHp:d.sysHp||0,sysTq:d.sysTq||0,vmax:d.vmax||0,burble:d.burble||0};
+  BUILD_KEYS.forEach(k=>{if(d[k]!=null)EXTRAOF[lane][k]=JSON.parse(JSON.stringify(d[k]));});
   const ms=d.modes||['normal'];
   const msel=document.getElementById('mode'+lane);
   msel.innerHTML=ms.map(m=>'<option value="'+m+'">'+MODES[m].label+'</option>').join('');
@@ -9458,18 +9501,20 @@ document.getElementById('dist').addEventListener('change',()=>{reset();activeLan
    Drag racing always starts from a dig, and strips run 1/8, 1000 ft or 1/4 mile. */
 function syncVenue(){
   {/* dyno: one car, no distance or rolling start, the dyno sheet under the 3D view */
-    const v=document.getElementById('venue'),rc=document.getElementById('racerCount'),dy=v.value==='dyno';
+    const v=document.getElementById('venue'),rc=document.getElementById('racerCount'),dy=v.value==='dyno'||v.value==='rc';
     const mpOn=(()=>{try{return !!MP.on;}catch(e){return false;}})();
     const opt=v.querySelector('option[value=dyno]');if(opt)opt.disabled=mpOn;
-    if(dy&&opt&&opt.disabled){v.value='road';}
-    const on=v.value==='dyno';
+    const opt2=v.querySelector('option[value=rc]');if(opt2)opt2.disabled=mpOn;
+    if(dy&&mpOn){v.value='road';}
+    const on=v.value==='dyno'||v.value==='rc',isRc=v.value==='rc';
+    if(typeof RC!=='undefined'&&RC){if(isRc&&!RC.on)setTimeout(rcEnter,0);else if(!isRc&&RC.on)rcLeave();}
     if(on&&!window.__dynoMode){window.__dynoMode=true;window.__preDynoRacers=window.activeRacers||2;applyRacerCount(1);}
     else if(!on&&window.__dynoMode){window.__dynoMode=false;if(typeof dynoStop==='function')dynoStop();applyRacerCount(window.__preDynoRacers||2);rc.value=String(window.activeRacers);ready=false;}
     rc.disabled=on||mpOn;
     document.getElementById('dynoPanel').hidden=!on;
     document.getElementById('runBtn').textContent=on?'Run dyno':'Run the race';
     ['dist','startMph'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=on;});
-    if(on){const note=document.getElementById('venueNote');note.textContent='Chassis dyno · strapped down · pull in the gear closest to 1:1';
+    if(on){const note=document.getElementById('venueNote');note.textContent=isRc?'Your build bay · the car in lane 1 is on the dyno — build it, tune it, save it':'Chassis dyno · strapped down · pull in the gear closest to 1:1';
       if(typeof dynoSheet==='function')dynoSheet(null,0,null);return;}
   }
   const v=document.getElementById('venue'),n=activeLanes().length;
@@ -9725,7 +9770,7 @@ function dynoSim(c){
   const r=(c.tireD*0.0254)/2,m=c.weight/LB_PER_KG,eff=dynoEff(c);
   const pf=Math.sqrt(airDensity(c.temp)/1.225),CF=1/pf;                 // SAE correction factor
   const awd=c.drive==='awd',Mdrum=awd?2300:1400;                        // roll equivalent mass (kg)
-  const IE=0.16,IW=awd?7.0:4.5;
+  const IE=c.ie||0.16,IW=awd?7.0:4.5;
   const ratio=k=>c.gears[k]*c.fd,Mrot=k=>IE*Math.pow(ratio(k)/r,2)+IW/(r*r);
   const g=dynoTestGear(c,Mdrum+Mrot(0)*0.2);
   const idle=isEV?0:Math.max(650,Math.min(950,Math.round(c.redline*0.11/10)*10));
@@ -9738,11 +9783,12 @@ function dynoSim(c){
      no-boost (NA-equivalent) curve is what the same engine makes at atmospheric pressure. */
   const Pk=I.boosted?Math.max(1,bi.psi):0,kB=I.boosted?(1/bi.naFrac-1):0,ss=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
   const psiSS=rpm=>{if(!I.boosted)return 0;const R=c.redline;
+    if(c.psiCurve)return curveAt(c.psiCurve,rpm);
     if(c.ind==='roots')return Pk*(0.72+0.28*ss((rpm-900)/(R*0.35)));
     if(c.ind==='centri')return Pk*Math.pow(Math.max(0,rpm)/R,1.85);
     const r0=Math.max(1300,R*(c.ind==='twin'?0.2:0.24)),r1=Math.max(r0+700,c.tqRpm*(c.ind==='twin'?0.9:1.0));
     return Pk*ss((rpm-r0)/(r1-r0))*(1-0.08*ss((rpm-c.hpRpm)/Math.max(300,R-c.hpRpm)));};
-  const Tna=rpm=>{const full=torqueAt(c,Math.max(800,rpm));return I.boosted?full/(1+kB*psiSS(rpm)/Pk):full;};
+  const Tna=rpm=>{const full=torqueAt(c,Math.max(800,rpm));if(c.naCurve&&I.boosted)return Math.min(full,curveAt(c.naCurve,rpm));return I.boosted?full/(1+kB*psiSS(rpm)/Pk):full;};
   const livePsi=(rpm,thr,sp)=>psiSS(rpm)*sp*(thr>0.75?1:Math.max(0,(thr-0.3)/0.45)*0.35);
   const torque=(rpm,thr,sp)=>{const p=livePsi(rpm,thr,sp);return Tna(rpm)*(1+(I.boosted?kB*p/Pk:0))*MD.powerMul*thr;};
   const DTd=1/120,S=[],pull=[];
@@ -9753,7 +9799,7 @@ function dynoSim(c){
     thr+=(thrTgt-thr)*Math.min(1,DT_D/dtThr);
     // turbo / supercharger boost follows throttle with the car's own lag
     if(I.boosted){const tgt=thr>0.75?1:Math.max(0,thr-0.3);
-      const tau=thr>0.75?Math.max(0.04,I.tau*Math.min(2,Math.max(0.4,2600/Math.max(900,rpm)))):0.3;boost+=(tgt-boost)*Math.min(1,DT_D/tau);}
+      const tau=thr>0.75?Math.max(0.04,(c.tau||I.tau)*Math.min(2,Math.max(0.4,2600/Math.max(900,rpm)))):0.3;boost+=(tgt-boost)*Math.min(1,DT_D/tau);}
     const k=gear;let Fw=0;
     if(shiftT>0){shiftT-=DT_D;}
     else{const Te=torque(rpm,thr,boost);Fw=Te*1.35582*ratio(k)*eff*pf*clutch/r*0.99;}
@@ -10024,6 +10070,650 @@ function runDyno(){
   DYNO.anim=requestAnimationFrame(frame);
 }
 
+/* ===================== REAL CUSTOMIZATION =====================
+   Build a car's engine from real parts, then tune its ECU. Nothing here adds horsepower directly:
+   every part changes a physical quantity (how freely air gets in and out, how much the compressor
+   can flow and how hot it makes the air, how much fuel can be delivered, how much cylinder pressure
+   the bottom end survives, ...) and torque is computed from those at every rpm:
+
+     air in  = displacement x rpm x volumetric efficiency (cam, ports, restrictions, backpressure)
+                x charge density (boost pressure, compressor efficiency, intercooler, inlet losses)
+     torque  = air x combustion efficiency (compression, spark timing vs. the knock limit, AFR)
+                - friction - pumping (exhaust backpressure) - supercharger drive power
+
+   The model is anchored to each car's real stock curve: with stock parts and the stock ECU map it
+   reproduces it exactly, and every change moves the curve by the physics above. The ECU then
+   enforces hardware limits (fuel, cylinder pressure, rpm, gearbox torque) unless the player lets
+   it run past them, in which case reliability suffers. */
+const RC_PARTS={
+ engine:{label:'Engine',parts:[
+  {id:'cam',label:'Camshafts',opts:[
+    {id:'stock',name:'Stock cams',desc:'Factory lift and duration.'},
+    {id:'street',name:'Street cams',desc:'More lift/duration: peak breathing moves ~500 rpm higher, a little softer down low.',cam:[500,1.035,0.97]},
+    {id:'aggr',name:'Aggressive cams',desc:'Big duration: strong top end, noticeably softer below ~3,500 rpm. Needs valve springs to rev.',cam:[1100,1.065,0.92]},
+    {id:'race',name:'Race cams',desc:'All top end. Loses low-rpm torque and idle quality; needs springs.',cam:[1700,1.09,0.86]}]},
+  {id:'heads',label:'Cylinder heads',opts:[
+    {id:'stock',name:'Stock heads',desc:'Factory ports.'},
+    {id:'port',name:'Ported heads',desc:'Hand-ported intake/exhaust runners: ~12% more port flow.',cap:{head:1.12}},
+    {id:'cnc',name:'CNC-ported heads',desc:'Machined ports and chambers: ~22% more flow.',cap:{head:1.22}},
+    {id:'after',name:'Aftermarket heads',desc:'Bigger ports and valves: ~32% more flow, strongest above 5,000 rpm.',cap:{head:1.32}}]},
+  {id:'valves',label:'Valves',opts:[{id:'stock',name:'Stock valves',desc:''},{id:'big',name:'Oversize valves',desc:'+5% head flow; work best with ported heads.',cap:{head:1.05}}]},
+  {id:'springs',label:'Valve springs',opts:[{id:'stock',name:'Stock springs',desc:'Valve float a little past the factory redline.'},
+    {id:'up',name:'Upgraded springs',desc:'Stiffer springs: valvetrain safe to ~700 rpm higher.',rpm:{valve:700}},
+    {id:'race',name:'Race springs + retainers',desc:'Valvetrain safe to ~1,300 rpm higher.',rpm:{valve:1300}}]},
+  {id:'cr',label:'Compression ratio',opts:[{id:'stock',name:'Stock compression',desc:''},
+    {id:'p05',name:'+0.5 compression',desc:'More thermal efficiency, more knock tendency.',cr:0.5},
+    {id:'p10',name:'+1.0 compression',desc:'Needs good fuel; less boost tolerance.',cr:1.0},
+    {id:'m10',name:'−1.0 compression',desc:'Less efficient, but much more boost tolerance.',cr:-1.0}]},
+  {id:'flywheel',label:'Flywheel',opts:[{id:'stock',name:'Stock flywheel / flexplate',desc:''},
+    {id:'light',name:'Lightweight flywheel',desc:'Less rotating inertia: revs up quicker in the low gears. No peak power change.',ie:0.85}]}]},
+ intake:{label:'Intake',parts:[
+  {id:'filter',label:'Air intake',opts:[{id:'stock',name:'Stock airbox',desc:''},
+    {id:'hf',name:'High-flow filter',desc:'Drop-in panel filter: a little less restriction.',cap:{filter:1.10}},
+    {id:'sri',name:'Short ram intake',desc:'Less restriction, but draws warmer under-hood air.',cap:{filter:1.25},heat:4},
+    {id:'cai',name:'Cold air intake',desc:'Less restriction and cooler inlet air.',cap:{filter:1.30},heat:-4}]},
+  {id:'pipe',label:'Intake pipe / turbo inlet',opts:[{id:'stock',name:'Stock piping',desc:''},{id:'big',name:'Larger intake pipe / turbo inlet',desc:'Bigger, smoother tube: matters most when flow demand is high.',cap:{pipe:1.25}}]},
+  {id:'tb',label:'Throttle body',opts:[{id:'stock',name:'Stock throttle body',desc:''},{id:'ported',name:'Ported throttle body',desc:'+10% flow area.',cap:{tb:1.10}},
+    {id:'big',name:'Larger throttle body',desc:'+30% flow area. Only helps if the stock one is restricting.',cap:{tb:1.30}}]},
+  {id:'mani',label:'Intake manifold',opts:[{id:'stock',name:'Stock manifold',desc:''},
+    {id:'ported',name:'Ported manifold',desc:'Smoother runners: +8% flow, peak moves up ~150 rpm.',cap:{mani:1.08},rc:150},
+    {id:'big',name:'Larger / short-runner manifold',desc:'+18% flow and peak ~400 rpm higher; a bit softer down low.',cap:{mani:1.18},rc:400,low:0.97}]}]},
+ fi:{label:'Turbo / Supercharger',parts:[
+  {id:'kit',label:'Forced induction',naOnly:true,opts:[{id:'none',name:'Naturally aspirated',desc:''},
+    {id:'turbo',name:'Turbo kit (single)',desc:'Bolt-on turbo, manifold, intercooler and piping. Stock internals and fuel will be the limit.',kit:'single'},
+    {id:'screw',name:'Twin-screw supercharger kit',desc:'Positive displacement: boost from just off idle, takes crank power to drive.',kit:'roots'},
+    {id:'centri',name:'Centrifugal supercharger kit',desc:'Belt-driven compressor: boost climbs with rpm.',kit:'centri'}]},
+  {id:'turbo',label:'Turbocharger',turboOnly:true,opts:[{id:'stock',name:'Stock turbo(s)',desc:'OEM-sized: quick spool, runs out of flow near the top.'},
+    {id:'hybrid',name:'Upgraded stock-frame turbo',desc:'Bigger compressor wheel in the stock housing: ~25% more flow, ~250 rpm later spool.',turbo:[1.25,5,250,0.74,0.68]},
+    {id:'larger',name:'Larger turbo',desc:'~65% more flow and higher pressure ratio, ~700 rpm later spool.',turbo:[1.65,10,700,0.76,0.70]},
+    {id:'big',name:'Big turbo',desc:'~2.3x stock flow. Spools ~1,500 rpm later; needs everything else upgraded.',turbo:[2.3,16,1500,0.77,0.72]}]},
+  {id:'wg',label:'Wastegate',turboOnly:true,opts:[{id:'stock',name:'Stock wastegate',desc:'Can let boost creep past target with a bigger turbo.'},{id:'big',name:'Larger / external wastegate',desc:'Holds the boost target at high rpm.',wg:1}]},
+  {id:'tman',label:'Turbo / exhaust manifold',turboOnly:true,opts:[{id:'stock',name:'Stock manifold',desc:''},{id:'tubular',name:'Tubular turbo manifold',desc:'Better exhaust energy to the turbine: earlier spool, lower backpressure.',spool:-200,cap:{hdr:1.25}}]},
+  {id:'ic',label:'Intercooler',boostOnly:true,opts:[{id:'stock',name:'Stock intercooler',desc:'Good when cool; heat-soaks as airflow rises.'},
+    {id:'up',name:'Upgraded intercooler',desc:'More core: cooler charge, holds temperature over more airflow.',ic:[0.80,1.4]},
+    {id:'large',name:'Large front-mount intercooler',desc:'Lowest charge temperatures; slightly more pressure drop and volume.',ic:[0.86,2.0]}]},
+  {id:'icpipe',label:'Intercooler piping / charge pipes',boostOnly:true,opts:[{id:'stock',name:'Stock piping',desc:''},{id:'up',name:'Aluminum charge pipes',desc:'Less pressure drop between compressor and throttle.',cap:{icp:1.3}}]},
+  {id:'bov',label:'Blow-off / bypass valve',turboOnly:true,opts:[{id:'stock',name:'Stock valve',desc:''},{id:'up',name:'Upgraded blow-off valve',desc:'Holds higher boost without leaking. No power by itself.',bov:1}]},
+  {id:'pulley',label:'Supercharger pulley',scOnly:true,opts:[{id:'stock',name:'Stock pulley',desc:''},
+    {id:'p5',name:'5% smaller pulley',desc:'Spins the blower ~5% faster: more boost, more heat, more drive power.',pulley:1.053},
+    {id:'p10',name:'10% smaller pulley',desc:'~11% faster blower.',pulley:1.11},
+    {id:'p15',name:'15% smaller pulley',desc:'~18% faster: near the blower speed limit.',pulley:1.18}]},
+  {id:'blower',label:'Supercharger',scOnly:true,opts:[{id:'stock',name:'Stock blower',desc:''},{id:'big',name:'Larger blower',desc:'~25% more displacement per rev: more boost at the same speed, cooler.',blower:1.25}]}]},
+ exhaust:{label:'Exhaust',parts:[
+  {id:'hdr',label:'Headers / exhaust manifold',naOnly2:true,opts:[{id:'stock',name:'Stock manifolds',desc:''},
+    {id:'shorty',name:'Shorty headers',desc:'Less restriction, small top-end gain.',cap:{hdr:1.2}},
+    {id:'long',name:'Long-tube headers',desc:'Big flow gain plus a scavenging bump in the midrange.',cap:{hdr:1.4},scav:0.03}]},
+  {id:'dp',label:'Catalytic converters / downpipe',opts:[{id:'stock',name:'Stock converters / downpipe',desc:'Usually the biggest restriction on a turbo car.'},
+    {id:'hf',name:'High-flow cats / catted downpipe',desc:'Much less backpressure; turbo spools sooner.',cap:{cat:1.45},spoolB:1},
+    {id:'catless',name:'Catless (off-road)',desc:'Least restriction. Not street legal.',cap:{cat:1.9},spoolB:1}]},
+  {id:'mid',label:'Midpipe',opts:[{id:'stock',name:'Stock midpipe',desc:''},{id:'x',name:'X / H-pipe',desc:'Less restriction, balances banks.',cap:{mid:1.3}}]},
+  {id:'res',label:'Resonator',opts:[{id:'stock',name:'Stock resonator',desc:''},{id:'del',name:'Resonator delete',desc:'Small restriction drop; louder.',cap:{res:1.3}}]},
+  {id:'muf',label:'Muffler / cat-back',opts:[{id:'stock',name:'Stock mufflers',desc:''},
+    {id:'perf',name:'Performance mufflers',desc:'Straight-through mufflers.',cap:{muf:1.25}},
+    {id:'catback',name:'Cat-back exhaust',desc:'Larger pipes and mufflers from the cats back.',cap:{muf:1.35,mid:1.1}},
+    {id:'full',name:'Full exhaust system',desc:'Larger diameter end to end.',cap:{muf:1.45,mid:1.3,res:1.3}}]}]},
+ fuel:{label:'Fuel',parts:[
+  {id:'octane',label:'Fuel',opts:[{id:'91',name:'91 octane (stock)',desc:'What the factory rating assumes.',oct:91},
+    {id:'87',name:'87 octane',desc:'More knock: the ECU pulls timing.',oct:87},{id:'93',name:'93 octane',desc:'A little more knock margin.',oct:93},
+    {id:'100',name:'100 octane race gas',desc:'Lots of knock margin.',oct:100},
+    {id:'e85',name:'E85',desc:'Huge knock margin and charge cooling, but needs ~45% more fuel flow.',oct:105,e85:1}]},
+  {id:'inj',label:'Fuel injectors',opts:[{id:'stock',name:'Stock injectors',desc:''},
+    {id:'i35',name:'Injectors +35%',desc:'',inj:1.35},{id:'i75',name:'Injectors +75%',desc:'',inj:1.75},{id:'i150',name:'Injectors +150%',desc:'',inj:2.5}]},
+  {id:'lpfp',label:'Low-pressure fuel pump',opts:[{id:'stock',name:'Stock in-tank pump',desc:''},{id:'up',name:'Upgraded in-tank pump',desc:'+50% flow',lp:1.5},{id:'dual',name:'Dual pumps',desc:'+120% flow',lp:2.2}]},
+  {id:'hpfp',label:'High-pressure fuel pump',diOnly:true,opts:[{id:'stock',name:'Stock direct-injection pump',desc:'Often the first fuel limit on a tuned DI turbo engine.'},{id:'up',name:'Upgraded HPFP',desc:'+40% flow',hp:1.4},{id:'race',name:'Race HPFP',desc:'+90% flow',hp:1.9}]},
+  {id:'rail',label:'Fuel rail',opts:[{id:'stock',name:'Stock rails',desc:''},{id:'up',name:'Larger fuel rails',desc:'Steadier pressure at high flow: +6% delivered flow.',rail:1.06}]}]},
+ cooling:{label:'Cooling',parts:[
+  {id:'rad',label:'Radiator',opts:[{id:'stock',name:'Stock radiator',desc:''},{id:'up',name:'Aluminum radiator',desc:'+30% heat rejection.',cool:0.3},{id:'race',name:'Race radiator + fans',desc:'+55% heat rejection.',cool:0.55}]},
+  {id:'oil',label:'Oil cooler',opts:[{id:'stock',name:'Stock',desc:''},{id:'up',name:'Oil cooler',desc:'Keeps oil temperature down under sustained load.',cool:0.1}]},
+  {id:'tstat',label:'Thermostat',opts:[{id:'stock',name:'Stock thermostat',desc:''},{id:'low',name:'Low-temp thermostat',desc:'Runs cooler: slightly more knock margin.',tstat:1}]}]},
+ drive:{label:'Drivetrain',parts:[
+  {id:'clutch',label:'Clutch',manualOnly:true,opts:[{id:'stock',name:'Stock clutch',desc:''},{id:'stage2',name:'Stage 2 clutch',desc:'Holds ~45% more torque.',trans:1.45},{id:'twin',name:'Twin-disc clutch',desc:'Holds ~110% more torque.',trans:2.1}]},
+  {id:'tc',label:'Torque converter',autoOnly:true,opts:[{id:'stock',name:'Stock converter',desc:''},{id:'stall',name:'High-stall converter',desc:'Launches higher in the rpm (onto boost) and holds more torque.',trans:1.3,stall:1}]},
+  {id:'trans',label:'Transmission',opts:[{id:'stock',name:'Stock transmission',desc:''},{id:'built',name:'Built transmission',desc:'Stronger clutches/gears: ~80% more torque capacity.',trans:1.8},{id:'race',name:'Race transmission',desc:'~160% more torque capacity.',trans:2.6}]},
+  {id:'diff',label:'Differential',opts:[{id:'stock',name:'Stock differential',desc:''},{id:'lsd',name:'Limited-slip differential',desc:'Shares drive across both tyres: better traction.',grip:0.04}]},
+  {id:'fd',label:'Final drive',opts:[{id:'stock',name:'Stock ratio',desc:''},{id:'s',name:'Shorter (≈ +10%)',desc:'Quicker acceleration, lower top speed in each gear.',fd:1.10},
+    {id:'ss',name:'Much shorter (≈ +20%)',desc:'',fd:1.20},{id:'l',name:'Taller (≈ −10%)',desc:'Longer gears, higher top speed per gear.',fd:0.9}]},
+  {id:'shaft',label:'Driveshaft',opts:[{id:'stock',name:'Stock driveshaft',desc:''},{id:'cf',name:'Carbon / aluminum driveshaft',desc:'Lighter and stronger.',ie:0.97,trans:1.05}]},
+  {id:'axles',label:'Axles',opts:[{id:'stock',name:'Stock axles',desc:''},{id:'up',name:'Upgraded axles',desc:'Raises the drivetrain torque limit.',axle:1.6}]}]},
+ internals:{label:'Internals',parts:[
+  {id:'pistons',label:'Pistons',opts:[{id:'stock',name:'Stock cast pistons',desc:''},{id:'forged',name:'Forged pistons',desc:'Take far more cylinder pressure and heat.',mech:{pis:1.45}}]},
+  {id:'rods',label:'Connecting rods',opts:[{id:'stock',name:'Stock rods',desc:''},{id:'forged',name:'Forged rods',desc:'More torque and rpm capacity.',mech:{rod:1.5},rpm:{rod:500}}]},
+  {id:'crank',label:'Crankshaft',opts:[{id:'stock',name:'Stock crank',desc:''},{id:'forged',name:'Forged crank',desc:'',mech:{crank:1.35},rpm:{rod:200}}]},
+  {id:'gasket',label:'Head gasket / studs',opts:[{id:'stock',name:'Stock gasket and bolts',desc:''},{id:'mls',name:'MLS gasket + head studs',desc:'Holds much higher cylinder pressure without lifting the head.',mech:{gsk:1.5}}]},
+  {id:'disp',label:'Displacement',opts:[{id:'stock',name:'Stock bore and stroke',desc:''},{id:'stroker',name:'Stroker kit (+8%)',desc:'Longer stroke: more torque everywhere, a little less rpm.',disp:1.08},{id:'big',name:'Bore + stroke (+14%)',desc:'',disp:1.14}]}]}
+};
+function rcEngine(base){
+  const c=base,I=IND[c.ind]||IND.na,bi=boostInfo(Object.assign({},c,{bPsi:null}));
+  const yr=parseInt(c.name,10)||2015,cyl=(ENGINES[c.engSound]||{cyl:6}).cyl;
+  const boosted=!!I.boosted;
+  return{c,I,cyl,yr,boosted,ind:c.ind,disp:c.disp||2,R:c.redline,
+    vvt:yr>=2009,di:yr>=2015||(boosted&&yr>=2011),
+    psi0:boosted?bi.psi:0,naFrac0:boosted?bi.naFrac:1,
+    CR0:boosted?(yr>=2015?9.8:9.3):(yr>=2010?11.0:10.3),
+    rc0:boosted?Math.max(2500,c.tqRpm*1.25):Math.max(3000,c.tqRpm),
+    trans:c.trans,manual:c.trans==='manual',auto:c.trans==='auto'||c.trans==='cvt'};
+}
+function rcStockParts(){const p={};for(const g in RC_PARTS)RC_PARTS[g].parts.forEach(x=>p[x.id]=x.opts[0].id);return p;}
+function rcOpt(id,v){for(const g in RC_PARTS){const x=RC_PARTS[g].parts.find(q=>q.id===id);if(x)return x.opts.find(o=>o.id===v)||x.opts[0];}return {};}
+function rcPts(E,limit){const a=[];for(let r=1500;r<=Math.max(E.R,limit||E.R);r+=500)a.push(r);return a;}
+/* the hardware the build actually has (resolved from the parts) */
+function rcHW(E,P){
+  const o=(id)=>rcOpt(id,P[id]);
+  const kit=E.boosted?null:o('kit').kit||null;
+  const ind=E.boosted?E.ind:(kit||'na');
+  const turbo=ind==='single'||ind==='twin',sc=ind==='roots'||ind==='centri',boosted=turbo||sc;
+  const cap={filter:1,pipe:1,tb:1,mani:1,head:1,hdr:1,cat:1,mid:1,res:1,muf:1,icp:1};
+  let rc=0,low=1,scav=0,heat=0,cam=[0,1,1],crd=0,ie=1,spool=0,wg=0,ic=null,pulley=1,blower=1,inj=1,lp=1,hp=1,rail=1,cool=0,tstat=0,trans=1,grip=0,fd=1,axle=1,disp=1,oct=91,e85=0,stall=0,spoolB=0,tb=null;
+  const mech={pis:1,rod:1,crank:1,gsk:1},rpm={valve:0,rod:0};
+  for(const id in P){const x=o(id);if(!x)continue;
+    if(x.cap)for(const k in x.cap)cap[k]*=x.cap[k];
+    if(x.rc)rc+=x.rc;if(x.low)low*=x.low;if(x.scav)scav+=x.scav;if(x.heat)heat+=x.heat;if(x.cam)cam=x.cam;if(x.cr)crd+=x.cr;
+    if(x.ie)ie*=x.ie;if(x.spool)spool+=x.spool;if(x.wg)wg=1;if(x.ic)ic=x.ic;if(x.pulley)pulley=x.pulley;if(x.blower)blower=x.blower;
+    if(x.inj)inj=x.inj;if(x.lp)lp=x.lp;if(x.hp)hp=x.hp;if(x.rail)rail=x.rail;if(x.cool)cool+=x.cool;if(x.tstat)tstat=1;
+    if(x.trans)trans*=x.trans;if(x.grip)grip+=x.grip;if(x.fd)fd=x.fd;if(x.axle)axle=x.axle;if(x.disp)disp=x.disp;
+    if(x.oct)oct=x.oct;if(x.e85)e85=1;if(x.stall)stall=1;if(x.spoolB)spoolB=1;if(x.turbo)tb=x.turbo;
+    if(x.mech)for(const k in x.mech)mech[k]*=x.mech[k];if(x.rpm)for(const k in x.rpm)rpm[k]=Math.max(rpm[k],x.rpm[k]);}
+  return{kit,ind,turbo,sc,boosted,cap,rc,low,scav,heat,cam,crd,ie,spool,wg,ic,pulley,blower,inj,lp,hp,rail,cool,tstat,trans,grip,fd,axle,disp,oct,e85,stall,spoolB,tb,mech,rpm};
+}
+const RC_STOICH=14.7,RC_PAMB=14.7;
+const rcSm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
+/* stock component capacities, as multiples of the stock engine's peak airflow. OEM turbo cars are
+   tight on the downpipe and turbo inlet; NA cars on the heads and manifolds. */
+function rcStockCap(E,k){const b=E.boosted;
+  return({filter:b?1.25:1.55,pipe:b?1.25:1.7,tb:b?2.0:1.75,mani:b?1.9:1.55,head:b?1.35:1.18,hdr:b?1.3:1.25,cat:b?0.95:1.35,mid:1.55,res:1.7,muf:b?1.45:1.35,icp:1.6})[k];}
+/* the tune: per-rpm tables plus global settings */
+function rcStockTune(E,HW){
+  const pts=rcPts(E,E.R+1500),boosted=HW?HW.boosted:E.boosted;
+  const ind=HW?HW.ind:E.ind,sc=ind==='roots'||ind==='centri';
+  // turbo: the boost target. Supercharger: the bypass limit (pulley speed sets the boost; the bypass can only trim it)
+  const t={rpm:pts,boost:pts.map(()=>sc?40:(E.boosted?Math.round(E.psi0*10)/10:(HW&&HW.boosted?9:0))),
+    afr:pts.map(()=>boosted?11.6:12.8),timing:pts.map(()=>null),icam:pts.map(r=>E.vvt?Math.round(12*(1-rcSm((r-1500)/Math.max(1000,E.R-2500)))):0),
+    ecam:pts.map(()=>0),rev:E.R,launch:Math.round(E.c.launchRpm||3000),lc:E.c.launch!=='none',knock:'normal',fuelP:0,boostLimit:0,
+    torqueCap:0,gearBoost:[100,100,100],gearTq:[100,100,100],throttle:'normal',tcRed:'normal',shiftCut:true,override:false};
+  return t;}
+function rcInterp(t,key,r){const R=t.rpm,V=t[key];if(r<=R[0])return V[0];for(let i=1;i<R.length;i++)if(r<=R[i]){const a=V[i-1],b=V[i];if(a==null||b==null)return a==null?b:a;return a+(b-a)*(r-R[i-1])/(R[i]-R[i-1]);}return V[V.length-1];}
+/* one rpm point of the physics. Returns raw torque (before the per-car calibration) and every
+   intermediate quantity so the UI can show where the limits are. */
+function rcPoint(E,HW,T,r,cal){
+  const amb=(typeof ambient==='function'?ambient():75),Ta=(amb-32)*5/9+273.15;
+  const D=E.disp*HW.disp,cr=E.CR0+HW.crd,R=E.R;
+  const cap=k=>rcStockCap(E,k)*HW.cap[k];
+  // ---- cam / runner tuning: where the engine breathes best ----
+  const icam=E.vvt?rcInterp(T,'icam',r):0,ecam=E.vvt?rcInterp(T,'ecam',r):0;
+  const rc=E.rc0+HW.cam[0]+HW.rc-25*icam+15*ecam,w=0.55*R;
+  let VE=(0.80+0.20*Math.exp(-Math.pow((r-rc)/w,2)))*(r>rc?HW.cam[1]:1)*(r<rc-1500?Math.pow(HW.cam[2]*HW.low,rcSm((rc-1500-r)/2500)):1);
+  if(r>rc-1500&&r<=rc)VE*=1+(HW.cam[1]-1)*rcSm((r-(rc-1500))/1500);
+  VE*=1+HW.scav*Math.exp(-Math.pow((r-(rc+600))/1800,2));
+  VE*=1+(E.boosted||HW.boosted?-0.004:0.006)*ecam*rcSm((r-3500)/2500);
+  // ---- forced induction ----
+  let psiT=HW.boosted?Math.max(0,rcInterp(T,'boost',r)):0,psi=0,PRc=1,Tc=Ta+HW.heat+(HW.boosted?0:8),eta=1,flowFrac=0,drive=0,creep=false,iat=Ta;
+  const lim=[];
+  // stock flow reference: the engine's own airflow at the stock peak
+  const A0=cal?cal.A0:1;
+  let Lin=0,Lpost=0,Bx=0,Aidx=0;
+  for(let it=0;it<4;it++){
+    const q=cal?Aidx/A0:1;                         // airflow relative to the stock engine's peak (1 = stock peak)
+    Lin=0.045*(Math.pow(q/cap('filter'),2)+Math.pow(q/cap('pipe'),2));
+    Bx=0.012*(Math.pow(q/cap('hdr'),2)+Math.pow(q/cap('cat'),2)+Math.pow(q/cap('mid'),2)+Math.pow(q/cap('res'),2)+Math.pow(q/cap('muf'),2));
+    let PRm=1;
+    if(HW.turbo){
+      const tb=HW.tb||[1,0,0,0.72,0.66],kitT=HW.kit==='single';
+      const flowMax=(kitT?2.2:1.25)*tb[0];
+      const psiMax=(kitT?16:E.psi0*1.35+2)+tb[1];
+      let r1=(kitT?0.5*R:E.c.tqRpm*(E.ind==='twin'?0.85:0.95))+tb[2]+HW.spool+(HW.spoolB?-150:0)+(Bx-0.035)*6000;
+      const r0=r1-1600;
+      const avail=psiMax*rcSm((r-r0)/(r1-r0));
+      psi=Math.min(psiT,avail);
+      if(HW.tb&&HW.tb[0]>1.4&&!HW.wg){const c2=avail*0.55*rcSm((r-r1)/1500);if(c2>psi){psi=c2;creep=true;}}
+      PRm=1+psi/RC_PAMB;
+      // compressor flow: the engine wants PR x density x displacement x rpm; past ~78% of the map the efficiency falls, past 100% it chokes
+      const want=q;flowFrac=want/flowMax;
+      // past its flow limit the compressor can't hold the pressure: boost falls back to what it can flow
+      if(flowFrac>1.0){PRm=Math.max(1,PRm/flowFrac);psi=(PRm-1)*RC_PAMB;flowFrac=1.0;lim.push('turbo');}
+      eta=Math.max(0.5,tb[3]*(1-2.4*Math.pow(Math.max(0,flowFrac-0.75),2))-0.02*Math.max(0,PRm-2.6));
+      if(flowFrac>0.92)lim.push('turboEff');
+    }else if(HW.sc){
+      if(HW.ind==='roots'){const base=E.boosted?E.psi0:7;
+        const bl=HW.blower,pu=HW.pulley,blowRpm=r*pu;
+        let p=base*Math.pow(pu,1.35)*Math.pow(bl,1.1)*(0.72+0.28*rcSm((r-900)/(R*0.35)));
+        if(blowRpm>R*1.12){p*=Math.max(0.6,1-(blowRpm/(R*1.12)-1)*1.8);lim.push('scSpeed');}
+        psi=Math.min(p,psiT>0?Math.max(psiT,0):p);psi=Math.min(psi,p);
+        eta=Math.max(0.45,(E.boosted?0.62:0.66)*(bl>1?1.04:1)-0.12*Math.max(0,pu-1));
+      }else{const base=E.boosted?E.psi0:8;
+        const p=base*Math.pow(r/R,1.85)*Math.pow(HW.pulley,2);psi=Math.min(p,psiT>0?psiT*Math.pow(r/R,1.85)*1.4:p);eta=0.74-0.2*Math.max(0,HW.pulley-1.12);
+        if(HW.pulley>1.15)lim.push('scSpeed');}
+      PRm=1+psi/RC_PAMB;
+    }
+    // inlet loss makes the compressor work harder; intercooler and piping drop pressure on the way in
+    const icCap=(HW.ic?HW.ic[1]:(HW.kit?1.3:1.15))*(HW.boosted?1:1);
+    Lpost=HW.boosted?0.035*Math.pow(q/(icCap*cap('icp')),2):0;
+    const tbL=0.04*Math.pow(q/cap('tb'),2)/Math.max(1,PRm),maniL=0.045*Math.pow(q/cap('mani'),2)/Math.max(1,PRm),headL=0.06*Math.pow(q/cap('head'),2)/Math.max(1,PRm);
+    if(HW.boosted){
+      const Pin=RC_PAMB*(1-Lin),Pout=PRm*RC_PAMB*(1+Lpost);PRc=Pout/Pin;
+      const T2=(Ta+HW.heat)*(1+(Math.pow(PRc,0.2857)-1)/eta);
+      // intercooler: effectiveness falls as the air mass it has to cool rises past what the core can shed
+      let eps=HW.ic?HW.ic[0]:(HW.kit?0.74:0.70);eps*=1-0.35*Math.max(0,q/icCap-1);
+      if(HW.ind==='roots'&&!HW.ic)eps=E.boosted?0.66:0.68;
+      Tc=T2-Math.max(0,eps)*(T2-Ta-4);iat=Tc;
+      if(HW.sc){const dT=T2-(Ta+HW.heat);drive=dT/1100*(HW.ind==='centri'?0.85:1);}
+      var DR=PRm*(1-tbL-maniL-headL)*Ta/Tc;
+    }else{var DR=(1-Lin-tbL-maniL-headL)*Ta/Tc;iat=Tc;}
+    const VEe=VE*(1-0.9*Bx-(HW.turbo?0.6*Bx:0));
+    Aidx=D*r*VEe*DR/1000;
+    if(it===3){
+      // ---- fuel ----
+      const lam=rcInterp(T,'afr',r)/RC_STOICH;
+      const stoich=HW.e85?9.8:14.7;
+      const fuel=Aidx/(lam*stoich)*(HW.e85?1:1);
+      // ---- combustion: compression, spark vs. knock, mixture ----
+      const MBT=24+8*(r/R)-3*(PRm-1);
+      const KI=1.6*(cr-10)+3.5*(PRm-1)+(Tc-313)/10+22*(lam-0.85)+2.5*(1-Math.min(1,r/R))-1.4*(HW.oct-91)-(HW.e85?4:0)-(HW.tstat?0.6:0)+(cal?cal.heatKI:0);
+      const L=MBT+5-KI;                            // knock-limited spark advance
+      const req=rcInterp(T,'timing',r);
+      let tim=req==null?Math.min(MBT,L-1.5):req,knock=0;
+      const sens={high:[1.5,4],normal:[0.5,2.5],low:[-2,0]}[T.knock]||[0.5,2.5];
+      if(tim>L-sens[0]+0.001&&req!=null){knock=Math.max(0,tim-L);tim=sens[0]<0?Math.min(tim,L+2):L-sens[1];}
+      const dM=Math.max(0,MBT-tim)+Math.max(0,tim-MBT)*0.5;
+      const etaIgn=1-0.0011*dM*dM;
+      const etaTh=(1-Math.pow(cr,-0.3))/(1-Math.pow(E.CR0,-0.3));
+      const fAfr=1-2.0*Math.pow(lam-0.86,2)+(HW.e85?0.03:0);
+      const ind=Aidx*etaTh*etaIgn*fAfr;
+      const fric=D*(0.07+0.09*Math.pow(r/6000,2))*(r/1000)*0.0+D*(0.10+0.14*Math.pow(r/6500,2));
+      // exhaust backpressure: a turbo's turbine plus everything after it; on an NA engine just the system
+      const pump=HW.turbo?ind*0.06*Math.max(0,(PRc-1)*0.55/((HW.tb?HW.tb[4]:0.66)*eta)*(1+12*Bx)-(PRm-1)*0.5):ind*0.8*Bx;
+      const rawI=ind/r*1000;
+      const raw=rawI*(1-drive)-fric-pump/r*1000;
+      return{raw,psi,PRm,iat:Tc,eta,flowFrac,lam,afr:lam*stoich,timing:tim,MBT,L,knock,Aidx,fuel,Lin,Bx,creep,lim,drive,KI};
+    }
+  }
+}
+/* calibrate the model to the car's real stock curve, then compute the build */
+function rcCalibrate(E){
+  const HW=rcHW(E,rcStockParts()),T=rcStockTune(E,HW);
+  // stock flow reference at the stock power peak
+  let cal={A0:1,heatKI:0,k:{}};
+  let A0=0;for(let r=1500;r<=E.R;r+=250)A0=Math.max(A0,rcPoint(E,HW,T,r,null).Aidx);cal.A0=A0||1;
+  for(let k=0;k<2;k++){let m=0;for(let r=1500;r<=E.R;r+=250)m=Math.max(m,rcPoint(E,HW,T,r,cal).Aidx);cal.A0=m||cal.A0;}
+  // fuel: stock injectors ~80% (turbo) / 70% (NA) duty at the stock maximum; pumps with a little headroom
+  let fmax=0;for(let r=1500;r<=E.R;r+=250)fmax=Math.max(fmax,rcPoint(E,HW,T,r,cal).fuel);
+  cal.inj=fmax/(E.boosted?0.80:0.70);cal.lp=fmax*1.3;cal.hp=fmax*(E.boosted?1.12:1.25);
+  // mechanical limits relative to the stock peak torque; cooling relative to stock power
+  cal.mech=E.c.tq*(E.boosted?1.35:1.45);cal.trans=E.c.tq*(E.manual?1.25:1.35);cal.axle=E.c.tq*1.7;cal.cool=E.c.hp*1.2;
+  cal.rpmValve=E.R+400;cal.rpmRod=E.R+700;
+  for(let r=1000;r<=E.R+1500;r+=250){const rr=Math.min(r,E.R);const p=rcPoint(E,HW,T,rr,cal);cal.k[r]=torqueAt(E.c,rr)/Math.max(1,p.raw);}
+  return cal;
+}
+function rcBuild(E,cal,P,T){
+  const HW=rcHW(E,P),out=[],warn={},R=E.R;
+  const hwRpm=Math.min(cal.rpmValve+HW.rpm.valve-(HW.cam[0]>800?300:0),cal.rpmRod+HW.rpm.rod-(HW.disp>1?300:0));
+  const rev=Math.min(T.rev,T.override?T.rev:hwRpm);
+  const mech=cal.mech*Math.min(HW.mech.pis,HW.mech.rod,HW.mech.crank)*(HW.boosted&&!E.boosted?0.9:1),gskPsi=(E.boosted?E.psi0*1.5+4:12)*HW.mech.gsk;
+  const transCap=cal.trans*HW.trans,axleCap=cal.axle*HW.axle;
+  const fuelCap={inj:cal.inj*HW.inj*HW.rail*Math.sqrt(1+(T.fuelP||0)/100),lp:cal.lp*HW.lp*(1-0.25*(T.fuelP||0)/100),hp:E.di?cal.hp*HW.hp:Infinity};
+  // cooling: heat to shed grows with power; past the system's capacity the engine runs hotter and knocks sooner
+  let heatKI=0;
+  for(let pass=0;pass<2;pass++){
+    out.length=0;
+    let peakHp=0;
+    for(let r=1000;r<=rev;r+=250){
+      const calH=Object.assign({},cal,{heatKI});
+      let p=rcPoint(E,HW,T,r,calH);
+      const k=cal.k[Math.min(r,R+1500)]||cal.k[R]||1;
+      const fuelFrac=pp=>{const need=pp.fuel*(HW.e85?1.45:1);return{need,fr:Math.max(need/fuelCap.inj/0.92,need/fuelCap.lp,need/fuelCap.hp)};};
+      let F=fuelFrac(p),fuelFlag=null;
+      if(F.fr>1){fuelFlag=F.need/fuelCap.inj/0.92>=F.need/fuelCap.lp&&F.need/fuelCap.inj/0.92>=F.need/fuelCap.hp?'inj':(F.need/fuelCap.lp>F.need/fuelCap.hp?'lp':'hpfp');}
+      // fuel delivery caps the air the ECU allows: on a boosted engine it lowers boost until the fuel it
+      // can deliver matches the air (less boost also means less knock); NA engines close the throttle
+      let thrScale=1;
+      if(F.fr>1&&!T.override){
+        if(HW.boosted&&p.psi>0.5){let lo=0,hi=p.psi;for(let it=0;it<9;it++){const m=(lo+hi)/2;
+            const Tm=Object.assign({},T,{boost:T.boost.map(()=>m)});const pm=rcPoint(E,HW,Tm,r,calH);if(fuelFrac(pm).fr>1)hi=m;else lo=m;}
+          const Tm=Object.assign({},T,{boost:T.boost.map(()=>lo)});p=rcPoint(E,HW,Tm,r,calH);F=fuelFrac(p);}
+        if(F.fr>1)thrScale=1/F.fr;}
+      let tq=Math.max(0,p.raw*k)*thrScale,flags=p.lim.slice();
+      const duty=F.need/fuelCap.inj;
+      if(fuelFlag)flags.push(T.override?'lean':fuelFlag);
+      if(p.knock>0)flags.push(T.knock==='low'?'knockDmg':'knock');
+      if(p.psi>gskPsi)flags.push('gasket');
+      let cap=Infinity;
+      if(tq>mech){flags.push('mech');if(!T.override)cap=Math.min(cap,mech);}
+      if(tq>transCap){flags.push('trans');if(!T.override)cap=Math.min(cap,transCap);}
+      if(tq>axleCap){flags.push('axle');if(!T.override)cap=Math.min(cap,axleCap);}
+      if(T.torqueCap>0)cap=Math.min(cap,T.torqueCap);
+      const unc0=p.raw*k*thrScale,unc=tq;tq=Math.min(tq,cap);
+      // when the ECU holds torque back it does it by lowering boost: boost scales with the air it allows
+      const PRo=1+p.psi/RC_PAMB,psiOut=HW.boosted?Math.max(0,(PRo*Math.min(1,tq/Math.max(1,unc0))-1)*RC_PAMB):0;
+      if(p.creep)flags.push('creep');
+      if(p.lam>0.92&&HW.boosted||p.lam>0.97)flags.push('leanAfr');
+      out.push({rpm:r,tq,hp:tq*r/5252,psi:psiOut,
+        afr:p.afr,lam:p.lam,timing:p.timing,MBT:p.MBT,L:p.L,iat:(p.iat-273.15)*9/5+32,eff:p.eta,flowFrac:p.flowFrac,duty,flags,drive:p.drive,
+        na:HW.boosted?0:tq});
+      peakHp=Math.max(peakHp,tq*r/5252);
+    }
+    const excess=Math.max(0,peakHp/(cal.cool*(1+HW.cool))-1);
+    if(pass===0){heatKI=excess*8;if(excess<=0)break;}
+    if(excess>0)warn.cooling=excess;
+  }
+  // the same engine with no boost (what forced induction adds), from the physics with boost off
+  if(HW.boosted){const T0=Object.assign({},T,{boost:T.boost.map(()=>0)});const HW0=Object.assign({},HW,{boosted:false,turbo:false,sc:false});
+    out.forEach(o=>{const p=rcPoint(E,HW0,T0,o.rpm,cal);o.na=Math.min(o.tq,Math.max(0,p.raw*(cal.k[Math.min(o.rpm,R+1500)]||1)));});}
+  let pk={hp:0,hpRpm:0,tq:0,tqRpm:0,psi:0};out.forEach(o=>{if(o.hp>pk.hp){pk.hp=o.hp;pk.hpRpm=o.rpm;}if(o.tq>pk.tq){pk.tq=o.tq;pk.tqRpm=o.rpm;}pk.psi=Math.max(pk.psi,o.psi);});
+  // reliability: margins left on each limit
+  let rel=100;const all=new Set();out.forEach(o=>o.flags.forEach(f=>all.add(f)));
+  const maxTq=Math.max(...out.map(o=>o.tq));
+  if(all.has('knockDmg'))rel-=25;if(all.has('lean')||all.has('leanAfr'))rel-=30;if(all.has('gasket'))rel-=25;if(all.has('creep'))rel-=10;
+  if(T.override){rel-=Math.max(0,(maxTq/mech-1))*220;rel-=Math.max(0,(maxTq/transCap-1))*160;rel-=Math.max(0,(maxTq/axleCap-1))*160;if(T.rev>hwRpm)rel-=40;}
+  if(Math.max(...out.map(o=>o.flowFrac||0))>1.05)rel-=15;if(warn.cooling)rel-=Math.min(30,warn.cooling*60);
+  if(out.some(o=>o.duty>0.95))rel-=12;
+  rel=Math.max(0,Math.min(100,Math.round(rel)));
+  return{pts:out,pk,HW,hwRpm,rev,mech,transCap,axleCap,gskPsi,fuelCap,warn,flags:[...all],rel,maxTq};
+}
+
+/* ---------------- Real Customization: the garage UI ---------------- */
+var RC={on:false,E:null,cal:null,P:null,T:null,B:null,B0:null,base:null,tab:'mech',mtab:'engine',ttab:'boost',applyT:0,perf:null};
+const RC_MSG={turbo:['Turbocharger Limit Reached','The compressor is out of flow: boost falls away at high rpm whatever the target.'],
+  turboEff:['Compressor Efficiency Exceeded','The turbo is working past its efficient range, heating the charge air.'],
+  inj:['Injector Duty Cycle Too High','The injectors are at their limit: the ECU holds boost/airflow back to stay safe.'],
+  lp:['Fuel System Limit Reached','The low-pressure pump can\'t supply more fuel.'],hpfp:['Fuel System Limit Reached','The high-pressure (direct-injection) pump is at its limit.'],
+  lean:['Running Lean','The fuel system can\'t keep up and the limits are overridden: engine damage risk.'],
+  leanAfr:['AFR Too Lean','The air/fuel target is too lean for this load: high combustion temperature, knock and damage risk.'],
+  knock:['Engine Knock Detected','The ECU is pulling timing where the request crosses the knock limit.'],
+  knockDmg:['Engine Knock Detected','Knock control is set to ignore it: the engine is knocking. Damage risk.'],
+  mech:['Engine Mechanical Limit','The pistons/rods/crank are at their safe cylinder-pressure limit; the ECU caps torque.'],
+  trans:['Transmission Torque Limit','The gearbox/clutch/converter can\'t take more torque; the ECU caps it.'],
+  axle:['Drivetrain Torque Limit','Axles/driveshaft at their limit.'],gasket:['Head Gasket Limit','Boost is past what the stock gasket and bolts hold reliably.'],
+  creep:['Boost Creep','The stock wastegate can\'t bleed enough exhaust for this turbo: boost rises past the target up top.'],
+  scSpeed:['Supercharger Overspeed','The blower is spinning past its efficient speed: hot air and wasted drive power.'],
+  exhaust:['Excessive Exhaust Backpressure','The exhaust is restricting flow at high rpm.'],cooling:['Cooling Capacity Exceeded','The engine sheds heat slower than it makes it: it heat-soaks and the ECU pulls timing.'],
+  rpm:['RPM Limit','The rev limiter is held at what the valvetrain/bottom end allows.']};
+function rcSupported(c){return c&&!((IND[c.ind]||{}).electric)&&c.gears&&c.gears.length;}
+function rcLoadFromLane(){
+  if(laneEmpty('A')){RC.E=null;rcRender();return;}
+  const c=readCar('A');
+  if(!rcSupported(c)){RC.E=null;RC.base=c;rcRender();return;}
+  const ex=EXTRAOF.A||{};
+  // a saved build re-opens from its stock car so the physics can be recalibrated
+  const base=ex.base&&ex.build?JSON.parse(JSON.stringify(ex.base)):JSON.parse(JSON.stringify(c));
+  delete base.curve;delete base.naCurve;delete base.psiCurve;delete base.build;delete base.base;delete base.bPsi;delete base.bNaFrac;delete base.tau;
+  RC.base=base;RC.E=rcEngine(base);RC.cal=rcCalibrate(RC.E);
+  RC.P=ex.build?Object.assign(rcStockParts(),ex.build.parts):rcStockParts();
+  RC.T=ex.build?JSON.parse(JSON.stringify(ex.build.tune)):rcStockTune(RC.E,rcHW(RC.E,RC.P));
+  RC.B0=rcBuild(RC.E,RC.cal,rcStockParts(),rcStockTune(RC.E,null));RC.perf=null;
+  rcRecalc(false);
+}
+function rcRecalc(apply){
+  if(!RC.E)return;
+  // the tune table must cover the rev range in use
+  const want=rcPts(RC.E,Math.max(RC.E.R,RC.T.rev));
+  if(want.length!==RC.T.rpm.length){['boost','afr','timing','icam','ecam'].forEach(k=>{const old=RC.T[k],R=RC.T.rpm;RC.T[k]=want.map(r=>{const i=R.indexOf(r);return i>=0?old[i]:old[old.length-1];});});RC.T.rpm=want;}
+  RC.B=rcBuild(RC.E,RC.cal,RC.P,RC.T);RC.perf=null;
+  rcRender();
+  if(apply!==false){clearTimeout(RC.applyT);RC.applyT=setTimeout(rcApply,350);}
+}
+function rcMakeCar(){
+  const E=RC.E,B=RC.B,HW=B.HW,base=RC.base,T=RC.T;
+  const c=JSON.parse(JSON.stringify(base));
+  const pts=B.pts.filter(o=>o.rpm>=1000);
+  c.curve=pts.map(o=>[o.rpm,+o.tq.toFixed(2)]);c.naCurve=pts.map(o=>[o.rpm,+o.na.toFixed(2)]);c.psiCurve=pts.map(o=>[o.rpm,+o.psi.toFixed(2)]);
+  c.hp=+B.pk.hp.toFixed(1);c.tq=+B.pk.tq.toFixed(1);c.hpRpm=B.pk.hpRpm;c.tqRpm=B.pk.tqRpm;c.redline=B.rev;
+  c.disp=+(E.disp*HW.disp).toFixed(2);c.ind=HW.ind;c.fd=+(base.fd*HW.fd).toFixed(3);c.gripAdj=+((base.gripAdj||1)+HW.grip).toFixed(3);
+  if(HW.stall&&E.auto){c.stall=Math.max(c.stall||2,2.5);c.stallRpm=Math.max(c.stallRpm||0,3200);}
+  const I2=IND[HW.ind]||IND.na;c.tau=HW.turbo?I2.tau*(HW.tb?(0.8+0.35*HW.tb[0]):1):undefined;
+  c.ie=+(0.16*HW.ie).toFixed(4);
+  if(HW.boosted){const ph=pts.find(o=>o.rpm===B.pk.hpRpm)||pts[pts.length-1];c.bPsi=+B.pk.psi.toFixed(1);c.bNaFrac=+Math.max(0.15,Math.min(1,ph.na/Math.max(1,ph.tq))).toFixed(3);}
+  else{delete c.bPsi;delete c.bNaFrac;}
+  c.gearBoost=T.gearBoost.map(v=>v/100);c.gearTq=T.gearTq.map(v=>v>=100?null:v/100);
+  c.launch=T.lc?(base.launch&&base.launch!=='none'?base.launch:'lc'):'none';c.launchRpm=T.launch;
+  if(HW.boosted&&!E.boosted){c.engSound=base.engSound;}
+  c.build={parts:Object.assign({},RC.P),tune:JSON.parse(JSON.stringify(T)),hp:c.hp,tq:c.tq,ts:Date.now()};
+  c.base=base;
+  return c;
+}
+function rcApply(){if(!RC.E||!RC.on)return;const c=rcMakeCar();RC.applying=true;setLane('A',c);RC.applying=false;if(typeof refreshAll==='function')refreshAll();}
+/* the "safe" tune a pro tuner would put on this hardware: boost, timing, AFR and cams per rpm,
+   each pushed until the first real limit (with margin) */
+function rcAutoTune(){
+  const E=RC.E,HW=rcHW(E,RC.P),T=RC.T,cal=RC.cal;
+  const afr=HW.boosted?11.5:12.7;T.afr=T.rpm.map(()=>afr);T.knock='normal';
+  T.rev=Math.min(Math.max(E.R,T.rev),rcBuild(E,cal,RC.P,T).hwRpm);
+  const evalAt=(r,psi,tim,ic)=>{const Tm=Object.assign({},T,{boost:T.rpm.map(()=>psi),timing:T.rpm.map(()=>tim),icam:T.rpm.map(()=>ic)});return rcPoint(E,HW,Tm,r,cal);};
+  T.rpm.forEach((r,i)=>{
+    // cams: whichever intake phasing breathes best here
+    let ic=T.icam[i];if(E.vvt){let best=-1;for(let a=-10;a<=30;a+=5){const p=evalAt(r,HW.boosted?T.boost[i]:0,null,a);if(p.raw>best){best=p.raw;ic=a;}}T.icam[i]=ic;}
+    if(HW.turbo){
+      // boost: up to where the turbo stops flowing efficiently, the gasket, fuel or internals say stop
+      const gsk=(E.boosted?E.psi0*1.5+4:12)*HW.mech.gsk*0.95;let best=0;
+      for(let psi=0;psi<=Math.min(45,gsk);psi+=0.5){const p=evalAt(r,psi,null,ic);if(p.flowFrac>0.97||p.psi<psi-0.6)break;best=psi;}
+      T.boost[i]=Math.round(best*2)/2;}
+    else if(HW.sc)T.boost[i]=40;
+    const p=evalAt(r,HW.boosted?T.boost[i]:0,null,ic);
+    T.timing[i]=Math.round(Math.min(p.MBT,p.L-1.0)*2)/2;});
+  // back the boost off wherever fuel or the bottom end would cap it anyway
+  let B=rcBuild(E,cal,RC.P,T);
+  for(let k=0;k<6&&HW.turbo;k++){let changed=false;
+    B.pts.forEach(o=>{const i=T.rpm.indexOf(o.rpm);if(i<0)return;
+      if(o.flags.some(f=>['inj','lp','hpfp','mech','trans','axle','gasket'].indexOf(f)>=0)){T.boost[i]=Math.max(0,Math.round((o.psi-0.5)*2)/2);changed=true;}});
+    if(!changed)break;B=rcBuild(E,cal,RC.P,T);}
+  rcRecalc();
+}
+function rcStage(){
+  const P=RC.P,HW=RC.B.HW,mod=k=>P[k]&&P[k]!==rcStockParts()[k];
+  const bolt=['filter','pipe','dp','muf','mid','hdr','ic','icpipe','tman'].filter(mod).length;
+  const big=mod('turbo')||mod('kit')||mod('blower')||mod('pulley')||mod('cam')||mod('heads')||mod('disp');
+  const tuned=JSON.stringify(RC.T)!==JSON.stringify(rcStockTune(RC.E,HW));
+  if(big)return HW.boosted?'Stage 3-style build: bigger power adder + supporting parts':'Built engine: cams/heads/displacement';
+  if(bolt>=2)return 'Stage 2-style: intake/exhaust'+(HW.boosted?'/intercooler':'')+(tuned?' + tune':'');
+  if(tuned||bolt)return 'Stage 1-style: mostly stock hardware'+(tuned?' + tune':'');
+  return 'Stock';
+}
+/* ---------- rendering ---------- */
+function rcEsc(t){return String(t).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[ch]);}
+function rcPartVisible(x,E,HW){
+  if(x.naOnly&&E.boosted)return false;if(x.naOnly2&&HW.turbo)return false;
+  if(x.turboOnly&&!HW.turbo)return false;if(x.scOnly&&!HW.sc)return false;if(x.boostOnly&&!HW.boosted)return false;
+  if(x.diOnly&&!E.di)return false;if(x.manualOnly&&!E.manual)return false;if(x.autoOnly&&!E.auto)return false;return true;}
+function rcRender(){
+  const el=document.getElementById('rcPanel');if(!el||!RC.on)return;
+  const main=document.getElementById('rcMain'),side=document.getElementById('rcSide');
+  document.querySelectorAll('#rcTabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===RC.tab));
+  if(!RC.E){main.innerHTML='<div class="rc-empty">'+(RC.base&&!rcSupported(RC.base)?'Electric drivetrains aren\'t part of Real Customization yet — load a combustion car into lane 1.':'Load a car into lane 1 to start building it.')+'</div>';side.innerHTML='';return;}
+  const E=RC.E,B=RC.B,HW=B.HW;
+  if(RC.tab==='mech')main.innerHTML=rcMechHTML(E,HW);
+  else if(RC.tab==='tune')main.innerHTML=rcTuneHTML(E,HW,B);
+  else if(RC.tab==='dyno')main.innerHTML='<canvas id="rcChart" width="1000" height="520"></canvas><div class="rc-row"><button type="button" class="go" id="rcDynoRun">Run it on the dyno</button><span class="rc-note">Strap it down and do a real pull with this build: wheel horsepower, boost and the gain from boost.</span></div>';
+  else main.innerHTML=rcPerfHTML();
+  side.innerHTML=rcSideHTML(E,B);
+  if(RC.tab==='dyno')rcChart();
+  if(RC.tab!=='dyno'){const mini=document.getElementById('rcMini');if(mini)rcChart(mini);}
+}
+function rcMechHTML(E,HW){
+  const g=RC_PARTS[RC.mtab]||RC_PARTS.engine;
+  const peak=RC.B.pts.reduce((a,o)=>o.hp>a.hp?o:a,RC.B.pts[0]);
+  let h='<div class="rc-sub">'+Object.keys(RC_PARTS).map(k=>'<button type="button" data-m="'+k+'" class="'+(k===RC.mtab?'on':'')+'">'+RC_PARTS[k].label+'</button>').join('')+'</div><div class="rc-parts">';
+  g.parts.forEach(x=>{if(!rcPartVisible(x,E,HW))return;
+    const cur=RC.P[x.id],o=rcOpt(x.id,cur);
+    h+='<div class="rc-part"><label>'+x.label+'</label><select data-part="'+x.id+'">'+x.opts.map(q=>'<option value="'+q.id+'"'+(q.id===cur?' selected':'')+'>'+rcEsc(q.name)+'</option>').join('')+'</select>'+
+      '<div class="rc-desc">'+rcEsc(o.desc||'')+'</div></div>';});
+  if(RC.mtab==='fi'&&!HW.boosted&&E.boosted===false&&!g.parts.some(x=>x.naOnly))h+='';
+  h+='</div><div class="rc-note">'+rcEsc(rcEngineNote(E,HW))+'</div>';
+  return h;
+}
+function rcEngineNote(E,HW){
+  const b=HW.boosted?(HW.turbo?(HW.ind==='twin'?'twin-turbo':'turbocharged'):(HW.ind==='centri'?'centrifugal-supercharged':'supercharged')):'naturally aspirated';
+  return E.c.name+': '+(E.disp*HW.disp).toFixed(1)+' L '+E.cyl+'-cylinder, '+b+', '+(E.CR0+HW.crd).toFixed(1)+':1 compression'+(E.vvt?', variable cam timing':'')+(E.di?', direct injection':'')+
+    '. Hardware rev limit '+RC.B.hwRpm.toLocaleString()+' rpm · cylinder-pressure limit ≈ '+Math.round(RC.B.mech)+' lb-ft · drivetrain limit ≈ '+Math.round(Math.min(RC.B.transCap,RC.B.axleCap))+' lb-ft.';
+}
+function rcRow(lbl,key,vals,opts){opts=opts||{};
+  return '<tr><th>'+lbl+'</th>'+vals.map((v,i)=>{
+    if(opts.ro)return '<td class="'+((opts.cls&&opts.cls(i))||'')+'">'+v+'</td>';
+    return '<td><input type="number" step="'+(opts.step||0.5)+'" data-tk="'+key+'" data-i="'+i+'" value="'+(v==null?'':v)+'"'+(opts.ph?' placeholder="'+opts.ph(i)+'"':'')+'></td>';}).join('')+'</tr>';}
+function rcTuneHTML(E,HW,B){
+  const T=RC.T,R=T.rpm,at=r=>B.pts.find(o=>o.rpm===r)||{};
+  const subs=[['boost','Boost'],['fuel','Fuel'],['ign','Ignition'],['vvt','VVT'],['thr','Throttle'],['tm','Torque Management'],['rpm','RPM Limits']];
+  let h='<div class="rc-sub">'+subs.map(([k,l])=>'<button type="button" data-tt="'+k+'" class="'+(k===RC.ttab?'on':'')+'">'+l+'</button>').join('')+'</div>';
+  const head='<table class="rc-tbl"><tr><th>RPM</th>'+R.map(r=>'<th>'+r+'</th>').join('')+'</tr>';
+  const fl=(r,f)=>(at(r).flags||[]).some(x=>f.indexOf(x)>=0)?'bad':'';
+  if(RC.ttab==='boost'){
+    if(!HW.boosted)h+='<div class="rc-note">This engine has no turbo or supercharger, so there is no boost to tune. Fit one under Mechanical → Turbo / Supercharger.</div>';
+    else h+=head+rcRow(HW.sc?'Bypass limit (psi)':'Boost target (psi)','boost',T.boost)+
+      rcRow('Actual boost','',R.map(r=>(at(r).psi||0).toFixed(1)),{ro:1,cls:i=>fl(R[i],['turbo','creep','inj','lp','hpfp','mech','trans'])})+
+      (HW.turbo?rcRow('Compressor flow','',R.map(r=>Math.round((at(r).flowFrac||0)*100)+'%'),{ro:1,cls:i=>(at(R[i]).flowFrac||0)>0.92?'bad':''}):'')+
+      rcRow('Charge air °F','',R.map(r=>Math.round(at(r).iat||0)),{ro:1,cls:i=>(at(R[i]).iat||0)>170?'bad':''})+'</table>'+
+      '<div class="rc-row"><label>Boost by gear (% of target) — 1st <input type="number" data-g="gearBoost" data-i="0" value="'+T.gearBoost[0]+'"> 2nd <input type="number" data-g="gearBoost" data-i="1" value="'+T.gearBoost[1]+'"> 3rd <input type="number" data-g="gearBoost" data-i="2" value="'+T.gearBoost[2]+'"></label></div>'+
+      '<div class="rc-note">'+(HW.sc?'A supercharger\'s boost is set by its pulley and rpm; the bypass valve can only trim it.':'The wastegate duty is driven to hit the target. The turbo can only make what its compressor can flow at each rpm — the actual row shows what it really makes.')+'</div>';
+  }else if(RC.ttab==='fuel'){
+    h+=head+rcRow('AFR target (gasoline)','afr',T.afr,{step:0.1})+
+      rcRow('Lambda','',R.map(r=>(at(r).lam||0).toFixed(2)),{ro:1,cls:i=>fl(R[i],['leanAfr','lean'])})+
+      (HW.e85?rcRow('E85 AFR','',R.map(r=>(at(r).afr||0).toFixed(1)),{ro:1}):'')+
+      rcRow('Injector duty','',R.map(r=>Math.round((at(r).duty||0)*100)+'%'),{ro:1,cls:i=>(at(R[i]).duty||0)>0.9?'bad':''})+'</table>'+
+      '<div class="rc-row"><label>Fuel pressure +<input type="number" min="0" max="15" step="1" id="rcFuelP" value="'+(T.fuelP||0)+'">% (more injector flow, less pump flow)</label></div>'+
+      '<div class="rc-note">Best power is around 12.6:1 (λ 0.86) NA and 11.5–11.8:1 under boost. Leaner makes more heat and knock; richer cools but loses a little power.</div>';
+  }else if(RC.ttab==='ign'){
+    h+=head+rcRow('Timing request (°)','timing',T.timing,{ph:i=>(at(R[i]).timing||0).toFixed(1)})+
+      rcRow('Best-torque timing','',R.map(r=>(at(r).MBT||0).toFixed(1)),{ro:1})+
+      rcRow('Knock limit','',R.map(r=>(at(r).L||0).toFixed(1)),{ro:1})+
+      rcRow('Timing used','',R.map(r=>(at(r).timing||0).toFixed(1)),{ro:1,cls:i=>fl(R[i],['knock','knockDmg'])})+'</table>'+
+      '<div class="rc-row"><label>Knock control <select id="rcKnock"><option value="high"'+(T.knock==='high'?' selected':'')+'>High sensitivity (safe)</option><option value="normal"'+(T.knock==='normal'?' selected':'')+'>Normal</option><option value="low"'+(T.knock==='low'?' selected':'')+'>Low (ignores knock — risky)</option></select></label></div>'+
+      '<div class="rc-note">Blank = the ECU\'s own map. More advance makes more torque up to best-torque timing, but past the knock limit (set by fuel octane, boost, charge temperature, compression and AFR) the engine knocks and the ECU pulls it back.</div>';
+  }else if(RC.ttab==='vvt'){
+    if(!E.vvt)h+='<div class="rc-note">This engine has no variable valve timing, so there is nothing to tune here.</div>';
+    else h+=head+rcRow('Intake cam (° adv)','icam',T.icam,{step:1})+rcRow('Exhaust cam (° ret)','ecam',T.ecam,{step:1})+
+      rcRow('Torque (lb-ft)','',R.map(r=>Math.round(at(r).tq||0)),{ro:1})+'</table>'+
+      '<div class="rc-note">Advancing the intake cam fills the cylinders better at low rpm; retarding it helps at high rpm. More exhaust-cam overlap helps an NA engine up top but hurts turbo spool.</div>';
+  }else if(RC.ttab==='thr'){
+    h+='<div class="rc-row"><label>Throttle map <select id="rcThr"><option value="normal"'+(T.throttle==='normal'?' selected':'')+'>Linear</option><option value="sport"'+(T.throttle==='sport'?' selected':'')+'>Aggressive</option><option value="soft"'+(T.throttle==='soft'?' selected':'')+'>Progressive</option></select></label></div>'+
+      '<div class="rc-row"><label>Max torque request <input type="number" id="rcTqCap" value="'+(T.torqueCap||'')+'" placeholder="none"> lb-ft</label></div>'+
+      '<div class="rc-note">The throttle map only changes how the pedal feels — full throttle is full throttle. A torque request cap limits the ECU everywhere.</div>';
+  }else if(RC.ttab==='tm'){
+    h+='<div class="rc-row"><label>Torque limit by gear (% of peak) — 1st <input type="number" data-g="gearTq" data-i="0" value="'+T.gearTq[0]+'"> 2nd <input type="number" data-g="gearTq" data-i="1" value="'+T.gearTq[1]+'"> 3rd <input type="number" data-g="gearTq" data-i="2" value="'+T.gearTq[2]+'"></label></div>'+
+      '<div class="rc-row"><label><input type="checkbox" id="rcLC"'+(T.lc?' checked':'')+'> Launch control</label> <label>Launch rpm <input type="number" id="rcLaunch" value="'+T.launch+'" step="100"></label></div>'+
+      '<div class="rc-row"><label><input type="checkbox" id="rcShiftCut"'+(T.shiftCut?' checked':'')+'> Shift torque reduction</label></div>'+
+      '<div class="rc-note">Limiting torque in the low gears trades a little acceleration for traction and drivetrain life; it matters most on high-power rear-drive builds.</div>';
+  }else{
+    h+='<div class="rc-row"><label>Rev limiter <input type="number" id="rcRev" value="'+T.rev+'" step="100"> rpm</label> <span class="rc-note">Hardware allows '+B.hwRpm.toLocaleString()+' rpm (valve springs, rods). Raising the limit only helps if the engine still makes power up there.</span></div>';
+  }
+  return h;
+}
+function rcPerfHTML(){
+  const p=RC.perf;
+  let h='<div class="rc-row"><button type="button" class="go" id="rcPerfRun">Calculate performance</button><span class="rc-note">Full simulation of the car with this build: its weight, tyres, drivetrain, gearing, shift speed, launch, drag and rolling resistance.</span></div>';
+  if(!p)return h;
+  const f=(v,d)=>v==null?'—':v.toFixed(d);
+  const row=(l,a,b,d,u,lowBetter)=>'<tr><th>'+l+'</th><td>'+f(a,d)+u+'</td><td>'+f(b,d)+u+'</td><td class="'+(a!=null&&b!=null?((lowBetter?b<a:b>a)?'good':(b===a?'':'bad')):'')+'">'+(a!=null&&b!=null?(b-a>=0?'+':'')+(b-a).toFixed(d):'')+'</td></tr>';
+  h+='<table class="rc-tbl rc-perf"><tr><th></th><th>Stock</th><th>This build</th><th>Change</th></tr>'+
+    row('Crank horsepower',p.s.hp,p.b.hp,0,' hp')+row('Crank torque',p.s.tq,p.b.tq,0,' lb-ft')+row('Wheel horsepower (dyno)',p.s.whp,p.b.whp,0,' whp')+row('Wheel torque (dyno)',p.s.wtq,p.b.wtq,0,' lb-ft')+
+    row('0–60 mph',p.s.t60,p.b.t60,2,' s',1)+row('0–100 mph',p.s.t100,p.b.t100,2,' s',1)+row('1/4 mile',p.s.q,p.b.q,2,' s',1)+row('1/4 mile trap',p.s.qt,p.b.qt,1,' mph')+
+    row('1/2 mile',p.s.h,p.b.h,2,' s',1)+row('1/2 mile trap',p.s.ht,p.b.ht,1,' mph')+row('Top speed',p.s.vmax,p.b.vmax,0,' mph')+
+    row('Weight',p.s.w,p.b.w,0,' lb',1)+row('Weight per horsepower',p.s.pw,p.b.pw,2,' lb/hp',1)+'</table>';
+  return h;
+}
+function rcSideHTML(E,B){
+  const s=RC.B0.pk,b=B.pk,d=(x,y)=>(y-x>=0?'+':'')+Math.round(y-x);
+  const flags=[...B.flags];if(B.warn.cooling)flags.push('cooling');if(RC.T.rev>B.hwRpm)flags.push('rpm');
+  const uniq=[...new Set(flags)].filter(f=>RC_MSG[f]);
+  const relC=B.rel>75?'var(--go)':B.rel>45?'#e8a91a':'var(--foul)';
+  return '<div class="rc-card"><div class="rc-big"><span>'+Math.round(b.hp)+'</span> hp <small>'+d(s.hp,b.hp)+'</small></div>'+
+    '<div class="rc-big tq"><span>'+Math.round(b.tq)+'</span> lb-ft <small>'+d(s.tq,b.tq)+'</small></div>'+
+    '<div class="rc-kv">Peak power @ '+b.hpRpm.toLocaleString()+' rpm · peak torque @ '+b.tqRpm.toLocaleString()+' rpm'+(B.HW.boosted?' · '+b.psi.toFixed(1)+' psi':'')+'</div>'+
+    '<canvas id="rcMini" width="300" height="150"></canvas>'+
+    '<div class="rc-kv"><b>'+rcEsc(rcStage())+'</b></div>'+
+    '<div class="rc-rel"><span>Reliability</span><div><i style="width:'+B.rel+'%;background:'+relC+'"></i></div><b>'+B.rel+'%</b></div>'+
+    (uniq.length?'<div class="rc-warns">'+uniq.map(f=>'<div><b>'+RC_MSG[f][0]+'</b><span>'+RC_MSG[f][1]+'</span></div>').join('')+'</div>':'<div class="rc-kv" style="color:var(--go)">No limits reached — there is headroom left.</div>')+
+    '<label class="rc-ov"><input type="checkbox" id="rcOverride"'+(RC.T.override?' checked':'')+'> Let it run past the limits (the ECU stops protecting the engine)</label>'+
+    '<div class="rc-btns"><button type="button" id="rcAuto">Auto-tune (safe)</button><button type="button" id="rcStockTune">Stock ECU map</button><button type="button" id="rcStock">Reset to stock</button></div>'+
+    '<div class="rc-save"><input type="text" id="rcName" maxlength="40" value="'+rcEsc((RC.saveName||RC.base.name+' (built)'))+'"><button type="button" class="go" id="rcSave">Save build</button></div>'+
+    '<div class="rc-btns"><button type="button" id="rcRace">Race this build</button></div><div class="rc-kv" id="rcSaved"></div></div>';
+}
+function rcChart(cv){
+  cv=cv||document.getElementById('rcChart');if(!cv)return;const x=cv.getContext('2d'),W=cv.width,H=cv.height,mini=cv.id==='rcMini';
+  const B=RC.B,S=RC.B0,boosted=B.HW.boosted;x.fillStyle='#0b0e12';x.fillRect(0,0,W,H);
+  const L=mini?28:70,Rr=W-(mini?28:70),T=mini?8:30,Bt=mini?H-18:(boosted?H-150:H-50),r0=1000,r1=Math.max(B.rev,RC.E.R)+200;
+  const top=Math.max(100,Math.ceil(Math.max(B.pk.hp,B.pk.tq,S.pk.hp,S.pk.tq)*1.15/50)*50);
+  const X=r=>L+(Rr-L)*(r-r0)/(r1-r0),Y=v=>Bt-(Bt-T)*v/top;
+  x.strokeStyle='#232931';x.lineWidth=1;x.font=(mini?'9':'11')+'px "Roboto Mono",monospace';x.fillStyle='#6f7680';
+  for(let v=0;v<=top;v+=top>600?100:50){x.beginPath();x.moveTo(L,Y(v));x.lineTo(Rr,Y(v));x.stroke();if(!mini||v%(top>600?200:100)===0){x.textAlign='right';x.fillText(v,L-4,Y(v)+3);}}
+  for(let r=1000;r<=r1;r+=1000){x.beginPath();x.moveTo(X(r),T);x.lineTo(X(r),Bt);x.stroke();x.textAlign='center';if(!mini||r%2000===0)x.fillText(mini?r/1000+'k':r,X(r),(mini?H-4:Bt+16));}
+  const line=(pts,k,col,dash,w)=>{x.beginPath();x.setLineDash(dash||[]);x.lineWidth=w||2.4;x.strokeStyle=col;pts.forEach((o,i)=>{i?x.lineTo(X(o.rpm),Y(o[k])):x.moveTo(X(o.rpm),Y(o[k]));});x.stroke();x.setLineDash([]);};
+  const sp=S.pts.filter(o=>o.rpm>=1500),bp=B.pts.filter(o=>o.rpm>=1500);
+  line(sp,'tq','rgba(74,163,232,0.55)',[6,5],1.6);line(sp,'hp','rgba(232,80,74,0.55)',[6,5],1.6);
+  line(bp,'tq','#4aa3e8');line(bp,'hp','#e8504a');
+  if(mini)return;
+  x.font='600 12px "Roboto Mono",monospace';x.textAlign='left';
+  x.fillStyle='#e8504a';x.fillText('PEAK '+B.pk.hp.toFixed(1)+' HP @ '+B.pk.hpRpm,X(B.pk.hpRpm)-150,Y(B.pk.hp)-10);
+  x.fillStyle='#4aa3e8';x.fillText('PEAK '+B.pk.tq.toFixed(1)+' LB-FT @ '+B.pk.tqRpm,Math.max(L+4,X(B.pk.tqRpm)-120),Y(B.pk.tq)-10);
+  x.fillStyle='#8b9099';x.font='11px "Roboto Mono",monospace';x.textAlign='right';x.fillText('— this build (crank)   - - stock',Rr,18);
+  x.textAlign='left';x.fillStyle='#e6e9ee';x.fillText('ENGINE RPM',L,H-6);
+  if(boosted){const BT=H-122,BB=H-36,pm=Math.max(5,Math.ceil(Math.max(B.pk.psi,S.pk.psi)*1.2/5)*5),PY=v=>BB-(BB-BT)*v/pm;
+    x.strokeStyle='#2c323b';x.strokeRect(L,BT,Rr-L,BB-BT);x.fillStyle='#6f7680';x.textAlign='right';
+    for(let v=0;v<=pm;v+=pm>20?10:5)x.fillText(v,L-4,PY(v)+3);
+    x.beginPath();x.lineWidth=2.2;x.strokeStyle='#e8a91a';bp.forEach((o,i)=>{i?x.lineTo(X(o.rpm),PY(o.psi)):x.moveTo(X(o.rpm),PY(o.psi));});x.stroke();
+    x.beginPath();x.setLineDash([5,4]);x.lineWidth=1.4;x.strokeStyle='rgba(232,169,26,0.5)';sp.forEach((o,i)=>{i?x.lineTo(X(o.rpm),PY(o.psi)):x.moveTo(X(o.rpm),PY(o.psi));});x.stroke();x.setLineDash([]);
+    // AFR on its own scale in the same strip (10-15:1)
+    const AY=v=>BB-(BB-BT)*(v-10)/5;x.beginPath();x.lineWidth=1.6;x.strokeStyle='#7fd18b';bp.forEach((o,i)=>{const v=o.lam*14.7;i?x.lineTo(X(o.rpm),AY(v)):x.moveTo(X(o.rpm),AY(v));});x.stroke();
+    x.textAlign='left';x.font='11px "Roboto Mono",monospace';x.fillStyle='#e8a91a';x.fillText('BOOST PSI',L+6,BT+13);x.fillStyle='#7fd18b';x.fillText('AFR (10–15)',L+90,BT+13);}
+  else{x.textAlign='left';}
+}
+/* ---------- performance: the game's own race simulation on the built and the stock car ---------- */
+function rcPerfFor(c0){
+  const c=Object.assign({},c0,{temp:ambient(),startMph:0,mode:c0.mode||'normal',noRunout:true});
+  c.shift=c.shift!==undefined&&!isNaN(c.shift)?c.shift:TRANS[c.trans].shift;c.eff=c.eff||EFFS[c.trans][c.drive];
+  const a=Object.assign({},c,{raceFt:2640});a.shiftPoints=resolveShiftPoints(a);const r=simulate(a);
+  const tr=r.trace,at=(fn)=>{const s=tr.find(fn);return s?s.t:null;};
+  const xq=1320/FT_PER_M,xh=2640/FT_PER_M,sq=tr.find(s=>s.x>=xq),sh=tr.find(s=>s.x>=xh);
+  const t2=Object.assign({},a,{raceFt:26400});const r2=simulate(t2);
+  let vm=0;for(const s of r2.trace)if(s.v>vm)vm=s.v;const vmax=vm*2.23694;
+  const dy=dynoSim(Object.assign({},c,{eff:c.eff}));
+  return{hp:c.hp,tq:c.tq,whp:dy.pk.hp,wtq:dy.pk.tq,t60:at(s=>s.v>=26.8224),t100:at(s=>s.v>=44.704),q:sq?sq.t:null,qt:sq?sq.v*2.23694:null,h:r.et,ht:r.trap,vmax,w:c.weight,pw:c.weight/c.hp};
+}
+/* ---------- events ---------- */
+document.addEventListener('change',e=>{if(!RC.on)return;const t=e.target;
+  if(t.dataset.part){RC.P[t.dataset.part]=t.value;
+    // fitting a power adder to an NA engine starts its tune from a sensible baseline
+    if(t.dataset.part==='kit'){const HW=rcHW(RC.E,RC.P);const st=rcStockTune(RC.E,HW);RC.T.boost=st.boost;RC.T.afr=st.afr;}
+    rcRecalc();}
+  else if(t.dataset.tk){const i=+t.dataset.i,v=t.value===''?null:parseFloat(t.value);RC.T[t.dataset.tk][i]=(v==null||isNaN(v))?(t.dataset.tk==='timing'?null:RC.T[t.dataset.tk][i]):v;rcRecalc();}
+  else if(t.dataset.g){RC.T[t.dataset.g][+t.dataset.i]=Math.max(0,Math.min(100,parseFloat(t.value)||0));rcRecalc();}
+  else if(t.id==='rcKnock'){RC.T.knock=t.value;rcRecalc();}
+  else if(t.id==='rcFuelP'){RC.T.fuelP=Math.max(0,Math.min(15,parseFloat(t.value)||0));rcRecalc();}
+  else if(t.id==='rcThr'){RC.T.throttle=t.value;rcRecalc();}
+  else if(t.id==='rcTqCap'){RC.T.torqueCap=Math.max(0,parseFloat(t.value)||0);rcRecalc();}
+  else if(t.id==='rcLC'){RC.T.lc=t.checked;rcRecalc();}
+  else if(t.id==='rcShiftCut'){RC.T.shiftCut=t.checked;rcRecalc();}
+  else if(t.id==='rcLaunch'){RC.T.launch=Math.max(1000,parseFloat(t.value)||3000);rcRecalc();}
+  else if(t.id==='rcRev'){const v=parseFloat(t.value)||RC.E.R;RC.T.rev=Math.round(Math.max(RC.E.R*0.7,Math.min(RC.E.R+1500,v))/100)*100;rcRecalc();}
+  else if(t.id==='rcOverride'){RC.T.override=t.checked;rcRecalc();}
+  else if(t.id==='rcName'){RC.saveName=t.value;}
+});
+document.addEventListener('click',e=>{if(!RC.on)return;const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.t){RC.tab=t.dataset.t;rcRender();}
+  else if(t.dataset.m){RC.mtab=t.dataset.m;rcRender();}
+  else if(t.dataset.tt){RC.ttab=t.dataset.tt;rcRender();}
+  else if(t.id==='rcAuto'){rcAutoTune();}
+  else if(t.id==='rcStockTune'){RC.T=rcStockTune(RC.E,rcHW(RC.E,RC.P));rcRecalc();}
+  else if(t.id==='rcStock'){RC.P=rcStockParts();RC.T=rcStockTune(RC.E,null);rcRecalc();}
+  else if(t.id==='rcDynoRun'){clearTimeout(RC.applyT);rcApply();document.getElementById('dynoPanel').hidden=false;runDyno();}
+  else if(t.id==='rcPerfRun'){t.textContent='Calculating…';t.disabled=true;setTimeout(()=>{try{RC.perf={s:rcPerfFor(RC.base),b:rcPerfFor(rcMakeCar())};}catch(err){RC.perf=null;console.error(err);}rcRender();},30);}
+  else if(t.id==='rcSave'){rcSave();}
+  else if(t.id==='rcRace'){clearTimeout(RC.applyT);rcApply();const v=document.getElementById('venue');v.value='road';v.dispatchEvent(new Event('change'));
+    document.getElementById('treeMsg').textContent='Your build is in lane 1 — load an opponent into lane 2 and run the race.';}
+});
+function rcSave(){
+  const name=(document.getElementById('rcName').value||'').trim();const msg=document.getElementById('rcSaved');
+  if(!name){msg.textContent='Give your build a name.';return;}
+  clearTimeout(RC.applyT);const c=rcMakeCar();c.name=name;c.garage=true;c.mfr='My garage';
+  const list=garageList().slice();const same=list.find(e=>e.car.name.toLowerCase()===name.toLowerCase());
+  const id=same?same.id:Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const entry={id,savedAt:new Date().toISOString(),car:c};const at=list.findIndex(e=>e.id===id);if(at>=0)list[at]=entry;else list.push(entry);
+  garageWrite(list);RC.saveName=name;
+  RC.applying=true;setLane('A',c);RC.applying=false;refreshAll();
+  populatePresets(document.getElementById('presetSearch').value);document.getElementById('presetPick').value='my:'+id;syncGarageBtns();
+  msg.textContent=garageStorageOk?(same?'Updated “'+name+'” in My garage.':'Saved “'+name+'” to My garage — load it into any lane to race or dyno it, or back here to keep building.'):'Saved for this visit only — this browser is blocking storage.';
+}
+function rcEnter(){RC.on=true;document.getElementById('rcPanel').hidden=false;document.getElementById('dynoPanel').hidden=true;rcLoadFromLane();}
+function rcLeave(){RC.on=false;clearTimeout(RC.applyT);document.getElementById('rcPanel').hidden=true;}
+
+/* when a different car goes into lane 1 while in the build bay, start building that one */
+{const _setLane=setLane;setLane=function(l,d){_setLane(l,d);if(l==='A'&&RC.on&&!RC.applying){RC.saveName=null;setTimeout(rcLoadFromLane,0);}};}
 document.getElementById('runBtn').addEventListener('click',()=>{
   if(currentVenue()==='dyno'){runDyno();return;}
   /* Single player can test-run one car: empty lanes simply sit out. Online, every lane
@@ -10485,7 +11175,7 @@ function mpLegal(c,cls){
 /* ---- compact car encoding (fits several cars in one 4 KB presence) ---- */
 const MP_KEYS=['name','hp','hpRpm','tq','tqRpm','redline','disp','ind','shift','fd','weight','tireD','dist','cda','eff','wb','cg',
  'gripAdj','stall','hpPerL','redFrac','stallRpm','hybHp','hybTq','launch','launchRpm','shiftMode','shiftRpm','mode','drive',
- 'trans','layout','tire','engSound','body','modes','cluster','sysHp','sysTq','vmax','burble','burnout','gears'];
+ 'trans','layout','tire','engSound','body','modes','cluster','sysHp','sysTq','vmax','burble','burnout','gears','curve','naCurve','psiCurve','tau','bPsi','bNaFrac','gearBoost','gearTq','ie'];
 function mpEnc(c){if(c&&c.empty)return['-'];return MP_KEYS.map(k=>{let v=c[k];if(typeof v==='number'&&!isFinite(v))v=null;
   if(k==='name')v=String(v||'').slice(0,48);return v===undefined?null:v;});}
 function mpDec(a){if(!Array.isArray(a)||a[0]==='-')return null;const c={};MP_KEYS.forEach((k,i)=>{c[k]=a[i];});
@@ -10862,7 +11552,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='b11c525715';let dismissed=null;
+(function(){const V='db2331e577';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
