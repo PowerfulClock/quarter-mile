@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="db2331e577";</script>
+<head><script>window.QM_VER="db93b7bea0";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -128,6 +128,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .mp-checks .ok{color:var(--go)}.mp-checks .bad{color:var(--foul)}
 .mp-owner{font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.06em;color:var(--amber);margin-bottom:8px}
 .mp-locked{opacity:.78}
+.spec-lock{font-size:12px;color:var(--dim);background:var(--asphalt-3);border-left:3px solid var(--amber);padding:7px 10px;margin:0 0 10px;line-height:1.45}
+.spec-lock .rc-open{background:none;border:none;color:var(--amber);font:inherit;padding:0;text-decoration:underline;cursor:pointer}
+.card [data-spec]:disabled{opacity:1;color:var(--paint);cursor:default}
 .clusters{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
 /* 3 or 4 racers: every cluster shrinks and sits in one row so all are visible at once */
 .clusters.n3{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
@@ -2060,6 +2063,8 @@ function buildForm(lane,color,idx){
   '<input type="text" id="name'+L+'f" aria-label="Lane '+idx+' car name" placeholder="Nothing Selected">'+
   '<button type="button" class="lane-clear" id="clear'+L+'" data-lane="'+L+'" title="Take the car out of this lane">Clear</button></div>'+
   '<div class="card-empty">Nothing Selected. Search for a car at the top of the page and load it into lane '+idx+'.</div><div class="card-body">'+
+  '<div class="spec-lock">🔒 The car\'s specs are locked for racing. To change its engine, power, gearing or tyres, '+
+  '<button type="button" class="rc-open" data-rcl="'+L+'">modify it in Real Customization</button></div>'+
   '<fieldset><legend>ENGINE</legend><div class="grid">'+
   '<div><label for="hp'+L+'">Peak horsepower (crank)</label><input type="number" id="hp'+L+'" min="20" max="3000" step="1"></div>'+
   '<div><label for="hpRpm'+L+'">at rpm</label><input type="number" id="hpRpm'+L+'" min="1000" max="15000" step="50"></div>'+
@@ -2122,6 +2127,18 @@ const LANE_COLORS={A:'#3f9ae0',B:'#e07a4a',C:'#5fc46a',D:'#c46ad0'};
 window.activeRacers=2;
 document.getElementById('carForms').innerHTML=
   LANES.map((l,i)=>buildForm(l,LANE_COLORS[l],i+1)).join('');
+/* The car's hardware can only be changed in the Real Customization map. On the race tracks the
+   driver still picks the drive mode, shift strategy and launch technique. */
+const SPEC_FIELDS=['hp','hpRpm','tq','tqRpm','redline','disp','ind','engSound','layout','drive','trans','fd','launchRpm','weight','tireD','tire',
+  'dist','cg','wb','cda','eff','shift','stall','stallRpm','hpPerL','hybHp','hybTq','redFrac','gripAdj'];
+function specLock(){LANES.forEach(L=>{SPEC_FIELDS.forEach(k=>{const el=document.getElementById(k+L);if(el){el.dataset.spec='1';el.disabled=true;}});
+  for(let i=1;i<=10;i++){const el=document.getElementById('g'+L+i);if(el){el.dataset.spec='1';el.disabled=true;}}});}
+document.addEventListener('click',e=>{const b=e.target.closest('button[data-rcl]');if(!b)return;
+  const L=b.dataset.rcl;if(laneEmpty(L))return;
+  if(L!=='A'){const d=readCarRaw(L);const ex=EXTRAOF[L]||{};BUILD_KEYS.forEach(k=>{if(ex[k]!=null)d[k]=ex[k];});
+    ['sysHp','sysTq','vmax','burble'].forEach(k=>{if(ex[k])d[k]=ex[k];});setLane('A',d);}
+  const v=document.getElementById('venue');v.value='rc';v.dispatchEvent(new Event('change'));
+  document.getElementById('rcPanel').scrollIntoView({behavior:'smooth',block:'start'});});
 function applyRacerCount(n){
   window.activeRacers=n;
   LANES.forEach((l,i)=>{
@@ -2236,7 +2253,25 @@ const BUILD_KEYS=['curve','naCurve','psiCurve','tau','bPsi','bNaFrac','gearBoost
 function buildExtras(lane,hp,tq){const E=EXTRAOF[lane]||{},o={};
   if(!E.curve)return o;if(E.build&&(Math.abs(E.build.hp-hp)>0.6||Math.abs(E.build.tq-tq)>0.6))return o;
   BUILD_KEYS.forEach(k=>{if(E[k]!=null)o[k]=E[k];});return o;}
-function readCar(lane){
+/* Wheel power is measured once, on the dyno, and the race uses exactly that number: the
+   driveline efficiency the race applies is whatever makes its peak wheel power equal the dyno's.
+   So the dyno sheet, the car card, the time slip and the race itself all agree. */
+const WHP_CACHE=new Map();
+const WHP_SKIP={eff:1,name:1,venue:1,empty:1,shiftPoints:1,tireTemp0:1,noRunout:1,raceFt:1,startMph:1,startGear:1,engSound:1,body:1,cluster:1,burble:1,build:1,base:1,modes:1};
+function dynoWheel(c){
+  const o={};Object.keys(c).sort().forEach(k=>{if(!WHP_SKIP[k])o[k]=c[k];});const key=JSON.stringify(o);
+  let v=WHP_CACHE.get(key);if(v)return v;
+  try{const d=dynoSim(Object.assign({},c));v={hp:d.pk.hp,tq:d.pk.tq};}catch(e){v=null;}
+  if(v){if(WHP_CACHE.size>400)WHP_CACHE.clear();WHP_CACHE.set(key,v);}
+  return v;}
+function readCar(lane){return applyDynoEff(readCarRaw(lane));}
+function applyDynoEff(c){
+  if(!c.empty&&!((IND[c.ind]||{}).electric)&&c.hp>0&&c.gears.length&&typeof dynoSim==='function'){
+    const w=dynoWheel(c);
+    if(w&&w.hp>0){const MD=MODES[c.mode]||MODES.normal;const crank=c.sysHp>0?c.sysHp:c.hp*(MD.powerMul||1);
+      c.eff=+Math.max(0.6,Math.min(0.97,w.hp/crank)).toFixed(4);}}
+  return c;}
+function readCarRaw(lane){
   const n=id=>parseFloat(document.getElementById(id+lane).value);
   const s=id=>document.getElementById(id+lane).value;
   const gears=[];
@@ -4648,6 +4683,7 @@ function precomputeShift(lane){clearTimeout(SP_PRE[lane]);const tok=SP_TOK[lane]
     step();}catch(e){}},700);}
 function refresh(lane){
   const c=readCar(lane);
+  {const ef=document.getElementById('eff'+lane);if(ef&&c.eff)ef.value=c.eff.toFixed(3);}
   drawCurve(lane);precomputeShift(lane);
   const I=IND[c.ind]||IND.na,bi=boostInfo(c);
   const ind=document.getElementById('indNote'+lane);
@@ -4670,9 +4706,9 @@ function refresh(lane){
   }
   const drv=document.getElementById('drvNote'+lane);
   if(drv&&!isNaN(c.hp)&&!isNaN(c.tq)){
-    const whp=c.hp*c.eff,wtq=c.tq*c.eff;
-    drv.innerHTML='At the wheels: <b>'+Math.round(whp)+' hp</b> / <b>'+Math.round(wtq)+' lb-ft</b> — '+
-      Math.round((1-c.eff)*100)+'% lost through a '+c.drive.toUpperCase()+' '+
+    const w=(typeof dynoWheel==='function'&&dynoWheel(c))||{hp:c.hp*c.eff,tq:c.tq*c.eff};
+    drv.innerHTML='At the wheels (dyno): <b>'+Math.round(w.hp)+' whp</b> / <b>'+Math.round(w.tq)+' lb-ft</b> — '+
+      Math.round((1-w.hp/((c.sysHp>0?c.sysHp:c.hp)||1))*100)+'% lost through a '+c.drive.toUpperCase()+' '+
       ((TRANS[c.trans]||{}).label||'').toLowerCase()+' driveline.';
   }
   const mn=document.getElementById('modeNote'+lane);
@@ -4840,7 +4876,7 @@ function makeSkyTextureNight(){
 }
 function setStreetLights(on,k){
   k=k||1;
-  (scene._streetLights||[]).forEach(o=>{o.lamp.visible=on;o.glow.material.emissiveIntensity=on?2.5*k:0;});
+  (scene._streetLights||[]).forEach(o=>{o.lamp.visible=false;o.glow.material.emissiveIntensity=on?2.5*k:0;});
   (scene._stripLights||[]).forEach(o=>{o.bank.material.emissiveIntensity=on?2.6*k:0.35;o.lamp.visible=false;});
 }
 let smokePool=[],smokeUsed=0;
@@ -8785,7 +8821,18 @@ function initStage(){
     catch(e){failed=true;
       stageWrap.innerHTML='<div class="glfail">This browser could not start WebGL, so the 3D view is unavailable.</div>';
       return;}
-    rend.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    rend.setPixelRatio(Math.min(1.5,window.devicePixelRatio||1));
+    /* adaptive resolution: if frames take too long (slow GPU, big high-DPI screen) render fewer
+       pixels; when there is headroom again, step back up. Changes at most every ~45 frames. */
+    {const AQ={cap:Math.min(1.5,window.devicePixelRatio||1),acc:0,n:0,last:0,good:0,ceil:9};
+     const r0=rend.render.bind(rend);
+     rend.render=function(sc,cm){const now=performance.now();
+       if(AQ.last){const dt=now-AQ.last;if(dt<250){AQ.acc+=dt;AQ.n++;}}AQ.last=now;
+       if(AQ.n>=45){const avg=AQ.acc/AQ.n;AQ.acc=0;AQ.n=0;let pr=rend.getPixelRatio();
+         if(avg>23&&pr>0.6){rend.setPixelRatio(Math.max(0.6,pr-0.2));AQ.good=0;}
+         else if(avg<18.5&&pr<AQ.cap-0.01){if(++AQ.good>=6){rend.setPixelRatio(Math.min(AQ.cap,pr+0.2));AQ.good=0;}}
+         else AQ.good=0;}
+       return r0(sc,cm);};}
     rend.shadowMap.enabled=true;rend.shadowMap.type=TH.PCFSoftShadowMap;
     /* Canvas textures hold sRGB data. Left as linear, three treats a mid grey of
        0.5 as if it were linear 0.5 when it is really about 0.21 — which is why
@@ -9352,17 +9399,18 @@ function drawStage(st){
   });
   if(_nightState){
     const camx=cam.position.x,k=(_todState==='dusk')?0.45:1;
-    if(!scene._strip&&scene._streetLights)scene._streetLights.forEach(o=>{
-      const near=Math.abs(o.px-camx)<60;
-      o.lamp.intensity=near?1.7*k:0;o.lamp.visible=near;
-    });
-    // strip floodlights: light the towers nearest the camera and the cars
+    /* Exactly the same number of lamps is lit every frame (the nearest few, faded by distance).
+       If the count of active lights changes, WebGL has to recompile every material's shader,
+       which is what made night races stutter as lamps switched on and off. */
+    const pool=(arr,K,dist,inten)=>{if(!arr||!arr.length)return;
+      const ord=arr.map((o,i)=>[dist(o),i]).sort((a,b)=>a[0]-b[0]);
+      arr.forEach(o=>{o.lamp.visible=false;});
+      for(let j=0;j<Math.min(K,ord.length);j++){const o=arr[ord[j][1]];o.lamp.visible=true;o.lamp.intensity=inten*Math.max(0,Math.min(1,1.6-ord[j][0]/90));}};
+    if(!scene._strip&&scene._streetLights)pool(scene._streetLights,3,o=>Math.abs(o.px-camx),1.7*k);
+    // strip floodlights: the towers nearest the camera and the leader
     if(scene._strip&&scene._stripLights){
-      const lead2=Math.max(...fts)*FT_M;
-      scene._stripLights.forEach(o=>{
-        const near=Math.abs(o.px-camx)<110||Math.abs(o.px-lead2)<60;
-        o.lamp.intensity=near?1.5*k:0;o.lamp.visible=near;
-      });
+      let lead2=0;for(const f of fts)if(f>lead2)lead2=f;lead2*=FT_M;
+      pool(scene._stripLights,3,o=>Math.min(Math.abs(o.px-camx),Math.abs(o.px-lead2)),1.5*k);
     }
   }
   if(scene._sky)scene._sky.position.set(cam.position.x,0,0);
@@ -9556,7 +9604,7 @@ document.getElementById('startMph').addEventListener('change',()=>{
   });
   reset();
 });
-LANES.forEach(clearLane);refreshAll();
+LANES.forEach(clearLane);specLock();refreshAll();
 document.addEventListener('click',e=>{const b=e.target&&e.target.closest&&e.target.closest('.lane-clear');if(!b||b.disabled)return;
   clearLane(b.dataset.lane);reset();refreshAll();});
 initStage();resetLanes();
@@ -10656,7 +10704,7 @@ function rcChart(cv){
 /* ---------- performance: the game's own race simulation on the built and the stock car ---------- */
 function rcPerfFor(c0){
   const c=Object.assign({},c0,{temp:ambient(),startMph:0,mode:c0.mode||'normal',noRunout:true});
-  c.shift=c.shift!==undefined&&!isNaN(c.shift)?c.shift:TRANS[c.trans].shift;c.eff=c.eff||EFFS[c.trans][c.drive];
+  c.shift=c.shift!==undefined&&!isNaN(c.shift)?c.shift:TRANS[c.trans].shift;c.eff=c.eff||EFFS[c.trans][c.drive];applyDynoEff(c);
   const a=Object.assign({},c,{raceFt:2640});a.shiftPoints=resolveShiftPoints(a);const r=simulate(a);
   const tr=r.trace,at=(fn)=>{const s=tr.find(fn);return s?s.t:null;};
   const xq=1320/FT_PER_M,xh=2640/FT_PER_M,sq=tr.find(s=>s.x>=xq),sh=tr.find(s=>s.x>=xh);
@@ -11006,7 +11054,7 @@ function slipHtml(r){
   }
   h+='<div class="slip-row"><span>Elapsed time</span><span>'+r.et.toFixed(3)+' s</span></div>'+
    '<div class="slip-row"><span>Trap speed</span><span>'+r.trap.toFixed(1)+' mph</span></div>'+
-   '<div class="slip-row"><span>Wheel hp / torque</span><span>'+Math.round(c.hp*c.eff)+' / '+Math.round(c.tq*c.eff)+'</span></div>'+
+   '<div class="slip-row"><span>Wheel hp / torque (dyno)</span><span>'+(()=>{const w=dynoWheel(c)||{hp:c.hp*c.eff,tq:c.tq*c.eff};return Math.round(w.hp)+' / '+Math.round(w.tq);})()+'</span></div>'+
    (I.boosted?'<div class="slip-row"><span>Peak boost</span><span>'+r.boostPsi.toFixed(1)+' psi</span></div>':'')+
    (c.startMph?'':'<div class="slip-row"><span>Launch</span><span>'+lbl+'</span></div>')+
    '<div class="slip-row"><span>Tyres at launch'+(c.burnout&&!c.startMph?' (after burnout)':'')+'</span><span>'+Math.round(r.tyre0)+'°F</span></div>'+
@@ -11262,6 +11310,7 @@ function mpLock(){
     const ed=!inRoom||mpEditable(L);
     card.querySelectorAll('input,select,button,textarea').forEach(el=>{
       let on=ed;if(ed&&build&&L===my){on=MP_FREE.some(k=>el.id===k+L);}
+      else if(el.dataset.spec)on=false;
       el.disabled=!on;});
     card.classList.toggle('mp-locked',inRoom&&!ed);
     let tag=card.querySelector('.mp-owner');
@@ -11552,7 +11601,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='db2331e577';let dismissed=null;
+(function(){const V='db93b7bea0';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
