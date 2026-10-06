@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="43f72bc60b";</script>
+<head><script>window.QM_VER="1a07d290d0";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -9484,11 +9484,16 @@ function suspProfile(c){
 }
 const SUSP_DEF=suspProfile({name:'',body:'sedan'});
 function resetSusp(){['A','B','C','D'].forEach(l=>{
-  SUSP[l].f=SUSP[l].r=SUSP[l].vf=SUSP[l].vr=0;SUSP[l].ups=-9;});}
+  SUSP[l].f=SUSP[l].r=SUSP[l].vf=SUSP[l].vr=0;SUSP[l].ups=-9;SUSP[l].gh=0;SUSP[l].pend=0;});}
 function stepSusp(l,c,dt){
   const s=SUSP[l]||(SUSP[l]={f:0,r:0,vf:0,vr:0,ups:-9});
   const P=SUSPP[l]||SUSP_DEF;
-  const a=(c.g||0)*9.81,M_TO_U=1/0.03937,IN_TO_U=1/1.55;
+  /* drag mode: a quick shift is over before the body can settle, so the chassis keeps the load it had
+     (it only lets go gradually), and when the next gear bites the nose comes up */
+  let gEff=c.g||0;
+  if(P.dragLift){s.gh=Math.max(gEff,(s.gh||0)-dt*1.2);gEff=Math.max(gEff,s.gh);
+    if(s.pend){s.pendT=(s.pendT||0)+dt;if(s.pendT>0.06&&(c.g||0)>0.3){const k=s.pend;s.pend=0;s.vf-=k*2*Math.PI*P.ff*0.055*10/1.55*P.dragLift;s.vr+=k*2*Math.PI*P.fr*0.04*10/1.55;}}}
+  const a=gEff*9.81,M_TO_U=1/0.03937,IN_TO_U=1/1.55;
   const wf=2*Math.PI*P.ff,wr=2*Math.PI*P.fr;
   const transfer=a*P.h/P.L;                               // per-unit-mass longitudinal load transfer
   const frontDriven=P.drive!=='rwd',rearDriven=P.drive!=='fwd';
@@ -9501,13 +9506,15 @@ function stepSusp(l,c,dt){
     tgtR= transfer/((1-P.df)*wr*wr)*(1-P.al);
   }
   tgtF*=M_TO_U;tgtR*=M_TO_U;
-  if(a>0&&rearDriven)tgtR+=(c.g||0)*P.tireSquat*IN_TO_U;
-  if(a>0&&frontDriven&&!rearDriven)tgtF+=(c.g||0)*P.tireSquat*0.5*IN_TO_U;
+  if(a>0&&rearDriven)tgtR+=gEff*P.tireSquat*IN_TO_U;
+  if(a>0&&frontDriven&&!rearDriven)tgtF+=gEff*P.tireSquat*0.5*IN_TO_U;
   const lim=P.tr*IN_TO_U;
   tgtF=Math.max(-lim,Math.min(lim,tgtF));tgtR=Math.max(-lim,Math.min(lim,tgtR));
   // a gear change briefly unloads the drive: the body springs back a little (more on slow manual shifts)
   if(c.ups!==undefined&&c.ups>s.ups+0.001){s.ups=c.ups;
-    const kk=(c.harsh!=null?2.4*c.harsh:(0.6+1.8*(c.hold||0))*P.kick);s.vr-=kk*wr*0.08*IN_TO_U*10;s.vf+=kk*wf*0.05*IN_TO_U*10;}
+    const kk=(c.harsh!=null?2.4*c.harsh:(0.6+1.8*(c.hold||0))*P.kick);
+    if(P.dragLift){s.pend=kk;s.pendT=0;}
+    else{s.vr-=kk*wr*0.08*IN_TO_U*10;s.vf+=kk*wf*0.05*IN_TO_U*10;}}
   // integrate in small sub-steps so stiff cars stay stable; front rebound uses its own damping (drag shocks)
   const N=6,h=dt/N;
   for(let i=0;i<N;i++){
@@ -11601,7 +11608,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='43f72bc60b';let dismissed=null;
+(function(){const V='1a07d290d0';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
