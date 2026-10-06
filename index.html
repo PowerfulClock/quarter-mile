@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="9f0483f95c";</script>
+<head><script>window.QM_VER="c3d5f7fa68";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -811,6 +811,12 @@ function boostInfo(c){
 /* A parallel hybrid's engine and motors cannot all deliver their individual peaks at
    once — the battery, inverter and driveline set a combined ceiling. sysHp/sysTq
    are that published system rating (Regera: 1,500 hp / 2,000 Nm). */
+/* what the whole powertrain makes at its peak: the engine alone, or for a hybrid the engine and
+   motors together (within the system rating) — the honest figure to compare wheel power against */
+function combinedHp(c){
+  if(!(c.hybHp>0)||((IND[c.ind]||{}).electric))return c.hp;
+  let m=0;for(let r=1000;r<=c.redline;r+=50){const p=torqueAt(c,r)*r/5252;if(p>m)m=p;}
+  return Math.max(c.hp,m);}
 function torqueAt(c,rpm){
   let t=torqueAtRaw(c,rpm);
   if(c.hybHp&&c.trans!=='ecvt'){
@@ -1352,7 +1358,7 @@ const PRESETS={
  bmw230i:Object.assign({},P0,{engSound:"i4",modes:['normal','sport'],mode:'normal',name:"2024 BMW 230i xDrive",hp:255,hpRpm:5000,tq:295,tqRpm:1550,redline:6500,redFrac:0.98,
   ind:"single",disp:2.0,gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:2.81,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:3594,dist:52,tireD:26.3,cda:6.9,wb:108,cg:20}),
- bmwM2:Object.assign({},P0,{burble:0.7,engSound:"i6",modes:['normal','sport','track'],mode:'normal',name:"2023 BMW M2 (G87)",hp:500,hpRpm:6250,tq:450,tqRpm:2650,redline:7200,redFrac:0.95,
+ bmwM2:Object.assign({},P0,{burble:0.7,engSound:"i6",modes:['normal','sport','track'],mode:'normal',name:"2023 BMW M2 (G87)",hp:453,hpRpm:6250,tq:406,tqRpm:2650,redline:7200,redFrac:0.95,
   ind:"twin",disp:3.0,gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"rwd",trans:"auto",
   layout:"front",tire:"summer",weight:3803,dist:52,tireD:26.6,cda:7.1,gripAdj:1.08,wb:108,cg:20,launchRpm:3200}),
  challSXT11:Object.assign({},P0,{engSound:"v6",modes:['normal'],mode:'normal',body:'challenger',name:"2011 Challenger SE",hp:305,hpRpm:6350,tq:268,tqRpm:4800,redline:6400,
@@ -1399,7 +1405,7 @@ Object.assign(PRESETS,{
  huracanEvo:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2020 Lamborghini Huracán EVO",mfr:"Lamborghini",hp:630,hpRpm:8000,tq:443,tqRpm:6500,redline:8500,
   ind:"na",disp:5.2,engSound:"v10",gears:[3.91,2.29,1.59,1.19,0.97,0.82,0.71],fd:3.7,drive:"awd",trans:"dct",
   layout:"mid",tire:"summer",weight:3500,dist:42,tireD:26.9,cda:7.6,wb:103.1,cg:18,launchRpm:6500}),
- aventadorSVJ:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2019 Lamborghini Aventador SVJ",mfr:"Lamborghini",hp:770,hpRpm:8500,tq:531,tqRpm:6750,redline:8700,
+ aventadorSVJ:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2019 Lamborghini Aventador SVJ",mfr:"Lamborghini",hp:759,hpRpm:8500,tq:531,tqRpm:6750,redline:8700,
   ind:"na",disp:6.5,engSound:"v12",gears:[3.41,2.61,1.88,1.43,1.10,0.87,0.71],fd:3.7,drive:"awd",trans:"amt",
   layout:"mid",tire:"summer",weight:3800,dist:43,tireD:27.9,cda:8.0,wb:106.3,cg:18,shift:0.16,launchRpm:6500,gripAdj:1.05}),
  mclaren720s:Object.assign({},P1,{modes:['normal','sport','track'],mode:'normal',name:"2018 McLaren 720S",mfr:"McLaren",hp:710,hpRpm:7500,tq:568,tqRpm:5500,redline:8200,
@@ -1636,8 +1642,8 @@ Object.assign(PRESETS,{
   ind:"twincharge",disp:2.0,engSound:"i4", gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.33,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:3900,dist:58,tireD:26.9,cda:7.2,wb:113.1,cg:21,
   launchRpm:2600,modes:['normal','sport'],mode:'normal'}),
- s60_t8:Object.assign({},P1,{name:"2020 Volvo S60 T8 Polestar",mfr:"Volvo",hp:313,hpRpm:6000,tq:295,tqRpm:2200,redline:6200,
-  ind:"twincharge",disp:2.0,engSound:"i4",hybHp:87,hybTq:177,
+ s60_t8:Object.assign({},P1,{name:"2020 Volvo S60 T8 Polestar",mfr:"Volvo",hp:328,hpRpm:6000,tq:317,tqRpm:2200,redline:6200,
+  ind:"twincharge",disp:2.0,engSound:"i4",hybHp:87,sysHp:415,sysTq:494,hybTq:177,
    gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.33,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4290,dist:57,tireD:27.0,cda:7.3,wb:113.1,cg:21,
   launchRpm:2600,gripAdj:1.10,modes:['normal','sport'],mode:'normal'}),
@@ -1871,11 +1877,11 @@ Object.assign(PRESETS,{
   layout:"front",tire:"summer",weight:3475,dist:53,tireD:26.8,cda:7.8,wb:107.1,cg:20.5,
   launchRpm:2500,modes:['normal']}),
  /* --- BMW M-Performance (a step below each M car) --- */
- m340i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M340i xDrive",mfr:"BMW",hp:415,hpRpm:5800,tq:398,tqRpm:2000,redline:6500,
+ m340i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M340i xDrive",mfr:"BMW",hp:382,hpRpm:5800,tq:369,tqRpm:2000,redline:6500,
   ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:3980,dist:52,tireD:26.6,cda:7.1,wb:112.2,cg:20.5,
   launchRpm:2800,modes:['normal','sport']}),
- m440i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M440i xDrive",mfr:"BMW",hp:415,hpRpm:5800,tq:398,tqRpm:2000,redline:6500,
+ m440i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M440i xDrive",mfr:"BMW",hp:382,hpRpm:5800,tq:369,tqRpm:2000,redline:6500,
   ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4010,dist:52,tireD:26.6,cda:7.0,wb:112.2,cg:20,
   launchRpm:2800,modes:['normal','sport']}),
@@ -1887,7 +1893,7 @@ Object.assign(PRESETS,{
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4478,dist:52,tireD:27.4,cda:7.5,wb:111.1,cg:19.5,
   launchRpm:3000,modes:['normal','sport']}),
- x3m40i:Object.assign({},P1,{burble:1.0,name:"2022 BMW X3 M40i",mfr:"BMW",hp:415,hpRpm:5800,tq:398,tqRpm:2000,redline:6500,
+ x3m40i:Object.assign({},P1,{burble:1.0,name:"2022 BMW X3 M40i",mfr:"BMW",hp:382,hpRpm:5800,tq:365,tqRpm:2000,redline:6500,
   ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4291,dist:54,tireD:28.0,cda:8.5,wb:112.8,cg:24,
   launchRpm:2800,modes:['normal','sport']}),
@@ -1913,10 +1919,10 @@ Object.assign(PRESETS,{
     Model X runs ~9.8 s at ~146 mph. Tesla rates both at 1,020 hp, but trapping
     150.8 mph at ~5,000 lb takes roughly 1,140 hp at the wheels, so the effective
     power here is set to what the cars actually deliver, not the badge. */
- ms_plaid:Object.assign({},PEV,{name:"2022 Tesla Model S Plaid",mfr:"Tesla",hp:1150,tq:1050,
+ ms_plaid:Object.assign({},PEV,{name:"2022 Tesla Model S Plaid",mfr:"Tesla",hp:1020,tq:1050,
   tqRpm:5752,hpRpm:5752,redline:20500,fd:9.00,drive:"awd",layout:"mid",tire:"summer",
   weight:4766,dist:49,tireD:27.6,cda:5.3,wb:116.5,cg:18.5,disp:0,gripAdj:1.20}),
- mx_plaid:Object.assign({},PEV,{name:"2022 Tesla Model X Plaid",mfr:"Tesla",hp:1230,tq:1050,
+ mx_plaid:Object.assign({},PEV,{name:"2022 Tesla Model X Plaid",mfr:"Tesla",hp:1020,tq:1050,
   tqRpm:6152,hpRpm:6152,redline:20500,fd:9.00,drive:"awd",layout:"mid",tire:"summer",
   weight:5390,dist:49,tireD:29.5,cda:7.8,wb:116.7,cg:23,disp:0,gripAdj:1.25}),
  /* Lucid Air Dream Edition Performance: 1,111 hp, 1,025 lb-ft, two motors.
@@ -1988,7 +1994,7 @@ Object.assign(PRESETS,{
     (track-tyre package): 0-60 1.88 s, quarter 9.03 s at 154.8 mph at 5,342 lb. As with
     the Plaids, that trap needs more than the badge power, so the effective output is
     set to what the car delivers. */
- lucidSapphire:Object.assign({},PEV,{name:"2025 Lucid Air Sapphire",mfr:"Lucid",hp:1400,tq:1430,
+ lucidSapphire:Object.assign({},PEV,{name:"2025 Lucid Air Sapphire",mfr:"Lucid",hp:1234,tq:1430,
   tqRpm:5140,hpRpm:5140,redline:20000,fd:9.00,drive:"awd",layout:"mid",tire:"summer",vmax:205,
   weight:5342,dist:48,tireD:28.3,cda:6.6,wb:116.5,cg:18.5,disp:0,gripAdj:1.1}),
  /* --- 2023 Dodge Durango, GT and up (all 8-speed automatic) ---
@@ -1996,12 +2002,12 @@ Object.assign(PRESETS,{
     392 Hemi both dyno strong), so their power is set slightly above the badge to
     match instrumented tests: the V6 at 305 hp and the 392 at 525 hp. */
  /* 3.6 Pentastar V6, 295 hp, RWD. Tests of the V6 Durango: 0-60 7.4-7.8 s, quarter 15.7-15.9 s at ~89 mph. */
- durangoGT:Object.assign({},P1,{body:'durango',name:"2023 Durango GT",mfr:"Dodge",hp:305,hpRpm:6400,tq:270,tqRpm:4000,redline:6500,
+ durangoGT:Object.assign({},P1,{body:'durango',name:"2023 Durango GT",mfr:"Dodge",hp:295,hpRpm:6400,tq:260,tqRpm:4000,redline:6500,
   ind:"na",disp:3.6,engSound:"v6",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.45,drive:"rwd",trans:"auto",
   layout:"front",tire:"allseason",weight:4756,dist:53,tireD:30.4,cda:11.3,wb:119.8,cg:28,
   launch:'bb',launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:'normal'}),
  /* GT Plus with AWD. MotorTrend (GT AWD): 0-60 7.8 s, quarter 15.9 s at 88.5 mph. */
- durangoGTPlus:Object.assign({},P1,{body:'durango',name:"2023 Durango GT Plus AWD",mfr:"Dodge",hp:305,hpRpm:6400,tq:270,tqRpm:4000,redline:6500,
+ durangoGTPlus:Object.assign({},P1,{body:'durango',name:"2023 Durango GT Plus AWD",mfr:"Dodge",hp:295,hpRpm:6400,tq:260,tqRpm:4000,redline:6500,
   ind:"na",disp:3.6,engSound:"v6",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.45,drive:"awd",trans:"auto",
   layout:"front",tire:"allseason",weight:4900,dist:53,tireD:30.4,cda:11.3,wb:119.8,cg:28,
   launch:'bb',launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:'normal'}),
@@ -2016,12 +2022,12 @@ Object.assign(PRESETS,{
   layout:"front",tire:"allseason",weight:5260,dist:55,tireD:30.4,cda:11.3,wb:119.8,cg:28,
   launch:'bb',launchRpm:2000,gripAdj:1.0,modes:['normal','sport','track'],mode:'normal'}),
  /* For 2023 the R/T Tow N Go package brings the SRT's 6.4 L 392 Hemi (475 hp), 3.70 axle and launch control. Dodge: 0-60 4.4 s. */
- durangoRTTNG:Object.assign({},P1,{body:'durango',name:"2023 Durango R/T Tow N Go (392)",mfr:"Dodge",hp:525,hpRpm:6000,tq:515,tqRpm:4300,redline:6400,
+ durangoRTTNG:Object.assign({},P1,{body:'durango',name:"2023 Durango R/T Tow N Go (392)",mfr:"Dodge",hp:475,hpRpm:6000,tq:470,tqRpm:4300,redline:6400,
   ind:"na",disp:6.4,engSound:"v8h",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.7,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:5460,dist:56,tireD:30.4,cda:11.3,wb:119.8,cg:28,
   launch:'lc',launchRpm:2400,gripAdj:1.0,modes:['normal','sport','track'],mode:'normal'}),
  /* Citadel, the luxury trim, with the standard V6 and AWD. Car and Driver (Citadel V6 AWD): 0-60 7.6 s, quarter 15.8 s at 89 mph. */
- durangoCitadel:Object.assign({},P1,{body:'durango',name:"2023 Durango Citadel AWD",mfr:"Dodge",hp:305,hpRpm:6400,tq:270,tqRpm:4000,redline:6500,
+ durangoCitadel:Object.assign({},P1,{body:'durango',name:"2023 Durango Citadel AWD",mfr:"Dodge",hp:295,hpRpm:6400,tq:260,tqRpm:4000,redline:6500,
   ind:"na",disp:3.6,engSound:"v6",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.45,drive:"awd",trans:"auto",
   layout:"front",tire:"allseason",weight:4980,dist:53,tireD:30.4,cda:11.3,wb:119.8,cg:28,
   launch:'bb',launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:'normal'}),
@@ -2031,7 +2037,7 @@ Object.assign(PRESETS,{
   layout:"front",tire:"allseason",weight:5300,dist:55,tireD:30.4,cda:11.3,wb:119.8,cg:28,
   launch:'bb',launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:'normal'}),
  /* SRT 392: 6.4 L Hemi, 475 hp, AWD. Car and Driver: 0-60 4.3 s, quarter 13.0 s at 105 mph. */
- durangoSRT392:Object.assign({},P1,{body:'durango',name:"2023 Durango SRT 392",mfr:"Dodge",hp:525,hpRpm:6000,tq:515,tqRpm:4300,redline:6400,
+ durangoSRT392:Object.assign({},P1,{body:'durango',name:"2023 Durango SRT 392",mfr:"Dodge",hp:475,hpRpm:6000,tq:470,tqRpm:4300,redline:6400,
   ind:"na",disp:6.4,engSound:"v8h",gears:[4.71,3.14,2.10,1.67,1.29,1.00,0.84,0.67],fd:3.7,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:5510,dist:56,tireD:30.4,cda:11.3,wb:119.8,cg:28,
   launch:'lc',launchRpm:2400,gripAdj:1.0,modes:['normal','sport','track'],mode:'normal'}),
@@ -2040,12 +2046,12 @@ Object.assign(PRESETS,{
     2.7-3.0 s, quarter 10.4-11.0 s at 132-136 mph. The V12 traps faster than its
     rating suggests, so power is set a little above the badge (691 -> 720 hp, and
     740 -> 770 hp for the S); shifts use the ISR's quicker Corsa-mode timing. */
- aventador700:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2012 Lamborghini Aventador LP 700-4",mfr:"Lamborghini",hp:720,hpRpm:8250,tq:525,tqRpm:5500,redline:8500,
+ aventador700:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2012 Lamborghini Aventador LP 700-4",mfr:"Lamborghini",hp:691,hpRpm:8250,tq:509,tqRpm:5500,redline:8500,
   ind:"na",disp:6.5,engSound:"v12",gears:[3.41,2.61,1.88,1.43,1.10,0.87,0.71],fd:3.7,drive:"awd",trans:"amt",
   layout:"mid",tire:"summer",weight:3880,dist:43,tireD:27.9,cda:7.6,wb:106.3,cg:18,shift:0.10,launchRpm:6000,gripAdj:1.0,vmax:217}),
  /* Aventador S: 740 hp, rear-wheel steering, same ISR gearbox. Lamborghini: 0-62 2.9 s;
     magazine runs ~2.7 s and ~10.5 s at ~136 mph. */
- aventadorS:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2018 Lamborghini Aventador S",mfr:"Lamborghini",hp:770,hpRpm:8400,tq:525,tqRpm:5500,redline:8700,
+ aventadorS:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2018 Lamborghini Aventador S",mfr:"Lamborghini",hp:730,hpRpm:8400,tq:509,tqRpm:5500,redline:8700,
   ind:"na",disp:6.5,engSound:"v12",gears:[3.41,2.61,1.88,1.43,1.10,0.87,0.71],fd:3.7,drive:"awd",trans:"amt",
   layout:"mid",tire:"summer",weight:3900,dist:43,tireD:27.9,cda:7.6,wb:106.3,cg:18,shift:0.10,launchRpm:6300,gripAdj:1.0,vmax:217}),
 });
@@ -2268,7 +2274,7 @@ function readCar(lane){return applyDynoEff(readCarRaw(lane));}
 function applyDynoEff(c){
   if(!c.empty&&!((IND[c.ind]||{}).electric)&&c.hp>0&&c.gears.length&&typeof dynoSim==='function'){
     const w=dynoWheel(c);
-    if(w&&w.hp>0){const MD=MODES[c.mode]||MODES.normal;const crank=c.sysHp>0?c.sysHp:c.hp*(MD.powerMul||1);
+    if(w&&w.hp>0){const MD=MODES[c.mode]||MODES.normal;const crank=combinedHp(c)*(MD.powerMul||1);
       c.eff=+Math.max(0.6,Math.min(0.97,w.hp/crank)).toFixed(4);}}
   return c;}
 function readCarRaw(lane){
@@ -4703,7 +4709,7 @@ function refresh(lane){
     else if(c.hybHp>0){
       ind.innerHTML='Petrol-electric hybrid: <b>'+Math.round(c.hp)+' hp</b> engine plus a <b>'+
         Math.round(c.hybHp)+' hp</b> motor filling in below '+Math.round(5252*c.hybHp/c.hybTq)+
-        ' rpm — combined about <b>'+Math.round(c.hp+c.hybHp*0.82)+' hp</b>.';
+        ' rpm — <b>'+Math.round(combinedHp(c))+' hp</b> combined system output.';
     }
     else if(I.boosted)ind.innerHTML='Implied peak boost <b>'+bi.psi.toFixed(1)+' psi</b> · NA baseline '+
       Math.round(bi.naHp)+' hp from '+c.disp.toFixed(1)+' L · specific output '+bi.specific.toFixed(0)+' hp/L';
@@ -4714,7 +4720,7 @@ function refresh(lane){
   if(drv&&!isNaN(c.hp)&&!isNaN(c.tq)){
     const w=(typeof dynoWheel==='function'&&dynoWheel(c))||{hp:c.hp*c.eff,tq:c.tq*c.eff};
     drv.innerHTML='At the wheels (dyno): <b>'+Math.round(w.hp)+' whp</b> / <b>'+Math.round(w.tq)+' lb-ft</b> — '+
-      Math.round((1-w.hp/((c.sysHp>0?c.sysHp:c.hp)||1))*100)+'% lost through a '+c.drive.toUpperCase()+' '+
+      Math.round((1-w.hp/(combinedHp(c)||1))*100)+'% lost'+(c.hybHp>0?' from the '+Math.round(combinedHp(c))+' hp combined output':'')+' through a '+c.drive.toUpperCase()+' '+
       ((TRANS[c.trans]||{}).label||'').toLowerCase()+' driveline.';
   }
   const mn=document.getElementById('modeNote'+lane);
@@ -10122,11 +10128,11 @@ function runDyno(){
     dynoView(t);rend.render(DYNO.scene,DYNO.cam);audio3D();
     if(t<run.end+0.1)DYNO.anim=requestAnimationFrame(frame);
     else{window.__racing=false;stopVoices();dynoSheet(run,run.S.length,run.S[run.S.length-1]);
-      const loss=(1-run.pk.hp/c.hp)*100;
+      const tot=combinedHp(c),loss=(1-run.pk.hp/tot)*100;
       document.getElementById('treeMsg').textContent='Run complete';
       document.getElementById('verdict').textContent=c.name+' on the dyno: '+run.pk.hp.toFixed(1)+' whp @ '+Math.round(run.pk.hpRpm).toLocaleString()+' rpm · '+
-        run.pk.tq.toFixed(1)+' lb-ft @ '+Math.round(run.pk.tqRpm).toLocaleString()+' rpm (SAE, gear '+(run.gear+1)+'). Rated '+Math.round(c.hp)+' hp at the crank → '+loss.toFixed(1)+'% lost through the drivetrain.'+
-        (run.boosted?' Forced induction: '+run.pk.psi.toFixed(1)+' psi peak boost adds '+(run.pk.hp-run.pk.na).toFixed(0)+' whp over the same engine without boost ('+run.pk.na.toFixed(0)+' whp).':'');}
+        run.pk.tq.toFixed(1)+' lb-ft @ '+Math.round(run.pk.tqRpm).toLocaleString()+' rpm (SAE, gear '+(run.gear+1)+'). Rated '+(c.hybHp>0?Math.round(tot)+' hp combined ('+Math.round(c.hp)+' hp engine + electric motors)':Math.round(c.hp)+' hp at the crank')+' → '+loss.toFixed(1)+'% lost through the drivetrain.'+
+        (run.boosted&&!(c.hybHp>0)?' Forced induction: '+run.pk.psi.toFixed(1)+' psi peak boost adds '+(run.pk.hp-run.pk.na).toFixed(0)+' whp over the same engine without boost ('+run.pk.na.toFixed(0)+' whp).':'');}
   };
   DYNO.anim=requestAnimationFrame(frame);
 }
@@ -11614,7 +11620,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='9f0483f95c';let dismissed=null;
+(function(){const V='c3d5f7fa68';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
