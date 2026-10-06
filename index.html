@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="db93b7bea0";</script>
+<head><script>window.QM_VER="c8482ea82a";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -8821,16 +8821,16 @@ function initStage(){
     catch(e){failed=true;
       stageWrap.innerHTML='<div class="glfail">This browser could not start WebGL, so the 3D view is unavailable.</div>';
       return;}
-    rend.setPixelRatio(Math.min(1.5,window.devicePixelRatio||1));
+    rend.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
     /* adaptive resolution: if frames take too long (slow GPU, big high-DPI screen) render fewer
        pixels; when there is headroom again, step back up. Changes at most every ~45 frames. */
-    {const AQ={cap:Math.min(1.5,window.devicePixelRatio||1),acc:0,n:0,last:0,good:0,ceil:9};
+    {const AQ={cap:Math.min(2,window.devicePixelRatio||1),floor:Math.min(1,window.devicePixelRatio||1),acc:0,n:0,last:0,good:0,ceil:9};
      const r0=rend.render.bind(rend);
      rend.render=function(sc,cm){const now=performance.now();
        if(AQ.last){const dt=now-AQ.last;if(dt<250){AQ.acc+=dt;AQ.n++;}}AQ.last=now;
        if(AQ.n>=45){const avg=AQ.acc/AQ.n;AQ.acc=0;AQ.n=0;let pr=rend.getPixelRatio();
-         if(avg>23&&pr>0.6){rend.setPixelRatio(Math.max(0.6,pr-0.2));AQ.good=0;}
-         else if(avg<18.5&&pr<AQ.cap-0.01){if(++AQ.good>=6){rend.setPixelRatio(Math.min(AQ.cap,pr+0.2));AQ.good=0;}}
+         if(avg>23&&pr>AQ.floor+0.01){rend.setPixelRatio(Math.max(AQ.floor,pr-0.25));AQ.good=0;}
+         else if(avg<18.5&&pr<AQ.cap-0.01){if(++AQ.good>=6){rend.setPixelRatio(Math.min(AQ.cap,pr+0.25));AQ.good=0;}}
          else AQ.good=0;}
        return r0(sc,cm);};}
     rend.shadowMap.enabled=true;rend.shadowMap.type=TH.PCFSoftShadowMap;
@@ -9484,7 +9484,7 @@ function suspProfile(c){
 }
 const SUSP_DEF=suspProfile({name:'',body:'sedan'});
 function resetSusp(){['A','B','C','D'].forEach(l=>{
-  SUSP[l].f=SUSP[l].r=SUSP[l].vf=SUSP[l].vr=0;SUSP[l].ups=-9;});}
+  SUSP[l].f=SUSP[l].r=SUSP[l].vf=SUSP[l].vr=0;SUSP[l].ups=-9;SUSP[l].pend=0;});}
 function stepSusp(l,c,dt){
   const s=SUSP[l]||(SUSP[l]={f:0,r:0,vf:0,vr:0,ups:-9});
   const P=SUSPP[l]||SUSP_DEF;
@@ -9507,13 +9507,20 @@ function stepSusp(l,c,dt){
   tgtF=Math.max(-lim,Math.min(lim,tgtF));tgtR=Math.max(-lim,Math.min(lim,tgtR));
   // a gear change briefly unloads the drive: the body springs back a little (more on slow manual shifts)
   if(c.ups!==undefined&&c.ups>s.ups+0.001){s.ups=c.ups;
-    const kk=(c.harsh!=null?2.4*c.harsh:(0.6+1.8*(c.hold||0))*P.kick);s.vr-=kk*wr*0.08*IN_TO_U*10;s.vf+=kk*wf*0.05*IN_TO_U*10;}
+    const kk=(c.harsh!=null?2.4*c.harsh:(0.6+1.8*(c.hold||0))*P.kick);
+    /* drag set-up: the next gear hits with the flywheel's stored energy and the rear squats hard,
+       throwing the nose up (drag shocks hold it there: soft rebound, stiff compression) */
+    if(P.dragLift){s.pend=kk;s.pendT=0;}   // applied the moment the next gear bites (below)
+    else{s.vr-=kk*wr*0.08*IN_TO_U*10;s.vf+=kk*wf*0.05*IN_TO_U*10;}}
+  if(P.dragLift&&s.pend){s.pendT=(s.pendT||0)+dt;}
+  if(P.dragLift&&s.pend&&s.pendT>0.07&&(c.g||0)>0.3){s.pendT=0;const kk=s.pend;s.pend=0;s.vr+=kk*wr*0.15*IN_TO_U*10;s.vf-=kk*wf*0.3*IN_TO_U*10*P.dragLift;}
   // integrate in small sub-steps so stiff cars stay stable; front rebound uses its own damping (drag shocks)
   const N=6,h=dt/N;
   for(let i=0;i<N;i++){
-    const zf=(s.vf<0?P.zf:P.z);   // front extending = rebound
+    const zf=(s.vf<0?P.zf:(P.dragLift?P.z*2.6:P.z));   // front extending = rebound; drag shocks resist the nose coming back down
     s.vf+=(wf*wf*(tgtF-s.f)-2*zf*wf*s.vf)*h;s.f+=s.vf*h;
-    s.vr+=(wr*wr*(tgtR-s.r)-2*P.z*wr*s.vr)*h;s.r+=s.vr*h;
+    const zr=(P.dragLift&&s.vr<0)?P.z*2.4:P.z;   // drag rear shocks: slow to unload, so the car stays planted through the shift
+    s.vr+=(wr*wr*(tgtR-s.r)-2*zr*wr*s.vr)*h;s.r+=s.vr*h;
     // bump stops: progressive, the body cannot pass full travel
     const bs=lim*1.15;
     if(Math.abs(s.f)>bs){s.f=Math.sign(s.f)*bs;s.vf*=-0.2;}
@@ -9810,7 +9817,7 @@ function dynoTestGear(c,Mtot){
 }
 /* steady-state drivetrain efficiency as a chassis dyno sees it (gearbox, diff, tyres on the roll):
    typical sheets read ~10% under crank for a manual, ~12-15% for an automatic, 18-20% for AWD */
-function dynoEff(c){if((IND[c.ind]||{}).electric)return 0.93;
+function dynoEff(c){if((IND[c.ind]||{}).electric)return c.drive==='awd'?0.89:0.93;
   let e=({manual:0.925,dct:0.915,amt:0.91,auto:0.905,cvt:0.88,ecvt:0.88})[c.trans]||0.905;
   if(c.drive==='fwd')e+=0.005;if(c.drive==='awd')e-=0.04;return e;}
 function dynoSim(c){
@@ -11601,7 +11608,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='db93b7bea0';let dismissed=null;
+(function(){const V='c8482ea82a';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
