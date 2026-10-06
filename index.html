@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="8264e031e9";</script>
+<head><script>window.QM_VER="aee5d49056";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -436,7 +436,6 @@ footer p{margin-bottom:10px}
       <option value="2640">1/2 mile</option>
       <option value="5280">1 mile</option>
       <option value="10560">2 miles</option>
-      <option value="26400">5 miles</option>
     </select></div>
   <div class="fld"><label for="startMph">START</label>
     <select id="startMph"><option value="0" selected>From a dig (0 mph)</option></select></div>
@@ -2752,26 +2751,33 @@ function crossoverPoints(c){
    the run, so it is remembered (and worked out in the background as soon as a car is loaded).
    On long runs the search only races as far as the last gear change plus a margin: past that point
    the shift points no longer make any difference. */
-const SP_CACHE=new Map();
+const SP_CACHE=new Map(),SP_GEN=new Map();
 function spKey(c){const o={};Object.keys(c).sort().forEach(k=>{if(k!=='shiftPoints'&&k!=='tireTemp0'&&k!=='noRunout')o[k]=c[k];});return JSON.stringify(o);}
 function optimalShiftPoints(c){
   const key=spKey(c);if(SP_CACHE.has(key))return SP_CACHE.get(key).slice();
+  // a background search for this exact car may already be part-way through: finish that one
+  const g=SP_GEN.get(key)||spSearch(c);SP_GEN.delete(key);let r;while(!(r=g.next()).done);return SP_CACHE.get(key).slice();
+}
+/* the search as a generator: it yields after every trial race, so the background version can
+   spread the work across frames instead of freezing the page */
+function* spSearch(c){
+  const key=spKey(c);
   const full=c.raceFt||1320;let evFt=full;
   if(full>1320){const base=simulate(Object.assign({},c,{shiftPoints:crossoverPoints(c),noRunout:true})),tr=base.trace||[];
     let g=tr.length?tr[0].gear:0,lastX=0;for(const s of tr){if(s.gear!==g){g=s.gear;lastX=s.x;}}
     evFt=Math.min(full,Math.max(1320,lastX*FT_PER_M*1.25+400));}
   const ev=p=>simulate(Object.assign({},c,{shiftPoints:p,noRunout:true,raceFt:evFt})).et;
-  let pts=crossoverPoints(c),best=ev(pts);
+  let pts=crossoverPoints(c),best=ev(pts);yield;
   const floor0=Math.round(c.redline*0.40);
   for(let R=floor0;R<=c.redline;R+=Math.round(c.redline*0.05)){
-    const t=pts.slice();t[0]=R;const e=ev(t);if(e<best-0.0005){best=e;pts=t;}}
+    const t=pts.slice();t[0]=R;const e=ev(t);if(e<best-0.0005){best=e;pts=t;}yield;}
   for(let pass=0;pass<2;pass++)for(let i=0;i<c.gears.length-1;i++){
     const base=pts[i];
     for(const d of (pass?[-120,120]:[-900,-450,-200,-80,80,200])){
       const R=Math.max(floor0,Math.min(c.redline,base+d));
-      const t=pts.slice();t[i]=R;const e=ev(t);if(e<best-0.0005){best=e;pts=t;}}}
+      const t=pts.slice();t[i]=R;const e=ev(t);if(e<best-0.0005){best=e;pts=t;}yield;}}
   const out=pts.map(Math.round);
-  if(SP_CACHE.size>200)SP_CACHE.clear();SP_CACHE.set(key,out);return out.slice();
+  if(SP_CACHE.size>200)SP_CACHE.clear();SP_CACHE.set(key,out);return out;
 }
 function resolveShiftPoints(c){
   if(c.shiftMode==='redline')return c.gears.map(()=>c.redline);
@@ -4580,13 +4586,18 @@ function setNeedle(id,frac){const el=document.getElementById(id);if(!el)return;
   el.setAttribute('transform','rotate('+(a0+span*f).toFixed(1)+' 100 100)');}
 /* Work out a lane's shift points in the background shortly after its car changes, so pressing
    Run doesn't have to wait for them. */
-const SP_PRE={};
-function precomputeShift(lane){clearTimeout(SP_PRE[lane]);
+const SP_PRE={},SP_TOK={};
+function precomputeShift(lane){clearTimeout(SP_PRE[lane]);const tok=SP_TOK[lane]=(SP_TOK[lane]||0)+1;
   SP_PRE[lane]=setTimeout(()=>{try{
     if(typeof laneEmpty==='function'&&laneEmpty(lane))return;
     const c=readCar(lane);if(validate(c).length)return;
     c.raceFt=raceDist();c.startMph=startMph();if(c.startMph>0)return;
-    resolveShiftPoints(c);}catch(e){}},700);}
+    if(['redline','peak','custom'].indexOf(c.shiftMode)>=0||SP_CACHE.has(spKey(c)))return;
+    const key=spKey(c),g=SP_GEN.get(key)||spSearch(c);SP_GEN.set(key,g);
+    // one trial race per slice, paused while a race is playing; dropped if the car changes again
+    const step=()=>{if(SP_TOK[lane]!==tok)return;if(window.__racing){setTimeout(step,400);return;}
+      if(!SP_GEN.has(key))return;try{if(g.next().done){SP_GEN.delete(key);return;}}catch(e){SP_GEN.delete(key);return;}setTimeout(step,0);};
+    step();}catch(e){}},700);}
 function refresh(lane){
   const c=readCar(lane);
   drawCurve(lane);precomputeShift(lane);
@@ -8327,7 +8338,49 @@ function buildLux(kind,colorHex,name){
       else box(4,0.4,2*W-8,/765/.test(n)?M.carbon:M.gloss,-52,22.8,0,0.2);
     }});
 }
+/* A built car is hundreds of small meshes (lamps, vents, trim strips). Drawing each one separately
+   costs a draw call per piece per frame (twice with shadows), which is what makes several cars on
+   screen laggy. Once a car is built, every static piece of its body that shares a look is merged into
+   one mesh: same picture, a few dozen draw calls instead of hundreds. Animated, textured, transparent
+   and multi-material parts are left alone. */
+function mergeShell(car){
+  if(!car)return;const keep=new Set([car.brake,car.head].filter(Boolean));
+  if(car.grp)car.grp.updateMatrixWorld(true);
+  if(car.shell)mergeInto(car.shell,keep);
+  (car.wheels||[]).forEach(w=>mergeInto(w,keep));   // each wheel turns as one piece, so it merges within itself
+}
+function mergeInto(shell,keep){
+  shell.updateMatrixWorld(true);
+  const inv=new TH.Matrix4().copy(shell.matrixWorld).invert();
+  const groups=new Map();
+  shell.traverse(o=>{
+    if(!o.isMesh||!o.visible||o.userData.noMerge)return;const m=o.material,g=o.geometry;
+    if(!m||Array.isArray(m)||keep.has(m)||m.map||m.transparent||m.vertexColors||!g||!g.attributes||!g.attributes.position)return;
+    if(g.morphAttributes&&Object.keys(g.morphAttributes).length)return;
+    const k=[m.type,m.color?m.color.getHex():0,m.emissive?m.emissive.getHex():0,m.emissiveIntensity,m.roughness,m.metalness,m.side,m.flatShading?1:0,o.castShadow?1:0,o.receiveShadow?1:0].join('|');
+    if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);});
+  groups.forEach(list=>{
+    if(list.length<2)return;
+    let n=0;const parts=[];
+    list.forEach(o=>{let g=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();
+      if(!g.attributes.normal)g.computeVertexNormals();
+      const M4=new TH.Matrix4().multiplyMatrices(inv,o.matrixWorld);g.applyMatrix4(M4);
+      const P=g.attributes.position.array,N=g.attributes.normal.array;
+      if(M4.determinant()<0){for(let i=0;i+8<P.length;i+=9)for(let j=0;j<3;j++){let t=P[i+3+j];P[i+3+j]=P[i+6+j];P[i+6+j]=t;t=N[i+3+j];N[i+3+j]=N[i+6+j];N[i+6+j]=t;}}
+      parts.push([P,N]);n+=P.length;});
+    const P=new Float32Array(n),N=new Float32Array(n);let off=0;
+    parts.forEach(([p,q])=>{P.set(p,off);N.set(q,off);off+=p.length;});
+    const g=new TH.BufferGeometry();g.setAttribute('position',new TH.BufferAttribute(P,3));g.setAttribute('normal',new TH.BufferAttribute(N,3));
+    g.computeBoundingSphere();
+    const mesh=new TH.Mesh(g,list[0].material);mesh.castShadow=list[0].castShadow;mesh.receiveShadow=list[0].receiveShadow;
+    list.forEach(o=>{if(o.parent)o.parent.remove(o);});shell.add(mesh);});
+}
 function buildCar(bodyKey,colorHex,carName){
+  const car=buildCarRaw(bodyKey,colorHex,carName);
+  try{mergeShell(car);}catch(e){}
+  return car;
+}
+function buildCarRaw(bodyKey,colorHex,carName){
   if(bodyKey==='mustang'&&isS550(carName))return buildMustangS550(colorHex,carName);
   if(bodyKey==='mustang'&&isS197(carName))return buildMustangS197(colorHex,carName);
   if(bodyKey==='mustang'&&isS650(carName))return buildMustangS650(colorHex,carName);
@@ -9582,7 +9635,7 @@ let anim=null,lastGear={},stageState={},wheelDist={};
 function activeLanes(){return LANES.slice(0,window.activeRacers||2);}
 const LC={A:'#3f9ae0',B:'#e07a4a',C:'#5fc46a',D:'#c46ad0'};
 function reset(){
-  if(anim)cancelAnimationFrame(anim);
+  if(anim)cancelAnimationFrame(anim);window.__racing=false;
   stageState={};
   (window._treeTimers||[]).forEach(clearTimeout);window._treeTimers=[];
   if(typeof stripTree==='function'&&scene&&scene._strip){stripTree('off');stripBoardReset();}
@@ -9881,9 +9934,9 @@ document.getElementById('runBtn').addEventListener('click',()=>{
       // results come up as soon as every car has crossed the stripe; the braking keeps playing behind them
       if(!slipShown&&lanes.every(l=>t>=res[l].et+0.4)){slipShown=true;showSlipN(res,lanes);}
       if(!done&&t<200)anim=requestAnimationFrame(frame);
-      else{stopVoices();if(!slipShown){slipShown=true;showSlipN(res,lanes);}}
+      else{window.__racing=false;stopVoices();if(!slipShown){slipShown=true;showSlipN(res,lanes);}}
     }
-    anim=requestAnimationFrame(frame);
+    window.__racing=true;anim=requestAnimationFrame(frame);
   }
 });
 function slipHtml(r){
@@ -10454,7 +10507,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='8264e031e9';let dismissed=null;
+(function(){const V='aee5d49056';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
