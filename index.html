@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="aee5d49056";</script>
+<head><script>window.QM_VER="079c4189a4";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -40,6 +40,7 @@ margin-left:auto;text-align:right;line-height:1.5}
 font-family:'Roboto Mono',monospace;font-size:13px;margin-bottom:5px}
 .lane-name{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:500}
 .lane-live{color:var(--dim)}.lane-live b{color:var(--paint);font-weight:500}
+.dyno-panel{background:#0b0e12;border:1px solid var(--line);border-top:none}.dyno-panel canvas{display:block;width:100%;height:auto}
 .stage3d{position:relative;width:100%;height:340px;background:#11151b;border:1px solid var(--line);overflow:hidden}
 .stage3d canvas{display:block;width:100%;height:100%}
 .glfail{padding:26px;font-family:'Roboto Mono',monospace;font-size:13px;color:var(--dim);line-height:1.7}
@@ -443,6 +444,7 @@ footer p{margin-bottom:10px}
     <select id="venue">
       <option value="road" selected>Country road</option>
       <option value="strip">Drag strip (prepped)</option>
+      <option value="dyno">Dyno test (1 car)</option>
       <option value="highway" disabled>Highway (3–4 racers)</option>
     </select>
     <span class="venue-note" id="venueNote"></span></div>
@@ -466,6 +468,7 @@ footer p{margin-bottom:10px}
     <span id="treeMsg">Ready to run</span>
   </div>
   <div id="stage3d" class="stage3d"><div class="stage-empty" id="stageEmpty" hidden>Nothing Selected</div></div>
+  <div id="dynoPanel" class="dyno-panel" hidden><canvas id="dynoCanvas" width="1100" height="380"></canvas></div>
   <div class="viewbar">
     <label for="viewMode">CAMERA</label>
     <select id="viewMode">
@@ -759,9 +762,11 @@ function startMph(){return parseFloat(document.getElementById('startMph').value)
    three or four racers always go to the highway (a lane per car). */
 function timeOfDay(){const e=document.getElementById('tod');return e?e.value:'day';}
 function currentVenue(){
+  {const e=document.getElementById('venue');if(e&&e.value==='dyno')return 'dyno';}
   const n=(typeof activeLanes==='function')?activeLanes().length:2;
   if(n>=3)return 'highway';
   const e=document.getElementById('venue');
+  if(e&&e.value==='dyno')return 'dyno';
   return (e&&e.value==='strip')?'strip':'road';
 }
 
@@ -843,12 +848,13 @@ function setAP(p,v,t){if(p&&p.setTargetAtTime)p.setTargetAtTime(v,t,0.03);}
 /* Put the listener at the camera and each engine at its car, every frame. */
 function audio3D(){
   if(typeof AC==='undefined'||!AC||typeof cam==='undefined'||!cam||typeof TH==='undefined')return;
-  const t=AC.currentTime,L=AC.listener,p=cam.position;
-  const f=new TH.Vector3();cam.getWorldDirection(f);const u=new TH.Vector3(0,1,0).applyQuaternion(cam.quaternion);
+  const dy=window.__dynoMode&&DYNO.cam,CAM=dy?DYNO.cam:cam;
+  const t=AC.currentTime,L=AC.listener,p=CAM.position;
+  const f=new TH.Vector3();CAM.getWorldDirection(f);const u=new TH.Vector3(0,1,0).applyQuaternion(CAM.quaternion);
   if(L.positionX){setAP(L.positionX,p.x,t);setAP(L.positionY,p.y,t);setAP(L.positionZ,p.z,t);
     setAP(L.forwardX,f.x,t);setAP(L.forwardY,f.y,t);setAP(L.forwardZ,f.z,t);setAP(L.upX,u.x,t);setAP(L.upY,u.y,t);setAP(L.upZ,u.z,t);}
   else if(L.setPosition){L.setPosition(p.x,p.y,p.z);L.setOrientation(f.x,f.y,f.z,u.x,u.y,u.z);}
-  for(const l in voices){const v=voices[l],o=typeof carObj!=='undefined'?carObj[l]:null;
+  for(const l in voices){const v=voices[l],o=dy?(l==='A'?DYNO.car:null):(typeof carObj!=='undefined'?carObj[l]:null);
     if(!v||!v.is3d||!o||!o.grp)continue;const P=v.panner,q=o.grp.position;
     if(P.positionX){setAP(P.positionX,q.x,t);setAP(P.positionY,q.y+0.6,t);setAP(P.positionZ,q.z,t);}
     else if(P.setPosition)P.setPosition(q.x,q.y+0.6,q.z);}
@@ -9149,6 +9155,7 @@ function stripBoard(l,et,mph,win){
 let lastTotal=-1;
 function drawStage(st){
   lastStageDraw=performance.now();
+  if(window.__dynoMode){if(!(DYNO.anim))dynoRender(0);return;}
   if(!ready){initStage();if(!ready)return;}
   ensureCars(st);
   const lanes=Object.keys(st).filter(k=>k!=='total');
@@ -9450,6 +9457,21 @@ document.getElementById('dist').addEventListener('change',()=>{reset();activeLan
 /* Venue rules. The strip is two lanes, so it is only offered with 2 racers.
    Drag racing always starts from a dig, and strips run 1/8, 1000 ft or 1/4 mile. */
 function syncVenue(){
+  {/* dyno: one car, no distance or rolling start, the dyno sheet under the 3D view */
+    const v=document.getElementById('venue'),rc=document.getElementById('racerCount'),dy=v.value==='dyno';
+    const mpOn=(()=>{try{return !!MP.on;}catch(e){return false;}})();
+    const opt=v.querySelector('option[value=dyno]');if(opt)opt.disabled=mpOn;
+    if(dy&&opt&&opt.disabled){v.value='road';}
+    const on=v.value==='dyno';
+    if(on&&!window.__dynoMode){window.__dynoMode=true;window.__preDynoRacers=window.activeRacers||2;applyRacerCount(1);}
+    else if(!on&&window.__dynoMode){window.__dynoMode=false;if(typeof dynoStop==='function')dynoStop();applyRacerCount(window.__preDynoRacers||2);rc.value=String(window.activeRacers);ready=false;}
+    rc.disabled=on||mpOn;
+    document.getElementById('dynoPanel').hidden=!on;
+    document.getElementById('runBtn').textContent=on?'Run dyno':'Run the race';
+    ['dist','startMph'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=on;});
+    if(on){const note=document.getElementById('venueNote');note.textContent='Chassis dyno · strapped down · pull in the gear closest to 1:1';
+      if(typeof dynoSheet==='function')dynoSheet(null,0,null);return;}
+  }
   const v=document.getElementById('venue'),n=activeLanes().length;
   const note=document.getElementById('venueNote');
   const sm=document.getElementById('startMph'),dist=document.getElementById('dist');
@@ -9636,6 +9658,7 @@ function activeLanes(){return LANES.slice(0,window.activeRacers||2);}
 const LC={A:'#3f9ae0',B:'#e07a4a',C:'#5fc46a',D:'#c46ad0'};
 function reset(){
   if(anim)cancelAnimationFrame(anim);window.__racing=false;
+  if(typeof dynoStop==='function'){dynoStop();if(window.__dynoMode&&typeof dynoSheet==='function')dynoSheet(null,0,null);}
   stageState={};
   (window._treeTimers||[]).forEach(clearTimeout);window._treeTimers=[];
   if(typeof stripTree==='function'&&scene&&scene._strip){stripTree('off');stripBoardReset();}
@@ -9670,7 +9693,298 @@ function sampleAt(res,time){
   // play the whole trace, including the coast-down after the line
   return tr[Math.max(0,Math.min(tr.length-1,Math.floor(time/DT)))];
 }
+/* ================= DYNO CELL =================
+   A Dynojet-style inertia chassis dyno. The car is strapped down with its driven wheels on a heavy
+   24-inch roll (both axles on an AWD dyno). The operator rolls up through the gears at part throttle
+   into the test gear (the one closest to 1:1, as shops do), steadies it at low rpm, then floors it to
+   the limiter. Power is what the roll measures: P = (roll inertia) x speed x acceleration, so it reads
+   at the wheels, after the gearbox, diff and tyres, and slightly under steady-state because the
+   engine, driveline and wheels soak up some of it while spinning up too. Numbers are SAE J1349
+   corrected; torque on the sheet is wheel hp x 5252 / engine rpm, the way dyno software shows it. */
+const DYNO={scene:null,cam:null,car:null,carKey:'',anim:null,run:null,parts:{},canvas:null,tex:null,lastDraw:0};
+function dynoTestGear(c,Mtot){
+  // the gear closest to 1:1, as shops do, but kept under ~165 mph on the roll (and the car's own
+  // limiter) and to a pull of no more than ~14 s; otherwise the next gear down
+  const r=(c.tireD*0.0254)/2;
+  const vAt=(g,rpm)=>rpm/(c.gears[g]*c.fd)*2*Math.PI/60*r;
+  const P=Math.max(60,c.hp)*745.7*0.7*dynoEff(c),secs=g=>{const a=vAt(g,c.redline),b=vAt(g,c.redline*0.3);return 0.5*Mtot*(a*a-b*b)/P;};
+  const vCap=Math.min(165,c.vmax||999)/2.23694+0.5;
+  const ok=c.gears.map((x,i)=>i).filter(g=>vAt(g,c.redline)<=vCap);
+  if(!ok.length)return 0;
+  const byOne=ok.slice().sort((a,b)=>Math.abs(c.gears[a]-1)-Math.abs(c.gears[b]-1));
+  for(const g of byOne)if(secs(g)<=14)return g;
+  return Math.min(...ok);
+}
+/* steady-state drivetrain efficiency as a chassis dyno sees it (gearbox, diff, tyres on the roll):
+   typical sheets read ~10% under crank for a manual, ~12-15% for an automatic, 18-20% for AWD */
+function dynoEff(c){if((IND[c.ind]||{}).electric)return 0.93;
+  let e=({manual:0.925,dct:0.915,amt:0.91,auto:0.905,cvt:0.88,ecvt:0.88})[c.trans]||0.905;
+  if(c.drive==='fwd')e+=0.005;if(c.drive==='awd')e-=0.04;return e;}
+function dynoSim(c){
+  const I=IND[c.ind]||IND.na,bi=boostInfo(c),MD=MODES[c.mode]||MODES.normal,isEV=!!I.electric;
+  const r=(c.tireD*0.0254)/2,m=c.weight/LB_PER_KG,eff=dynoEff(c);
+  const pf=Math.sqrt(airDensity(c.temp)/1.225),CF=1/pf;                 // SAE correction factor
+  const awd=c.drive==='awd',Mdrum=awd?2300:1400;                        // roll equivalent mass (kg)
+  const IE=0.16,IW=awd?7.0:4.5;
+  const ratio=k=>c.gears[k]*c.fd,Mrot=k=>IE*Math.pow(ratio(k)/r,2)+IW/(r*r);
+  const g=dynoTestGear(c,Mdrum+Mrot(0)*0.2);
+  const idle=isEV?0:Math.max(650,Math.min(950,Math.round(c.redline*0.11/10)*10));
+  const startRpm=isEV?Math.round(c.redline*0.06):Math.max(1800,Math.min(3000,Math.round(c.redline*0.3/100)*100));
+  const upAt=Math.max(startRpm+300,Math.min(2900,c.redline*0.42));
+  const torque=(rpm,thr,bst)=>{const full=torqueAt(c,Math.max(800,rpm)),na=full*bi.naFrac;return (na+(full-na)*Math.min(1,bst))*MD.powerMul*thr;};
+  const DTd=1/120,S=[],pull=[];
+  let t=0,v=0,gear=0,rpm=idle,boost=I.boosted?bi.naFrac:1,thr=0,phase='idle',pt=0,shiftT=0,limT=0,F=0,clutch=0;
+  let seed=(c.hp*7919+c.redline*31)|0;const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+  const wheelRpm=()=>v/r*60/(2*Math.PI);
+  const step=(thrTgt,dtThr)=>{
+    thr+=(thrTgt-thr)*Math.min(1,DT_D/dtThr);
+    // turbo / supercharger boost follows throttle with the car's own lag
+    if(I.boosted){const tgt=thr>0.75?1:bi.naFrac+(1-bi.naFrac)*Math.max(0,thr-0.3)*0.5;
+      const tau=thr>0.75?Math.max(0.05,I.tau*Math.min(2,Math.max(0.4,2600/Math.max(900,rpm)))):0.35;boost+=(tgt-boost)*Math.min(1,DT_D/tau);}
+    const k=gear;let Fw=0;
+    if(shiftT>0){shiftT-=DT_D;}
+    else{const Te=torque(rpm,thr,boost);Fw=Te*1.35582*ratio(k)*eff*pf*clutch/r*0.99;}
+    const loss=0.006*m*9.81*(awd?1:0.55)+(v>0.1?25:0);
+    const Mt=Mdrum+Mrot(k)*(clutch>0.5?1:0.15);
+    let a=(Fw-loss)/Mt;if(phase==='brake')a=-9;
+    if(phase==='hold'){a=Math.max(-3,Math.min(3,((startRpm/(ratio(k)*60/(2*Math.PI))*r)-v)*1.6));}
+    v=Math.max(0,v+a*DT_D);F=Fw;
+    return a;};
+  const DT_D=DTd;
+  const push=(a,extra)=>S.push(Object.assign({t,rpm,v,gear,thr,boost,phase,F,a,shift:shiftT>0},extra||{}));
+  // 1. engine idling, fan spooling up
+  for(;t<1.5;t+=DTd){rpm=idle+(isEV?0:Math.sin(t*37)*12);push(0);}
+  // 2. roll up through the gears at part throttle
+  phase='rollup';clutch=0;
+  while(gear<g||(gear===g&&rpm<startRpm-40)){
+    const a=step(gear<g?0.45:0.25,0.25);
+    const wr=wheelRpm()*ratio(gear);
+    if(clutch<1){clutch=Math.min(1,clutch+DTd/0.9);rpm=Math.max(wr,isEV?wr:idle*1.35+600*clutch);}else rpm=wr;
+    if(shiftT<=0&&gear<g&&rpm>upAt){gear++;shiftT=isEV?0:0.38;}
+    if(shiftT>0)rpm=Math.max(wheelRpm()*ratio(gear),rpm-DTd*4000);
+    push(a);t+=DTd;if(t>40)break;
+  }
+  // 3. steady it at the start rpm, then the run is armed
+  phase='hold';const h0=t;
+  while(t-h0<1.0){const a=step(0.2,0.3);rpm=wheelRpm()*ratio(gear);push(a);t+=DTd;}
+  // 4. wide-open-throttle pull to the limiter
+  phase='pull';let peakHp=0;
+  while(t<120){
+    const a=step(1,0.12);rpm=wheelRpm()*ratio(gear);
+    let lim=false;
+    if(rpm>=c.redline||(c.vmax&&v*2.23694>=c.vmax)||(isEV&&v*2.23694>=120)){lim=true;}
+    const hpU=Mdrum*v*Math.max(0,a)/745.7,hp=hpU*CF*(1+(rnd()-0.5)*0.008);
+    if(!lim&&thr>0.9&&rpm>startRpm){pull.push({i:S.length,rpm,hp,tq:hp*5252/Math.max(1,rpm)});peakHp=Math.max(peakHp,hp);}
+    push(a,{hp});t+=DTd;
+    if(lim){phase='limiter';break;}
+  }
+  // 5. bounce off the limiter briefly, lift, and brake the roll to a stop
+  const l0=t;
+  while(t-l0<0.35){thr=((t-l0)*40|0)%2?1:0;rpm=c.redline-((t-l0)*40|0)%2*180;push(0);t+=DTd;}
+  phase='brake';thr=0;
+  while(v>0.05||t-l0<2){step(0,0.05);const wr=wheelRpm()*ratio(gear);rpm=isEV?wr:(wr>idle*1.5?wr:Math.max(idle,rpm-DTd*3000));push(-9);t+=DTd;if(t>200)break;}
+  phase='done';for(let k=0;k<180;k++){rpm=idle;push(0);t+=DTd;}
+  // the sheet is drawn smoothed (Dynojet "smoothing 5"-style moving average)
+  const W=9;const sm=pull.map((p,i)=>{let h=0,q=0,n=0;for(let j=Math.max(0,i-W);j<=Math.min(pull.length-1,i+W);j++){h+=pull[j].hp;q+=pull[j].tq;n++;}return {i:p.i,rpm:p.rpm,hp:h/n,tq:q/n};});
+  let pk={hp:0,hpRpm:0,tq:0,tqRpm:0};sm.forEach(p=>{if(p.hp>pk.hp){pk.hp=p.hp;pk.hpRpm=p.rpm;}if(p.tq>pk.tq){pk.tq=p.tq;pk.tqRpm=p.rpm;}});
+  return {S,pts:sm,pk,gear:g,ratio:c.gears[g],startRpm,idle,CF,DT:DTd,end:t,awd,car:c};
+}
+/* ---- the dyno cell scene ---- */
+function dynoBuildScene(){
+  const sc=new TH.Scene();sc.background=new TH.Color(0x1a1d22);
+  sc.add(new TH.HemisphereLight(0xdfe6f0,0x3a3936,0.7));
+  const key=new TH.DirectionalLight(0xffffff,0.75);key.position.set(3,9,4);key.castShadow=true;
+  key.shadow.mapSize.set(1024,1024);const kc=key.shadow.camera;kc.left=-7;kc.right=7;kc.top=7;kc.bottom=-7;kc.near=1;kc.far=30;
+  sc.add(key);sc.add(key.target);
+  [[-3,-2],[3,-2],[-3,2],[3,2]].forEach(([x,z])=>{const p=new TH.PointLight(0xf4f7ff,0.35,16,1.6);p.position.set(x,5.2,z);sc.add(p);});
+  const mat=(col,r,m,e)=>new TH.MeshStandardMaterial({color:col,roughness:r==null?0.8:r,metalness:m||0,emissive:e||0});
+  // room: sealed concrete floor, painted block walls, ceiling with light panels
+  const fc=document.createElement('canvas');fc.width=fc.height=256;const fx=fc.getContext('2d');
+  fx.fillStyle='#5d6166';fx.fillRect(0,0,256,256);for(let i=0;i<2400;i++){fx.fillStyle='rgba('+(Math.random()<0.5?255:0)+','+(Math.random()<0.5?255:0)+',255,0.035)';fx.fillRect(Math.random()*256,Math.random()*256,2,2);}
+  fx.strokeStyle='rgba(0,0,0,0.25)';fx.lineWidth=2;fx.strokeRect(0,0,256,256);
+  const ft=new TH.CanvasTexture(fc);ft.wrapS=ft.wrapT=TH.RepeatWrapping;ft.repeat.set(6,4);if(TH.sRGBEncoding!==undefined)ft.encoding=TH.sRGBEncoding;
+  const floor=new TH.Mesh(new TH.PlaneGeometry(24,16),new TH.MeshStandardMaterial({map:ft,roughness:0.88,metalness:0.0}));
+  floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;sc.add(floor);
+  const room=new TH.Mesh(new TH.BoxGeometry(24,6.2,16),new TH.MeshStandardMaterial({color:0x8d939b,roughness:0.95,side:TH.BackSide}));room.position.y=3.1;sc.add(room);
+  const band=new TH.Mesh(new TH.BoxGeometry(23.9,1.1,15.9),new TH.MeshStandardMaterial({color:0x2c3a52,roughness:0.9,side:TH.BackSide}));band.position.y=0.55;sc.add(band);
+  for(let x=-8;x<=8;x+=4)for(const z of [-3,3]){const lp=new TH.Mesh(new TH.BoxGeometry(1.4,0.06,0.35),new TH.MeshBasicMaterial({color:0xf6f8ff}));lp.position.set(x,6.1,z);sc.add(lp);}
+  // yellow safety lines round the dyno bay
+  const yl=mat(0xe8c21a,0.6);[[-1,0],[1,0]].forEach(([s])=>{const b=new TH.Mesh(new TH.BoxGeometry(9,0.012,0.12),yl);b.position.set(0,0.006,s*2.1);sc.add(b);});
+  [-4.5,4.5].forEach(x=>{const b=new TH.Mesh(new TH.BoxGeometry(0.12,0.012,4.3),yl);b.position.set(x,0.006,0);sc.add(b);});
+  // big shop fan in front of the car
+  const fan=new TH.Group(),fm=mat(0x23262b,0.6,0.4);
+  const ring=new TH.Mesh(new TH.TorusGeometry(0.55,0.07,8,32),fm);ring.rotation.y=Math.PI/2;fan.add(ring);
+  const grill=new TH.Mesh(new TH.CircleGeometry(0.55,24),new TH.MeshStandardMaterial({color:0x111214,roughness:0.9,transparent:true,opacity:0.35}));grill.rotation.y=-Math.PI/2;grill.position.x=-0.06;fan.add(grill);
+  const blades=new TH.Group();for(let i=0;i<5;i++){const b=new TH.Mesh(new TH.BoxGeometry(0.03,0.48,0.16),mat(0x8a9099,0.4,0.6));b.position.y=0.26;const h=new TH.Group();h.add(b);h.rotation.x=i/5*Math.PI*2;blades.add(h);}
+  blades.add(new TH.Mesh(new TH.CylinderGeometry(0.08,0.08,0.12,12),fm).rotateZ(Math.PI/2));fan.add(blades);
+  const legs=new TH.Mesh(new TH.BoxGeometry(0.4,0.75,0.08),fm);legs.position.y=-0.85;fan.add(legs);
+  const base=new TH.Mesh(new TH.BoxGeometry(0.7,0.06,0.9),fm);base.position.y=-1.22;fan.add(base);
+  sc.add(fan);
+  // dyno computer on a cart, its screen shows the same live sheet
+  const cart=new TH.Group(),cm=mat(0xb3261e,0.5,0.3);
+  const cb=new TH.Mesh(new TH.BoxGeometry(0.6,0.85,0.5),cm);cb.position.y=0.45;cart.add(cb);
+  const post=new TH.Mesh(new TH.BoxGeometry(0.06,0.55,0.06),mat(0x222222,0.5,0.5));post.position.y=1.15;cart.add(post);
+  const scr=new TH.Mesh(new TH.BoxGeometry(0.06,0.62,1.02),mat(0x0a0b0d,0.4,0.3));scr.position.y=1.6;cart.add(scr);
+  const cv=document.getElementById('dynoCanvas');const tex=new TH.CanvasTexture(cv);if(TH.sRGBEncoding!==undefined)tex.encoding=TH.sRGBEncoding;
+  const face=new TH.Mesh(new TH.PlaneGeometry(0.96,0.56),new TH.MeshBasicMaterial({map:tex}));face.position.set(0.035,1.6,0);face.rotation.y=Math.PI/2;cart.add(face);
+  sc.add(cart);
+  // red tool chest against the back wall
+  const tool=new TH.Mesh(new TH.BoxGeometry(0.6,1.1,1.6),mat(0xa61f1a,0.45,0.3));tool.position.set(-6.5,0.55,-7.4);sc.add(tool);
+  DYNO.scene=sc;DYNO.tex=tex;DYNO.parts={fan,blades,cart};
+  DYNO.cam=new TH.PerspectiveCamera(42,1,0.1,80);
+}
+function dynoPlaceCar(){
+  const nmEl=document.getElementById('nameAf'),nm=nmEl?nmEl.value:'',body=(typeof carBody==='function'?carBody('A'):'sedan');
+  const c=readCar('A'),key=body+'|'+nm+'|'+c.drive;
+  if(DYNO.car&&DYNO.carKey===key)return;
+  const P=DYNO.parts,sc=DYNO.scene;
+  if(DYNO.car)sc.remove(DYNO.car.grp);(P.extra||[]).forEach(o=>sc.remove(o));P.extra=[];
+  const car=buildCar(body,LANE_COLORS.A,nm);sc.add(car.grp);DYNO.car=car;DYNO.carKey=key;
+  if(car.taillight)car.taillight.intensity=0.08;if(car.headlight)car.headlight.visible=false;
+  car.grp.traverse(o=>{if(o.isMesh)o.castShadow=true;});
+  car.grp.updateMatrixWorld(true);const bb=new TH.Box3().setFromObject(car.grp);
+  const wx=car.S.wx*U,hw=(car.depth/2)*U,nose=bb.max.x,tail=bb.min.x;
+  DYNO.geom={wx,hw,nose,tail,wr:car.S.wr*U,len:nose-tail};
+  const add=o=>{sc.add(o);P.extra.push(o);return o;};
+  const mat=(col,r,m)=>new TH.MeshStandardMaterial({color:col,roughness:r==null?0.7:r,metalness:m||0});
+  const driven=c.drive==='awd'?[1,-1]:c.drive==='fwd'?[1]:[-1];
+  // the roll(s): steel deck plate with a slot, the knurled drum showing through it
+  const deck=add(new TH.Mesh(new TH.BoxGeometry(Math.max(7,DYNO.geom.len+2.2),0.04,3.4),mat(0x3d4148,0.45,0.6)));deck.position.y=0.02;deck.receiveShadow=true;
+  DYNO.drums=[];
+  driven.forEach(s=>{const x=s*wx;
+    const slot=add(new TH.Mesh(new TH.BoxGeometry(0.62,0.05,2.6),mat(0x050506,1,0)));slot.position.set(x,0.021,0);
+    const dg=new TH.Group();dg.position.set(x,-0.27,0);
+    const drum=new TH.Mesh(new TH.CylinderGeometry(0.305,0.305,2.4,32),mat(0x4a4f57,0.35,0.85));drum.rotation.x=Math.PI/2;dg.add(drum);
+    const mark=new TH.Mesh(new TH.BoxGeometry(0.05,0.02,2.42),mat(0xe8c21a,0.5,0.2));mark.position.y=0.3;dg.add(mark);
+    add(dg);DYNO.drums.push(dg);
+    [1,-1].forEach(z=>{const e=add(new TH.Mesh(new TH.BoxGeometry(0.7,0.05,0.14),mat(0xe8c21a,0.6)));e.position.set(x,0.045,z*1.32);});});
+  // wheel chocks on the axle that isn't driven
+  if(c.drive!=='awd'){const x=-driven[0]*wx;[1,-1].forEach(z=>[1,-1].forEach(f=>{
+    const ch=add(new TH.Mesh(new TH.BoxGeometry(0.22,0.14,0.32),mat(0xe8c21a,0.7)));ch.position.set(x+f*(DYNO.geom.wr+0.1),0.07,z*hw*0.86);ch.rotation.z=-f*0.45;}));}
+  // ratchet straps from the tow points out to the floor anchors
+  const strap=(a,b)=>{const d=new TH.Vector3().subVectors(b,a),L=d.length();
+    const m=add(new TH.Mesh(new TH.BoxGeometry(L,0.045,0.01),mat(0xf2b705,0.8)));m.position.copy(a).add(b).multiplyScalar(0.5);
+    m.quaternion.setFromUnitVectors(new TH.Vector3(1,0,0),d.normalize());
+    const rk=add(new TH.Mesh(new TH.BoxGeometry(0.12,0.07,0.07),mat(0x9aa0a8,0.4,0.8)));rk.position.copy(m.position);
+    const an=add(new TH.Mesh(new TH.CylinderGeometry(0.06,0.06,0.03,10),mat(0x777b80,0.4,0.8)));an.position.set(b.x,0.03,b.z);};
+  [[nose-0.35,1],[tail+0.35,-1]].forEach(([x,f])=>[1,-1].forEach(z=>strap(new TH.Vector3(x,0.32,z*hw*0.55),new TH.Vector3(x+f*1.5,0.02,z*(hw+0.7)))));
+  // exhaust extraction hose pulled over the tailpipe(s) up to the ceiling duct
+  const curve=new TH.CatmullRomCurve3([new TH.Vector3(tail-0.05,0.33,0),new TH.Vector3(tail-0.7,0.4,0),new TH.Vector3(tail-1.4,1.4,0),new TH.Vector3(tail-1.6,3.4,0),new TH.Vector3(tail-1.6,6.2,0)]);
+  const hose=add(new TH.Mesh(new TH.TubeGeometry(curve,40,0.1,10,false),mat(0x1b1c1f,0.85,0.2)));hose.castShadow=true;
+  // fan and cart positions follow the car's size
+  P.fan.position.set(nose+1.25,1.25,0);P.cart.position.set(nose-0.6,0,-hw-1.5);P.cart.rotation.y=-0.5;
+}
+function dynoView(t){
+  const g=DYNO.geom||{len:4.6,nose:2.3,tail:-2.3},mode=(document.getElementById('viewMode')||{}).value||'chase';
+  const cam=DYNO.cam,W=(stageWrap&&stageWrap.clientWidth)||960,H=340;cam.aspect=W/H;cam.updateProjectionMatrix();
+  const sw=Math.sin(t*0.12)*0.25;
+  if(mode==='side'){cam.position.set(0.2+sw,0.95,g.len*0.92+0.7);cam.lookAt(0,0.62,0);}
+  else if(mode==='wide'){cam.position.set(g.tail-3.2,2.6,4.4+sw);cam.lookAt(0.4,0.6,0);}
+  else{cam.position.set(g.nose+2.4,1.55,3.9+sw);cam.lookAt(-0.3,0.55,0);}
+}
+function dynoRender(t){
+  if(!rend){initStage();if(!rend)return;}
+  if(!DYNO.scene)dynoBuildScene();
+  if(!laneEmpty('A'))dynoPlaceCar();else if(DYNO.car){DYNO.scene.remove(DYNO.car.grp);DYNO.car=null;DYNO.carKey='';}
+  dynoView(t||0);rend.render(DYNO.scene,DYNO.cam);
+}
+/* ---- the live dyno sheet ---- */
+function dynoSheet(run,idx,s){
+  const cv=document.getElementById('dynoCanvas');if(!cv)return;const x=cv.getContext('2d'),W=cv.width,H=cv.height;
+  x.fillStyle='#0b0e12';x.fillRect(0,0,W,H);
+  const c=run?run.car:null;
+  x.fillStyle='#e6e9ee';x.font='600 18px "Roboto Mono",monospace';x.textAlign='left';
+  x.fillText('CHASSIS DYNO'+(c?' · '+c.name:''),18,28);
+  x.font='13px "Roboto Mono",monospace';x.fillStyle='#8b9099';
+  if(run)x.fillText((run.awd?'AWD twin-roll':'Inertia roll')+' · SAE J1349 · CF '+run.CF.toFixed(2)+' · smoothing 5 · test gear '+(run.gear+1)+' ('+run.ratio.toFixed(2)+':1)',18,48);
+  else x.fillText('Load a car into lane 1 and press Run dyno.',18,48);
+  // graph area
+  const L=250,R=W-70,T=70,B=H-44;
+  const rpm0=run?Math.max(0,run.startRpm-300):1000,rpm1=c?c.redline+200:7000;
+  const top=run?Math.max(100,Math.ceil(Math.max(run.pk.hp,run.pk.tq)*1.18/50)*50):500;
+  const X=r=>L+(R-L)*(r-rpm0)/(rpm1-rpm0),Y=v=>B-(B-T)*v/top;
+  x.strokeStyle='#232931';x.lineWidth=1;x.font='11px "Roboto Mono",monospace';x.fillStyle='#6f7680';
+  for(let v=0;v<=top;v+=top>600?100:50){x.beginPath();x.moveTo(L,Y(v));x.lineTo(R,Y(v));x.stroke();x.textAlign='right';x.fillText(v,L-6,Y(v)+4);x.textAlign='left';x.fillText(v,R+6,Y(v)+4);}
+  const st=rpm1-rpm0>6000?1000:500;
+  for(let r=Math.ceil(rpm0/st)*st;r<=rpm1;r+=st){x.beginPath();x.moveTo(X(r),T);x.lineTo(X(r),B);x.stroke();x.textAlign='center';x.fillText(r,X(r),B+16);}
+  x.textAlign='center';x.fillText('ENGINE RPM',(L+R)/2,H-8);
+  x.save();x.translate(L-42,(T+B)/2);x.rotate(-Math.PI/2);x.fillStyle='#e8504a';x.fillText('WHEEL HP',0,0);x.restore();
+  x.save();x.translate(R+50,(T+B)/2);x.rotate(Math.PI/2);x.fillStyle='#4aa3e8';x.fillText('TORQUE LB-FT',0,0);x.restore();
+  if(run){
+    const pts=run.pts.filter(p=>p.i<=idx);
+    const line=(key,col)=>{x.beginPath();x.lineWidth=2.6;x.strokeStyle=col;pts.forEach((p,k)=>{const px=X(p.rpm),py=Y(p[key]);k?x.lineTo(px,py):x.moveTo(px,py);});x.stroke();};
+    line('tq','#4aa3e8');line('hp','#e8504a');
+    if(pts.length){const p=pts[pts.length-1];[['hp','#e8504a'],['tq','#4aa3e8']].forEach(([k,col])=>{x.beginPath();x.arc(X(p.rpm),Y(p[k]),4,0,7);x.fillStyle=col;x.fill();});}
+    if(s&&(s.phase==='brake'||s.phase==='done'||s.phase==='limiter')&&pts.length){
+      x.font='600 12px "Roboto Mono",monospace';
+      x.fillStyle='#e8504a';x.textAlign='left';x.fillText('MAX '+run.pk.hp.toFixed(1)+' WHP @ '+Math.round(run.pk.hpRpm),X(run.pk.hpRpm)-150,Y(run.pk.hp)-10);
+      x.fillStyle='#4aa3e8';x.fillText('MAX '+run.pk.tq.toFixed(1)+' LB-FT @ '+Math.round(run.pk.tqRpm),Math.max(L+4,X(run.pk.tqRpm)-120),Y(run.pk.tq)-10);}
+  }
+  // live readouts down the left
+  const val=(lbl,v,col,y)=>{x.textAlign='left';x.fillStyle='#6f7680';x.font='11px "Roboto Mono",monospace';x.fillText(lbl,18,y);
+    x.fillStyle=col;x.font='600 26px "Roboto Mono",monospace';x.fillText(v,18,y+27);};
+  const cur=run&&s?run.pts.filter(p=>p.i<=idx).slice(-1)[0]:null;
+  const label={idle:'WARM-UP · FAN ON',rollup:'ROLLING INTO GEAR '+(run?run.gear+1:''),hold:'STEADY @ '+(run?run.startRpm:'')+' RPM',pull:'PULL · WIDE OPEN',limiter:'REV LIMITER',brake:'LIFT · ROLL BRAKING',done:'RUN COMPLETE'}[s?s.phase:'']||'READY';
+  x.fillStyle=s&&s.phase==='pull'?'#ffb020':'#9ad06a';x.font='600 13px "Roboto Mono",monospace';x.fillText(label,18,82);
+  val('ENGINE RPM',s?Math.round(s.rpm):0,'#e6e9ee',104);
+  val('ROLL MPH',s?(s.v*2.23694).toFixed(1):'0.0','#e6e9ee',160);
+  val('WHEEL HP',cur&&s&&s.phase==='pull'?cur.hp.toFixed(1):(run&&s&&(s.phase==='brake'||s.phase==='done'||s.phase==='limiter')?run.pk.hp.toFixed(1):'—'),'#e8504a',216);
+  val('TORQUE',cur&&s&&s.phase==='pull'?cur.tq.toFixed(1):(run&&s&&(s.phase==='brake'||s.phase==='done'||s.phase==='limiter')?run.pk.tq.toFixed(1):'—'),'#4aa3e8',272);
+  if(c&&(IND[c.ind]||{}).boosted)val('BOOST PSI',s?(s.boost*((clusterMeta.A||{}).psi||12)*(s.thr>0.5?1:0.3)).toFixed(1):'0.0','#c9a227',328);
+  if(DYNO.tex)DYNO.tex.needsUpdate=true;
+}
+function dynoStop(){if(DYNO.anim)cancelAnimationFrame(DYNO.anim);DYNO.anim=null;window.__racing=false;}
+function runDyno(){
+  const box=document.getElementById('errBox');
+  if(laneEmpty('A')){box.textContent='Nothing Selected. Load a car into lane 1 to put it on the dyno.';box.classList.add('show');return;}
+  const c=readCar('A');const errs=validate(c);if(errs.length){box.textContent=errs[0];box.classList.add('show');return;}
+  box.classList.remove('show');reset();buildClusters();
+  c.temp=ambient();
+  const run=dynoSim(c);DYNO.run=run;window.lastRaceInfo=null;
+  document.getElementById('verdict').textContent='';
+  document.getElementById('treeMsg').textContent='On the dyno';
+  dynoRender(0);startVoicesN({A:c},['A']);
+  const car=DYNO.car,meta=clusterMeta.A||{tachMax:8,spdMax:160,psi:12},m=c.weight/LB_PER_KG;
+  const drivenIdx=c.drive==='awd'?[0,1,2,3]:c.drive==='fwd'?[0,1]:[2,3];
+  let th=0,thv=0,dist=0,drumA=0,fanS=0,lastT=0,prevGear=0;const t0=performance.now();
+  window.__racing=true;
+  const frame=now=>{
+    if(!DYNO.run||DYNO.run!==run)return;
+    const t=Math.max(0,(now-t0)/1000),dt=Math.min(0.05,Math.max(0.001,t-lastT));lastT=t;
+    const i=Math.min(run.S.length-1,Math.floor(t/run.DT)),s=run.S[i];
+    // body: the drive force squats the driven end and lifts the nose (held down a bit by the straps),
+    // plus engine shake that grows with rpm under load
+    const gF=s.F/(m*9.81),k=c.drive==='awd'?0.55:c.drive==='fwd'?0.45:1;
+    const tgt=0.05*gF*k*0.8,w=2*Math.PI*1.5;thv+=(w*w*(tgt-th)-2*0.32*w*thv)*dt;th+=thv*dt;
+    const shake=(s.thr>0.6?1:0.35)*(s.rpm/c.redline)*0.0016;
+    if(car){car.shell.rotation.z=th+(Math.random()-0.5)*shake;car.shell.rotation.x=(Math.random()-0.5)*shake*0.6;
+      car.shell.position.y=-Math.abs(gF)*0.012*k;
+      dist+=s.v*dt;const ang=-dist/((car.S.wr||14)*U);
+      car.wheels.forEach((wh,j)=>{if(drivenIdx.indexOf(j)>=0){wh.rotation.z=ang;
+        const ud=wh.userData;if(ud.blur){const op=Math.max(0,Math.min(0.72,(s.v*dt/((car.S.wr||14)*U)-0.22)/0.45));ud.blur.forEach(b=>{b.material.opacity=op;b.visible=op>0.01;});}}});
+      car.brake.emissiveIntensity=s.phase==='brake'?1.6:0.5;if(car.taillight)car.taillight.intensity=0.08;if(car.headlight)car.headlight.visible=false;}
+    drumA-=s.v*dt/0.305;(DYNO.drums||[]).forEach(d=>d.rotation.z=drumA);
+    fanS=Math.min(1,fanS+dt*0.5);DYNO.parts.blades.rotation.x+=fanS*dt*22;
+    // gauges and sound
+    const mph=s.v*2.23694;setNeedle('nd-rpm-A',s.rpm/(meta.tachMax||8000));setNeedle('nd-spd-A',mph/(meta.spdMax||160));
+    const em=document.getElementById('cl-mph-A');if(em)em.textContent=Math.round(mph);setGear('A',s.gear+1);
+    const bb=document.getElementById('cl-bb-A');if(bb){bb.style.width=(Math.max(0,s.boost)*100).toFixed(0)+'%';const ps=document.getElementById('cl-psi-A');if(ps)ps.textContent=(s.boost*meta.psi).toFixed(1);}
+    const sw=document.getElementById('cl-slip-A');if(sw){sw.textContent='DYNO · '+({idle:'WARM-UP',rollup:'ROLLING',hold:'STEADY',pull:'PULL',limiter:'LIMITER',brake:'BRAKING',done:'DONE'}[s.phase]);sw.className='slipwarn';}
+    const vo=voices.A;if(vo){const sh=s.gear!==prevGear;prevGear=s.gear;vo.update(s.rpm,s.thr,s.boost,0,sh||s.shift,mph);}
+    if(now-DYNO.lastDraw>50||s.phase==='done'){DYNO.lastDraw=now;dynoSheet(run,i,s);}
+    dynoView(t);rend.render(DYNO.scene,DYNO.cam);audio3D();
+    if(t<run.end+0.1)DYNO.anim=requestAnimationFrame(frame);
+    else{window.__racing=false;stopVoices();dynoSheet(run,run.S.length,run.S[run.S.length-1]);
+      const loss=(1-run.pk.hp/c.hp)*100;
+      document.getElementById('treeMsg').textContent='Run complete';
+      document.getElementById('verdict').textContent=c.name+' on the dyno: '+run.pk.hp.toFixed(1)+' whp @ '+Math.round(run.pk.hpRpm).toLocaleString()+' rpm · '+
+        run.pk.tq.toFixed(1)+' lb-ft @ '+Math.round(run.pk.tqRpm).toLocaleString()+' rpm (SAE, gear '+(run.gear+1)+'). Rated '+Math.round(c.hp)+' hp at the crank → '+loss.toFixed(1)+'% lost through the drivetrain.';}
+  };
+  DYNO.anim=requestAnimationFrame(frame);
+}
+
 document.getElementById('runBtn').addEventListener('click',()=>{
+  if(currentVenue()==='dyno'){runDyno();return;}
   /* Single player can test-run one car: empty lanes simply sit out. Online, every lane
      needs a car (the host's Start button already checks that). */
   const solo=!(typeof MP!=='undefined'&&MP.on);
@@ -10507,7 +10821,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='aee5d49056';let dismissed=null;
+(function(){const V='079c4189a4';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
