@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="ddb4450684";</script>
+<head><script>window.QM_VER="43f72bc60b";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -2128,8 +2128,8 @@ window.activeRacers=2;
 document.getElementById('carForms').innerHTML=
   LANES.map((l,i)=>buildForm(l,LANE_COLORS[l],i+1)).join('');
 /* The car's hardware can only be changed in the Real Customization map. On the race tracks the
-   driver still picks the drive mode, shift strategy and launch technique. */
-const SPEC_FIELDS=['hp','hpRpm','tq','tqRpm','redline','disp','ind','engSound','layout','drive','trans','fd','launchRpm','weight','tireD','tire',
+   driver still picks the drive mode, shift strategy and launch technique (method and launch rpm). */
+const SPEC_FIELDS=['hp','hpRpm','tq','tqRpm','redline','disp','ind','engSound','layout','drive','trans','fd','weight','tireD','tire',
   'dist','cg','wb','cda','eff','shift','stall','stallRpm','hpPerL','hybHp','hybTq','redFrac','gripAdj'];
 function specLock(){LANES.forEach(L=>{SPEC_FIELDS.forEach(k=>{const el=document.getElementById(k+L);if(el){el.dataset.spec='1';el.disabled=true;}});
   for(let i=1;i<=10;i++){const el=document.getElementById('g'+L+i);if(el){el.dataset.spec='1';el.disabled=true;}}});}
@@ -11601,7 +11601,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='ddb4450684';let dismissed=null;
+(function(){const V='43f72bc60b';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
