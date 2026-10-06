@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="02a9a0f365";</script>
+<head><script>window.QM_VER="8264e031e9";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -436,6 +436,7 @@ footer p{margin-bottom:10px}
       <option value="2640">1/2 mile</option>
       <option value="5280">1 mile</option>
       <option value="10560">2 miles</option>
+      <option value="26400">5 miles</option>
     </select></div>
   <div class="fld"><label for="startMph">START</label>
     <select id="startMph"><option value="0" selected>From a dig (0 mph)</option></select></div>
@@ -2747,18 +2748,30 @@ function crossoverPoints(c){
   }
   pts.push(c.redline);return pts;
 }
+/* Shift points are found by racing the car many times. The answer only depends on the car and
+   the run, so it is remembered (and worked out in the background as soon as a car is loaded).
+   On long runs the search only races as far as the last gear change plus a margin: past that point
+   the shift points no longer make any difference. */
+const SP_CACHE=new Map();
+function spKey(c){const o={};Object.keys(c).sort().forEach(k=>{if(k!=='shiftPoints'&&k!=='tireTemp0'&&k!=='noRunout')o[k]=c[k];});return JSON.stringify(o);}
 function optimalShiftPoints(c){
-  const ev=p=>simulate(Object.assign({},c,{shiftPoints:p,noRunout:true})).et;
+  const key=spKey(c);if(SP_CACHE.has(key))return SP_CACHE.get(key).slice();
+  const full=c.raceFt||1320;let evFt=full;
+  if(full>1320){const base=simulate(Object.assign({},c,{shiftPoints:crossoverPoints(c),noRunout:true})),tr=base.trace||[];
+    let g=tr.length?tr[0].gear:0,lastX=0;for(const s of tr){if(s.gear!==g){g=s.gear;lastX=s.x;}}
+    evFt=Math.min(full,Math.max(1320,lastX*FT_PER_M*1.25+400));}
+  const ev=p=>simulate(Object.assign({},c,{shiftPoints:p,noRunout:true,raceFt:evFt})).et;
   let pts=crossoverPoints(c),best=ev(pts);
   const floor0=Math.round(c.redline*0.40);
   for(let R=floor0;R<=c.redline;R+=Math.round(c.redline*0.05)){
     const t=pts.slice();t[0]=R;const e=ev(t);if(e<best-0.0005){best=e;pts=t;}}
   for(let pass=0;pass<2;pass++)for(let i=0;i<c.gears.length-1;i++){
     const base=pts[i];
-    for(const d of [-900,-450,-200,-80,80,200]){
+    for(const d of (pass?[-120,120]:[-900,-450,-200,-80,80,200])){
       const R=Math.max(floor0,Math.min(c.redline,base+d));
       const t=pts.slice();t[i]=R;const e=ev(t);if(e<best-0.0005){best=e;pts=t;}}}
-  return pts.map(Math.round);
+  const out=pts.map(Math.round);
+  if(SP_CACHE.size>200)SP_CACHE.clear();SP_CACHE.set(key,out);return out.slice();
 }
 function resolveShiftPoints(c){
   if(c.shiftMode==='redline')return c.gears.map(()=>c.redline);
@@ -4565,9 +4578,18 @@ function setNeedle(id,frac){const el=document.getElementById(id);if(!el)return;
   const muscle=el.getAttribute('data-muscle')==='1';
   const a0=muscle?-135:-125, span=muscle?270:250;
   el.setAttribute('transform','rotate('+(a0+span*f).toFixed(1)+' 100 100)');}
+/* Work out a lane's shift points in the background shortly after its car changes, so pressing
+   Run doesn't have to wait for them. */
+const SP_PRE={};
+function precomputeShift(lane){clearTimeout(SP_PRE[lane]);
+  SP_PRE[lane]=setTimeout(()=>{try{
+    if(typeof laneEmpty==='function'&&laneEmpty(lane))return;
+    const c=readCar(lane);if(validate(c).length)return;
+    c.raceFt=raceDist();c.startMph=startMph();if(c.startMph>0)return;
+    resolveShiftPoints(c);}catch(e){}},700);}
 function refresh(lane){
   const c=readCar(lane);
-  drawCurve(lane);
+  drawCurve(lane);precomputeShift(lane);
   const I=IND[c.ind]||IND.na,bi=boostInfo(c);
   const ind=document.getElementById('indNote'+lane);
   if(ind&&!isNaN(c.hp)){
@@ -9371,7 +9393,7 @@ function stepSusp(l,c,dt){
 const tempIn=document.getElementById('temp'),tempSl=document.getElementById('tempSlide');
 tempIn.addEventListener('input',()=>{tempSl.value=tempIn.value;refreshAll();});
 tempSl.addEventListener('input',()=>{tempIn.value=tempSl.value;refreshAll();});
-document.getElementById('dist').addEventListener('change',reset);
+document.getElementById('dist').addEventListener('change',()=>{reset();activeLanes().forEach(precomputeShift);});
 /* Venue rules. The strip is two lanes, so it is only offered with 2 racers.
    Drag racing always starts from a dig, and strips run 1/8, 1000 ft or 1/4 mile. */
 function syncVenue(){
@@ -9612,6 +9634,10 @@ document.getElementById('runBtn').addEventListener('click',()=>{
   const D=raceDist(),S=startMph();
   lanes.forEach(l=>{cars[l].raceFt=D;cars[l].startMph=S;});
   document.getElementById('treeMsg').textContent='Computing shift points…';
+  if(!window.__spReady){const need=lanes.some(l=>{const c=Object.assign({},cars[l]);return c.shiftMode!=='redline'&&c.shiftMode!=='peak'&&c.shiftMode!=='custom'&&!SP_CACHE.has(spKey(c));});
+    if(need){window.__spReady=true;const btn=document.getElementById('runBtn'),was=btn.disabled;btn.disabled=true;
+      setTimeout(()=>{btn.disabled=false;btn.click();btn.disabled=was;window.__spReady=false;},30);return;}}
+  window.__spReady=false;
   const res={};
   const onStrip=(currentVenue()==='strip'&&activeLanes().length===2);
   const PRE=(S===0)?planPreRace(cars,lanes,onStrip,ambient()):null;
@@ -10428,7 +10454,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='02a9a0f365';let dismissed=null;
+(function(){const V='8264e031e9';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
