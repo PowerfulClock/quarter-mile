@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="c3d5f7fa68";</script>
+<head><script>window.QM_VER="a0c0c5c392";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -2055,6 +2055,83 @@ Object.assign(PRESETS,{
   ind:"na",disp:6.5,engSound:"v12",gears:[3.41,2.61,1.88,1.43,1.10,0.87,0.71],fd:3.7,drive:"awd",trans:"amt",
   layout:"mid",tire:"summer",weight:3900,dist:43,tireD:27.9,cda:7.6,wb:106.3,cg:18,shift:0.10,launchRpm:6300,gripAdj:1.0,vmax:217}),
 });
+Object.assign(PRESETS,{
+ g37c15journey:Object.assign({},P1,{name:"2015 Infiniti G37 Coupe Journey",mfr:"Infiniti",hp:330,hpRpm:7000,tq:270,tqRpm:5200,redline:7500,
+  ind:"na",disp:3.7,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.357,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3668,dist:53,tireD:26.9,cda:6.6,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,192],[2000,214],[3000,232],[4000,251],[5200,270],[6000,266],[7000,247.6],[7500,226]]}),
+ g37c15awd:Object.assign({},P1,{name:"2015 Infiniti G37 Coupe AWD",mfr:"Infiniti",hp:330,hpRpm:7000,tq:270,tqRpm:5200,redline:7500,
+  ind:"na",disp:3.7,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.357,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3814,dist:55,tireD:26.7,cda:6.6,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,192],[2000,214],[3000,232],[4000,251],[5200,270],[6000,266],[7000,247.6],[7500,226]]}),
+ g37c15sport:Object.assign({},P1,{name:"2015 Infiniti G37 Coupe Sport",mfr:"Infiniti",hp:330,hpRpm:7000,tq:270,tqRpm:5200,redline:7500,
+  ind:"na",disp:3.7,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.357,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3693,dist:53,tireD:27.0,cda:6.6,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,192],[2000,214],[3000,232],[4000,251],[5200,270],[6000,266],[7000,247.6],[7500,226]]}),
+ g37c15sport6mt:Object.assign({},P1,{name:"2015 Infiniti G37 Coupe Sport 6MT",mfr:"Infiniti",hp:330,hpRpm:7000,tq:270,tqRpm:5200,redline:7500,
+  ind:"na",disp:3.7,engSound:"v6",gears:[3.794, 2.324, 1.624, 1.271, 1.0, 0.794],fd:3.692,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3668,dist:53,tireD:27.0,cda:6.6,wb:112.2,cg:20,launch:"none",launchRpm:3200,gripAdj:1.0,modes:['normal'],mode:"normal",curve:[[1000,192],[2000,214],[3000,232],[4000,251],[5200,270],[6000,266],[7000,247.6],[7500,226]]}),
+ g37c15sportltd:Object.assign({},P1,{name:"2015 Infiniti G37 Coupe Sport Limited",mfr:"Infiniti",hp:330,hpRpm:7000,tq:270,tqRpm:5200,redline:7500,
+  ind:"na",disp:3.7,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.357,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3717,dist:53,tireD:27.0,cda:6.6,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,192],[2000,214],[3000,232],[4000,251],[5200,270],[6000,266],[7000,247.6],[7500,226]]}),
+ g37c15sportltd6mt:Object.assign({},P1,{name:"2015 Infiniti G37 Coupe Sport Limited 6MT",mfr:"Infiniti",hp:330,hpRpm:7000,tq:270,tqRpm:5200,redline:7500,
+  ind:"na",disp:3.7,engSound:"v6",gears:[3.794, 2.324, 1.624, 1.271, 1.0, 0.794],fd:3.692,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3693,dist:53,tireD:27.0,cda:6.6,wb:112.2,cg:20,launch:"none",launchRpm:3200,gripAdj:1.0,modes:['normal'],mode:"normal",curve:[[1000,192],[2000,214],[3000,232],[4000,251],[5200,270],[6000,266],[7000,247.6],[7500,226]]}),
+ q50_21purerwd:Object.assign({},P1,{name:"2021 Infiniti Q50 Pure",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3685,dist:55,tireD:26.7,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21pureawd:Object.assign({},P1,{name:"2021 Infiniti Q50 Pure AWD",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3810,dist:57,tireD:26.7,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21luxerwd:Object.assign({},P1,{name:"2021 Infiniti Q50 Luxe",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3732,dist:55,tireD:26.9,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21luxeawd:Object.assign({},P1,{name:"2021 Infiniti Q50 Luxe AWD",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3857,dist:57,tireD:26.9,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21sigrwd:Object.assign({},P1,{name:"2021 Infiniti Q50 Signature Edition",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3740,dist:55,tireD:26.9,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21sigawd:Object.assign({},P1,{name:"2021 Infiniti Q50 Signature Edition AWD",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3865,dist:57,tireD:26.9,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21sensoryrwd:Object.assign({},P1,{name:"2021 Infiniti Q50 Sensory",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3785,dist:55,tireD:26.7,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21sensoryawd:Object.assign({},P1,{name:"2021 Infiniti Q50 Sensory AWD",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3910,dist:57,tireD:26.7,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q50_21rs400rwd:Object.assign({},P1,{name:"2021 Infiniti Q50 Red Sport 400",mfr:"Infiniti",hp:400,hpRpm:6400,tq:350,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.133,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3855,dist:55,tireD:26.7,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport','track'],mode:"normal",curve:[[1000,235],[1600,350],[5200,350],[6400,328.2],[7000,286]]}),
+ q50_21rs400awd:Object.assign({},P1,{name:"2021 Infiniti Q50 Red Sport 400 AWD",mfr:"Infiniti",hp:400,hpRpm:6400,tq:350,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.133,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:3980,dist:57,tireD:26.7,cda:6.5,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport','track'],mode:"normal",curve:[[1000,235],[1600,350],[5200,350],[6400,328.2],[7000,286]]}),
+ q60_1720trwd:Object.assign({},P1,{name:"2017 Infiniti Q60 2.0t",mfr:"Infiniti",hp:208,hpRpm:5500,tq:258,tqRpm:1500,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[4.38, 2.86, 1.92, 1.37, 1.0, 0.82, 0.73],fd:3.27,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3727,dist:55,tireD:26.7,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,175],[1500,258],[3500,258],[5500,198.6],[6000,180],[6500,160]]}),
+ q60_1720tawd:Object.assign({},P1,{name:"2017 Infiniti Q60 2.0t AWD",mfr:"Infiniti",hp:208,hpRpm:5500,tq:258,tqRpm:1500,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[4.38, 2.86, 1.92, 1.37, 1.0, 0.82, 0.73],fd:3.27,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3840,dist:57,tireD:26.7,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,175],[1500,258],[3500,258],[5500,198.6],[6000,180],[6500,160]]}),
+ q60_1720tprwd:Object.assign({},P1,{name:"2017 Infiniti Q60 2.0t Premium",mfr:"Infiniti",hp:208,hpRpm:5500,tq:258,tqRpm:1500,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[4.38, 2.86, 1.92, 1.37, 1.0, 0.82, 0.73],fd:3.27,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3765,dist:55,tireD:26.7,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,175],[1500,258],[3500,258],[5500,198.6],[6000,180],[6500,160]]}),
+ q60_1720tpawd:Object.assign({},P1,{name:"2017 Infiniti Q60 2.0t Premium AWD",mfr:"Infiniti",hp:208,hpRpm:5500,tq:258,tqRpm:1500,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[4.38, 2.86, 1.92, 1.37, 1.0, 0.82, 0.73],fd:3.27,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3878,dist:57,tireD:26.7,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,175],[1500,258],[3500,258],[5500,198.6],[6000,180],[6500,160]]}),
+ q60_1730tprwd:Object.assign({},P1,{name:"2017 Infiniti Q60 3.0t Premium",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3774,dist:55,tireD:26.7,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q60_1730tpawd:Object.assign({},P1,{name:"2017 Infiniti Q60 3.0t Premium AWD",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:3887,dist:57,tireD:26.7,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q60_1730tsrwd:Object.assign({},P1,{name:"2017 Infiniti Q60 3.0t Sport",mfr:"Infiniti",hp:300,hpRpm:6400,tq:295,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:2.937,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3855,dist:55,tireD:26.3,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport'],mode:"normal",curve:[[1000,205],[1600,295],[5200,295],[6400,246.2],[7000,214]]}),
+ q60_17rs400rwd:Object.assign({},P1,{name:"2017 Infiniti Q60 Red Sport 400",mfr:"Infiniti",hp:400,hpRpm:6400,tq:350,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.133,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3862,dist:55,tireD:26.3,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport','track'],mode:"normal",curve:[[1000,235],[1600,350],[5200,350],[6400,328.2],[7000,286]]}),
+ q60_17rs400awd:Object.assign({},P1,{name:"2017 Infiniti Q60 Red Sport 400 AWD",mfr:"Infiniti",hp:400,hpRpm:6400,tq:350,tqRpm:1600,redline:7000,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.133,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:3975,dist:57,tireD:26.3,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport','track'],mode:"normal",curve:[[1000,235],[1600,350],[5200,350],[6400,328.2],[7000,286]]}),
+});
 // Tag manufacturer on existing presets for search/grouping
 const MFR_MAP={mustang25eco:"Ford",mustang18eco:"Ford",mustang25gt:"Ford",mustang09v6:"Ford",
  bmw230i:"BMW",bmwM2:"BMW",challSXT11:"Dodge",challRT23:"Dodge",scatpack23:"Dodge",
@@ -2182,7 +2259,7 @@ function hasCustomModel(body,name){
 function hasCustomCluster(body,name){
   const nm=name||'',yr=parseInt(nm,10)||0;
   if(['challenger','camaro','mustang'].indexOf(body)>=0)return true;
-  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0/i.test(nm))return true;
+  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti/i.test(nm))return true;
   if(/corvette/i.test(nm)&&/\bC[78]\b/.test(nm))return true;
   if(/mustang|shelby/i.test(nm)&&yr>=2005)return true;
   if(/charger/i.test(nm)&&yr>=2011)return true;
@@ -3781,6 +3858,51 @@ function displayAccord9(l,c,tk,rf){
 /* Genesis G70: two chrome-ringed dials with glowing orange-red needles; the speedo
    spreads 0-60 mph over half its sweep. Coolant inset in the tach, fuel inset in
    the speedo, and a centre screen with gear, range and drive mode. */
+/* Infiniti (G37 / Q50 / Q60): two deep analog dials, white bar ticks outside a violet-blue ring,
+   white numerals, white needles; tach 0-9 with the red zone outside the ring, coolant arc at its
+   foot; speedo 0-180 mph with an inner km/h scale and the fuel arc; colour TFT between them. */
+function displayInfiniti(l,c,tk,rf){
+  const o=[],BLUE='#3b3df5',glow='url(#ifg'+l+')';
+  const bez=(cx)=>'<circle cx="'+cx+'" cy="92" r="82" fill="#07080b" stroke="#2a2d33" stroke-width="3"/>'+
+    '<circle cx="'+cx+'" cy="92" r="60" fill="none" stroke="'+BLUE+'" stroke-width="3.2" filter="'+glow+'"/>'+
+    '<circle cx="'+cx+'" cy="92" r="57" fill="none" stroke="#1a1c6e" stroke-width="2"/>';
+  o.push(bez(86),bez(354));
+  const tN=tk;
+  o.push(gDial({cx:86,cy:92,R:78,a0:-120,span:240,redFrac:rf,scale:uniScale(tN,2,i=>''),
+    red:{r:80,col:'#e0201a',w:2.4},ticks:{lM:9,wM:3.2,lm:5,wm:1.6,cM:'#f2f2f2',cm:'#d8d8d8',red:'#ff3a2a'},
+    needle:{id:'nd-rpm-'+l,col:'#f4f4f4',r0:-12,r1:56,w:3.4,tw:1.4,hub:{r:9,fill:'#141518',stroke:'#3a3d44',w:1.4}}}));
+  // numerals sit inside the blue ring
+  for(let i=0;i<=tN;i++){const q=pol(86,92,47,-120+240*i/tN);o.push(T(q[0],q[1]+4.5,String(i),12.5,'#fff',{w:600}));}
+  o.push(T(86,75,'RPMx1000',6,'#e8e8e8'));
+  o.push('<path d="'+arcD(98,140,15,-70,40)+'" fill="none" stroke="#e8e8e8" stroke-width="1.2"/>'+T(84,136,'C',6,'#fff')+T(116,134,'H',6,'#fff')+
+    staticNeedle(98,140,-2,14,-28,'#f4f4f4',2));
+  o.push('<g transform="translate(70,116)"><rect x="-4" y="-3" width="8" height="5" rx="1" fill="#3bd16b"/></g>'+
+    '<g transform="translate(104,116)"><circle r="2.6" fill="#3bd16b"/></g>');
+  // speedometer 0-180 mph, inner km/h
+  const M=[],m=[];for(let v=0;v<=180;v+=20)M.push({p:v/180,t:String(v)});for(let v=10;v<180;v+=20)m.push(v/180);
+  o.push(gDial({cx:354,cy:92,R:78,a0:-120,span:240,scale:{M:M.map(q=>({p:q.p,t:''})),m},
+    ticks:{lM:9,wM:3.2,lm:5,wm:1.6,cM:'#f2f2f2',cm:'#d8d8d8'},
+    needle:{id:'nd-spd-'+l,col:'#f4f4f4',r0:-12,r1:56,w:3.4,tw:1.4,hub:{r:9,fill:'#141518',stroke:'#3a3d44',w:1.4}}}));
+  M.forEach(q=>{const p=pol(354,92,47,-120+240*q.p);o.push(T(p[0],p[1]+4.5,q.t,11.5,'#fff',{w:600}));});
+  for(let k=0;k<=280;k+=40){const p=pol(354,92,33,-120+240*(k/1.609)/180);if(k/1.609<=180)o.push(T(p[0],p[1]+2.5,String(k),5.6,'#cfd3da'));}
+  o.push(T(354,76,'MPH',6,'#e8e8e8')+T(372,118,'km/h',5,'#cfd3da'));
+  o.push('<path d="'+arcD(366,140,15,-40,70)+'" fill="none" stroke="#e8e8e8" stroke-width="1.2"/>'+T(352,136,'0',6,'#fff')+T(382,134,'1',6,'#fff')+
+    '<path d="'+arcD(366,140,15,-40,-30)+'" fill="none" stroke="#e0201a" stroke-width="2"/>'+staticNeedle(366,140,-2,14,40,'#f4f4f4',2));
+  // centre TFT
+  o.push('<rect x="176" y="20" width="88" height="144" rx="3" fill="#0b1018" stroke="#2c3440" stroke-width="1.2"/>'+
+    T(184,32,'12:36 AM',7.5,'#fff',{anchor:'start'})+T(258,32,Math.round(ambient())+'°F',7.5,'#fff',{anchor:'end'})+
+    '<line x1="180" y1="37" x2="260" y2="37" stroke="#56606e" stroke-width="1"/>'+
+    '<rect x="186" y="42" width="11" height="19" rx="3" fill="none" stroke="#3bd16b" stroke-width="1.6"/>'+
+    T(258,56,'<tspan id="cl-g-'+l+'">0.00</tspan> g',7,'#fff',{anchor:'end'})+
+    '<line x1="180" y1="66" x2="260" y2="66" stroke="#56606e" stroke-width="1"/>'+
+    T(220,80,'Speed',8,'#e6e9ee')+T(214,106,'0',25,'#fff',{id:'cl-mph-'+l,w:500})+T(246,106,'MPH',6.5,'#fff')+
+    T(220,122,'Average',7,'#e6e9ee')+T(228,134,'— MPH',7,'#fff')+
+    '<line x1="180" y1="139" x2="260" y2="139" stroke="#56606e" stroke-width="1"/>'+
+    T(186,153,'D',12,'#fff',{anchor:'start',id:'cl-gear2-'+l,extra:' data-pre="'+(c.trans==='manual'?'':'D')+'"'})+
+    '<rect x="184" y="155" width="30" height="7" fill="#25a454"/>'+T(199,161,modeTxt(c,{normal:'ECO',sport:'SPORT',track:'SPORT+',corsa:'SPORT+'}),5.5,'#fff')+
+    T(258,153,'34038 mi',7,'#fff',{anchor:'end'}));
+  return svgWrap(o.join(''),glowDef('ifg'+l,1.2),'<rect x="2" y="2" width="436" height="176" rx="40" fill="#0d0e11"/>');
+}
 function displayG70(l,c,tk,rf){
   const o=[],chrome='url(#g7c'+l+')';
   const ring=(x)=>'<circle cx="'+x+'" cy="92" r="80" fill="#0b0c0f" stroke="'+chrome+'" stroke-width="4"/>';
@@ -4442,7 +4564,7 @@ function buildClusters(){
       e.innerHTML='<h3>Nothing Selected</h3><div class="sub">LANE '+(LANES.indexOf(l)+1)+' · LOAD A CAR TO RACE</div>';view.appendChild(e);return;}
     const c=readCar(l);
     const rl=(!isNaN(c.redline)&&c.redline>1200)?c.redline:7000;
-    const tachMax=Math.ceil((rl+400)/1000)*1000;
+    const tachMax=/infiniti/i.test(c.name||'')?Math.max(9000,Math.ceil((rl+400)/1000)*1000):Math.ceil((rl+400)/1000)*1000;
     clusterMeta[l]={tachMax,spdMax:220,boosted:(IND[c.ind]||IND.na).boosted,psi:boostInfo(c).psi};
     // a saved car can pick its cluster; otherwise it follows the body / make
     const cs=(c.cluster&&c.cluster!=='auto')?c.cluster:null;
@@ -4461,7 +4583,7 @@ function buildClusters(){
     const isAcc=/\baccord\b/i.test(nm);
     const NEWC={r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria/i,impala:/impala/i,
       venom:/venom/i,focusrs:/focus rs/i,agera:/agera|jesko/i,regera:/regera/i,lucid:/lucid/i,tesla:/tesla/i,taurus:/taurus/i,
-      mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i};
+      mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i,infiniti:/infiniti/i};
     let nstyle=null;
     const EXTRA=['charger11','charger15','chall11','accord','accord9','s650','mustangD','mustang6','mustang5','camaro6','camaro5','acura17','acura21','bmwm5','bmwcurved'];
     if(cs){if(NEWC[cs]||EXTRA.indexOf(cs)>=0)nstyle=cs;}
@@ -4478,7 +4600,7 @@ function buildClusters(){
     // the Durango speedo reads to 140 mph; SRT models print 200
     const durSpd=/srt|hellcat|392/i.test(nm)?200:140;
     // needle scale must match the numbers printed on each style of speedo
-    clusterMeta[l].spdMax=nstyle?({g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
+    clusterMeta[l].spdMax=nstyle?({infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
     if(nstyle==='charger15')clusterMeta[l].spdMax=/hellcat/i.test(nm)?200:/scat|392/i.test(nm)?180:160;
     const d=document.createElement('div');d.className='cluster'+(darkCluster?' cluster-muscle':'');
     // Build mode buttons from the car's available modes
@@ -4528,7 +4650,7 @@ function buildClusters(){
     if(nstyle){
       const tk=tachMax/1000,rf=rl/tachMax;
       const F={r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
-        golf:displayGolf,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,g70:displayG70,g80:displayG80,
+        golf:displayGolf,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,infiniti:displayInfiniti,g70:displayG70,g80:displayG80,
         mustangD:displayMustangDigital,mustang6:displayMustangS550,mustang5:displayMustangS197,camaro6:(a,b,cc,dd)=>displayCamaro6(a,b,cc,dd,clusterMeta[l].boosted),
         camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,charger15:displayCharger15,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
         venom:displayVenom,focusrs:displayFocusRS,agera:displayAgera,regera:displayRegera,lucid:displayLucid,tesla:displayTesla,taurus:displayTaurus,acura17:displayAcura17,acura21:displayAcura21,bmwm5:displayBMWM5,bmwcurved:displayBMWCurved}[nstyle];
@@ -5199,6 +5321,13 @@ function wheelSpec(body,name){
   }else if(body==='p911'){if(/turbo|gt3/.test(n)){f=ty(20,255,35);r=ty(21,315,30);}else{f=ty(20,245,35);r=ty(21,305,30);}style=/gt3/.test(n)?'ten':'multi';finish=/gt3|turbo/.test(n)?'black':'silver';cal=/gt3|turbo/.test(n)?'yellow':'red';
   }else if(body==='s60'){f=r=ty(19,235,40);style='split5';finish=/polestar/.test(n)?'black':'gunmetal';cal=/polestar/.test(n)?'yellow':'silver';
   }else if(body==='g80'){f=ty(20,245,40);r=ty(20,275,35);style='multi';finish='silver';cal=/sport|3\.5/.test(n)?'red':'silver';
+  }else if(body==='g37c'){if(/sport|limited/.test(n)){f=ty(19,225,45);r=ty(19,245,40);style='split5';finish='silver';cal='silver';}
+    else if(/awd/.test(n)){f=r=ty(17,225,55);style='seven';finish='silver';}else{f=r=ty(18,225,50);style='ten';finish='silver';}
+  }else if(body==='q50'){if(/red sport/.test(n)){f=r=ty(19,245,40);style='multi';finish='gunmetal';cal='silver';}
+    else if(/sensory/.test(n)){f=r=ty(19,245,40);style='multi';finish='silver';}else if(/luxe|signature/.test(n)){f=r=ty(18,225,50);style='split5';finish=/signature/.test(n)?'gunmetal':'silver';}
+    else{f=r=ty(17,225,55);style='ten';finish='silver';}
+  }else if(body==='q60'){if(/red sport|3\.0t sport/.test(n)){f=ty(20,245,35);r=ty(20,265,30);style='multi';finish=/red sport/.test(n)?'gunmetal':'silver';cal=/red sport/.test(n)?'silver':'silver';}
+    else{f=r=ty(19,245,40);style='split5';finish='silver';}
   }else if(body==='g70'){f=ty(19,225,40);r=ty(19,255,35);style='ten';finish='gunmetal';cal=/3\.3/.test(n)?'red':'silver';
   }else if(body==='venom'){f=ty(19,255,35);r=ty(19,345,30);style='ten';finish='silver';cal='red';
   }else if(['agera','jesko','regera'].includes(body)){f=ty(19,265,35);r=ty(20,325,30);style=body==='agera'?'five':'multi';finish=body==='regera'?'silver':'gunmetal';cal='red';
@@ -5673,11 +5802,13 @@ function buildChallenger(colorHex,name){
    A smooth body built from rounded cross-sections laid along the car's length,
    so the nose and tail round off in plan, the shoulders and roof edges are
    rounded, and lamps can follow the body's curve round the corners. */
-function rrSection(wb,wt,yb,yt,rb,rt,n){
+function rrSection(wb,wt,yb,yt,rb,rt,n,sn){
   n=n||6;const h=Math.max(0.05,yt-yb);
   rb=Math.max(0,Math.min(rb,wb*0.95,h*0.48));rt=Math.max(0,Math.min(rt,wt*0.95,h*0.48));
   const P=[],arc=(cz,cy,r,a0,a1)=>{for(let k=0;k<n;k++){const a=(a0+(a1-a0)*k/(n-1))*Math.PI/180;P.push([cz+r*Math.cos(a),cy+r*Math.sin(a)]);}};
-  arc(wb-rb,yb+rb,rb,-90,0);arc(wt-rt,yt-rt,rt,0,90);arc(-(wt-rt),yt-rt,rt,90,180);arc(-(wb-rb),yb+rb,rb,180,270);
+  // sn: extra points up each flank, so a window edge that runs across the side is not one tall facet
+  const flank=(z0,y0,z1,y1)=>{for(let k=1;k<=(sn||0);k++){const t=k/((sn||0)+1);P.push([z0+(z1-z0)*t,y0+(y1-y0)*t]);}};
+  arc(wb-rb,yb+rb,rb,-90,0);flank(wb,yb+rb,wt,yt-rt);arc(wt-rt,yt-rt,rt,0,90);arc(-(wt-rt),yt-rt,rt,90,180);flank(-wt,yt-rt,-wb,yb+rb);arc(-(wb-rb),yb+rb,rb,180,270);
   return P;
 }
 function loftMesh(xs,secFn,classify,mats){
@@ -6534,7 +6665,7 @@ function bpCar(colorHex,name,C){
   const G=C.gh,gTop=bpTab(G.top);
   const gxs=[];for(let x=G.x0;x<=G.x1;x+=0.4)gxs.push(x);gxs.push(G.x1);
   const gbF=G.gbF||(()=>G.GB),gtF=G.gtF||(()=>G.GT);
-  shell.add(loftMesh(gxs,x=>{const yb=yTop(x)-0.7,yt=Math.max(yb+0.2,gTop(x));return rrSection(gbF(x),gtF(x),yb,yt,0.1,G.rr||2.0,6);},
+  shell.add(loftMesh(gxs,x=>{const yb=yTop(x)-0.7,yt=Math.max(yb+0.2,gTop(x));return rrSection(gbF(x),gtF(x),yb,yt,0.1,G.rr||2.0,6,G.sn||0);},
     (x,y,z)=>{const top=gTop(x),az=Math.abs(z),GT=gtF(x);
       if(y<yTop(x)+(G.sill!=null?G.sill:0.5))return 0;
       const wr=G.wrap&&x>G.roof[0];
@@ -8049,6 +8180,7 @@ function buildJP(kind,colorHex,name){
 /* ---------- Volvo S60, Genesis G80 / G70, Hennessey Venom GT, Koenigsegg Agera RS / Jesko / Regera,
    McLaren 720S / 765LT and P1, from scaled blueprints ---------- */
 function luxKind(name){const n=(name||'').toLowerCase();
+  if(/infiniti/.test(n)){if(/g37/.test(n))return 'g37c';if(/q50/.test(n))return 'q50';if(/q60/.test(n))return 'q60';}
   if(/s60/.test(n))return 's60';if(/g80/.test(n))return 'g80';if(/g70/.test(n))return 'g70';if(/venom/.test(n))return 'venom';
   if(/agera/.test(n))return 'agera';if(/jesko/.test(n))return 'jesko';if(/regera/.test(n))return 'regera';
   if(/720s|765/.test(n))return 'mc720';if(/mclaren p1/.test(n))return 'p1';
@@ -8106,6 +8238,29 @@ function buildLux(kind,colorHex,name){
     gtop:[[28.8,21.0],[28,21.8],[24.6,23.7],[20.5,25.8],[16.3,27.5],[12.2,28.5],[8,28.9],[3.9,29.2],[-0.3,29.2],[-4.4,28.9],[-8.6,28.5],[-12.7,27.8],[-16.9,27.1],[-21,26.1],[-25.2,25.1],[-29.3,24.0],[-33.5,22.7],[-35,22.2]],
     roof:[9,-9],wrap:1,front:31,belt:20.6,aS:0,gap:0.5,bp:[99,99],cE:y=>-7.6+(y-21)*0.3,canopy:1,
     mirror:[20,23.0,[3.2,1.8,2.6]],cuts:[[26,4,20.4],[-9,4,21]],handles:[],rocker:[-26,26],rockerY:4},
+  /* Infiniti G37 Coupe (4650 x 1823 x 1407), Q50 (4810 x 1823 x 1442) and Q60 (4683 x 1849 x 1381), all on the
+     2850 mm FR-L wheelbase: side profiles, belt lines and roofs traced from the scaled blueprints */
+  g37c:{sn:10,NOSE:59.3,TAIL:-59.3,W:23.2,wx:36.18,wr:8.7,GB:19.8,GT:14.6,rearSide:3.0,tumbleY:15,tumble:1.4,
+    plan:[[59.3,5],[58.4,11],[57.3,13.6],[56.3,16.0],[55.3,17.8],[54.2,19.1],[53.2,20.1],[51.1,20.9],[49.1,21.8],[47,22.5],[44.9,22.8],[42.8,23.2],[28.3,23.2],[25.2,22.6],[12,22.2],[0,22.2],[-22,22.2],[-26,22.8],[-30,23.2],[-41.1,23.2],[-45.3,22.8],[-47.3,22.2],[-49.4,21.5],[-51.5,20.9],[-53.5,20.3],[-55.6,18.8],[-56.7,17.4],[-57.7,15.3],[-58.7,12],[-59.3,6]],
+    top:[[59.3,12.1],[58.9,12.6],[58.3,13.6],[57.7,15.0],[56.1,18.0],[54.5,20.0],[52.9,20.6],[51.3,21.2],[49.7,21.6],[48.1,21.9],[46.5,22.2],[44.9,22.6],[43.3,23.1],[41.7,23.4],[38.5,23.7],[35.3,24.1],[32.1,24.4],[28.9,24.8],[25.7,24.9],[23.0,25.0],[20.9,24.9],[17.7,24.7],[12.9,24.7],[8.1,24.8],[3.3,24.9],[-1.5,25.1],[-6.3,25.2],[-11.1,25.4],[-15.9,25.6],[-20.7,25.8],[-25.5,26.1],[-30.3,26.3],[-36.7,26.3],[-43.1,26.4],[-47.9,26.3],[-51.1,26.2],[-52.7,26.0],[-53.6,25.2],[-54.3,24.1],[-55.9,19.6],[-57.5,17.2],[-58.3,16.1],[-58.9,15.4],[-59.3,15.0]],
+    bot:[[59.3,10.5],[58.6,6.5],[57,5.0],[52,4.4],[44,4.3],[28,4.3],[-28,4.3],[-45,5.4],[-52,5.7],[-56,6.0],[-57.6,8.0],[-58.8,11],[-59.3,12.5]],
+    gtop:[[23.0,25.3],[21.4,26.6],[19.8,27.6],[18.2,28.6],[16.6,29.5],[15.0,30.3],[13.4,31.0],[11.8,31.7],[10.2,32.4],[8.6,33.1],[7.0,33.7],[5.4,34.0],[3.8,34.3],[2.2,34.5],[0.6,34.7],[-1.0,34.8],[-4.2,34.9],[-7.4,35.0],[-10.6,35.0],[-12.2,34.8],[-13.8,34.7],[-15.4,34.5],[-17.0,34.1],[-18.6,33.9],[-20.2,33.7],[-21.8,33.4],[-23.4,33.0],[-25.0,32.5],[-26.6,32.1],[-28.2,31.7],[-29.8,31.2],[-31.4,30.7],[-33.0,30.2],[-34.6,29.6],[-36.2,29.0],[-37.8,28.5],[-39.4,27.9],[-41.0,27.4],[-42.6,26.9],[-44.0,26.6]],
+    roof:[0.4,-17.5],front:15.5,belt:24.7,aS:1.6,gap:2.1,bp:[99,99],qp:[-15.2,-16.6],cE:y=>-29.9+(y-26.3)*0.55,
+    mirror:[12.2,27.0,[3.4,2.4,3.0]],cuts:[[20.4,5,24.7],[-15.9,5,25.4]],handles:[[-8,21.6]],handleMat:'chrome',rocker:[-24,24],rockerY:5.0},
+  q50:{sn:10,NOSE:59.8,TAIL:-62.6,W:23.2,wx:36.18,wr:8.7,sedan:1,GB:20.4,GT:15.4,rearSide:3.2,tumbleY:15,tumble:1.3,
+    plan:[[59.8,8],[58.8,10.6],[57.8,14.6],[56.7,16.3],[55.7,17.3],[54.6,18.7],[53.6,19.8],[52.6,20.8],[50.5,21.9],[48.4,22.4],[46.3,22.8],[44.2,23.1],[26.5,23.2],[24,22.9],[14,22.8],[0,22.8],[-26,22.9],[-27.6,23.2],[-46.3,23.2],[-48.4,22.9],[-50.5,22.3],[-52.6,21.9],[-54.6,21.4],[-56.7,20.2],[-58.8,19.1],[-60.9,17.0],[-61.9,14.6],[-62.6,10]],
+    top:[[59.8,11.3],[59.4,12.0],[58.8,14.3],[58.2,16.3],[56.6,18.2],[55.0,18.8],[53.4,19.6],[51.8,19.9],[50.2,20.5],[48.6,20.8],[47.0,21.5],[45.4,21.9],[43.8,22.2],[42.2,22.5],[39.0,22.8],[35.8,23.1],[32.6,23.7],[29.4,24.1],[26.2,24.4],[23.0,24.7],[19.8,24.8],[18.4,24.7],[15.0,24.7],[10.2,24.9],[5.4,25.0],[0.6,25.1],[-4.2,25.2],[-9.0,25.4],[-13.8,25.5],[-18.6,25.7],[-23.4,25.9],[-28.2,26.3],[-33.0,26.9],[-37.8,27.2],[-42.6,27.6],[-47.0,27.6],[-49.0,27.6],[-50.6,27.2],[-53.8,26.8],[-57.0,26.5],[-58.6,26.4],[-59.6,25.8],[-60.2,24.8],[-61.0,20.0],[-61.6,16.4],[-62.2,15.6],[-62.6,15.2]],
+    bot:[[59.8,10],[59.2,6.2],[57.6,5.0],[52,4.8],[40,4.7],[-30,4.7],[-46,5.8],[-52,5.9],[-58,6.0],[-60.6,6.6],[-61.8,8.6],[-62.4,11.4],[-62.6,13]],
+    gtop:[[18.4,24.9],[16.8,26.4],[15.2,27.3],[13.6,28.2],[12.0,29.1],[10.4,30.0],[8.8,31.0],[7.2,31.9],[5.6,33.2],[4.0,34.2],[2.4,34.9],[0.8,35.3],[-0.8,35.5],[-4.0,35.6],[-8.8,35.8],[-13.6,36.0],[-18.4,36.0],[-23.2,35.7],[-26.4,35.5],[-28.0,35.3],[-29.6,35.0],[-31.2,34.5],[-32.8,34.0],[-34.4,33.3],[-36.0,32.4],[-37.6,31.6],[-39.2,30.9],[-40.8,30.2],[-42.4,29.5],[-44.0,28.9],[-45.6,28.3],[-47.0,27.9]],
+    roof:[4.0,-29.0],front:17.2,belt:24.8,aS:1.32,gap:2.2,bp:[-6.9,-10.4],qp:[-25.0,-26.6],cE:y=>-30.7+(y-25.2)*0.82,
+    mirror:[21.6,25.4,[3.4,2.6,3.2]],cuts:[[20.3,5,24.8],[-8.2,5,25.4],[-30.0,5,26.4]],handles:[[-4.4,20.6],[-28.6,21.3]],handleMat:'chrome',rocker:[-27,27],rockerY:4.9},
+  q60:{sn:10,NOSE:58.6,TAIL:-60.5,W:23.5,wx:36.18,wr:8.8,GB:20.2,GT:14.4,rearSide:3.0,tumbleY:14.5,tumble:1.5,
+    plan:[[58.6,10],[58.0,13.4],[57.0,14.9],[55.9,16.0],[54.9,17.4],[53.9,18.4],[52.8,19.4],[51.8,20.4],[50.8,21.5],[49.7,22.3],[47.7,22.9],[45.6,23.2],[43.6,23.4],[27,23.5],[24,23.3],[22,23.0],[0,23.0],[-20,23.0],[-24,23.3],[-30,23.5],[-34,23.5],[-43,23.3],[-46.1,22.9],[-48.2,22.4],[-50.3,21.8],[-52.3,21.2],[-54.4,20.1],[-56.4,18.0],[-57.5,15.8],[-58.5,13.8],[-59.5,11.5],[-60.5,7]],
+    top:[[58.6,15.2],[58.2,15.9],[57.6,16.5],[57.0,17.4],[55.4,18.5],[53.8,19.2],[52.2,19.9],[50.6,20.6],[49.0,21.1],[47.4,21.6],[45.8,21.9],[44.2,22.3],[42.6,22.6],[41.0,23.0],[37.8,23.3],[34.6,24.0],[31.4,24.3],[28.2,24.6],[25.0,24.8],[21.8,25.0],[18.6,24.8],[15.4,24.9],[10.6,24.9],[5.8,25.1],[1.0,25.4],[-3.8,25.6],[-8.6,25.8],[-13.4,26.3],[-18.2,26.9],[-23.0,27.4],[-26.2,27.6],[-31.0,27.6],[-37.4,27.5],[-43.8,27.3],[-47.0,27.0],[-50.2,26.5],[-53.4,26.2],[-55.0,26.0],[-56.6,25.6],[-57.4,24.2],[-58.2,21.0],[-59.5,18.0],[-60.1,17.5],[-60.5,17.0]],
+    bot:[[58.6,13],[58.0,7],[56.5,5.3],[50,5.2],[40,5.0],[-30,5.0],[-46,5.4],[-52,5.4],[-56.6,5.6],[-58.8,6.6],[-59.8,9.4],[-60.3,12.0],[-60.5,13.5]],
+    gtop:[[18.6,25.4],[17.0,26.4],[15.4,27.4],[13.8,28.3],[12.2,29.3],[10.6,30.2],[9.0,31.0],[7.4,31.8],[5.8,32.8],[4.2,33.7],[2.6,34.2],[1.0,34.6],[-0.6,34.7],[-5.4,34.8],[-10.2,34.8],[-15.0,34.7],[-18.2,34.6],[-19.8,34.4],[-21.4,34.0],[-23.0,33.4],[-24.6,32.7],[-26.2,32.1],[-27.8,31.7],[-29.4,31.3],[-31.0,30.8],[-32.6,30.3],[-34.2,29.8],[-35.8,29.3],[-37.4,28.7],[-39.0,28.2],[-40.6,27.8],[-42.2,27.5],[-44.0,27.3]],
+    roof:[2.4,-21.0],front:17.4,belt:24.9,aS:1.58,gap:2.0,bp:[99,99],qp:[-13.2,-15.8],cE:y=>-24.9+(y-27.8)*1.17,
+    mirror:[19.0,26.9,[3.6,2.5,3.4]],cuts:[[18.1,5,24.9],[-13.2,5,26.3]],handles:[[-6.0,23.2]],handleMat:'chrome',rocker:[-25,25],rockerY:5.0},
   /* Lamborghini Urus (5112 x 2016, 3003 wb), Huracán (4506 x 1924 x 1165, 2620 wb) and
      Aventador (4780 x 2030 x 1136, 2700 wb): profiles traced from the scaled side / top views */
   /* production Urus (2018-): 5112 x 2016 x 1638, 3003 wb. Fastback roof falling to a roof spoiler,
@@ -8149,12 +8304,14 @@ function buildLux(kind,colorHex,name){
   };
   const D=T[kind],SUP=!D.sedan;
   const creases={s60:[{x0:-60,x1:52,y:x=>24.2+Math.max(0,-x)*0.03},{x0:-26,x1:28,y:x=>11.6+(28-x)*0.03}],g80:[{x0:-62,x1:55,y:x=>23.4+Math.max(0,-x)*0.04}],
-    g70:[{x0:-58,x1:50,y:x=>22.2+Math.max(0,-x)*0.04},{x0:-24,x1:26,y:10.6}],venom:[],
+    g70:[{x0:-58,x1:50,y:x=>22.2+Math.max(0,-x)*0.04},{x0:-24,x1:26,y:10.6}],
+    g37c:[{x0:-52,x1:46,y:x=>22.6-x*0.014},{x0:-28,x1:22,y:x=>10.4}],q50:[{x0:-56,x1:48,y:x=>22.6-x*0.02},{x0:-34,x1:-6,y:x=>14.6+(-x-6)*0.12}],
+    q60:[{x0:-56,x1:50,y:x=>22.8-x*0.025},{x0:-30,x1:14,y:x=>11.8+(14-x)*0.1}],venom:[],
     agera:[],jesko:[{x0:-30,x1:20,y:x=>13+(20-x)*0.08}],regera:[{x0:-30,x1:24,y:x=>12+(24-x)*0.06}],mc720:[{x0:-28,x1:24,y:x=>14+(24-x)*0.1}],urus:[{x0:-60,x1:50,y:x=>23.6+Math.max(0,-x)*0.02},{x0:-30,x1:22,y:x=>14.6+(22-x)*0.02}],huracan:[{x0:-26,x1:24,y:x=>12+(24-x)*0.1}],aventador:[{x0:-12,x1:24,y:x=>13.4+(24-x)*0.06}],p1:[{x0:-28,x1:24,y:x=>13+(24-x)*0.08}]}[kind];
   return bpCar(colorHex,name,{body:kind,NOSE:D.NOSE,TAIL:D.TAIL,W:D.W,wx:D.wx,wr:D.wr,AR:D.wr+1.5,
     plan:D.plan,top:D.top,bot:D.bot,tumbleY:D.tumbleY||(SUP?10:15),tumble:D.tumble||(SUP?1.6:1.3),crown:D.crown||(SUP?[D.NOSE-3,30,-0.8]:[D.NOSE-3,D.gtop[0][0]+3,0.6]),
     flare:{r:0.1,t:0.8,arc:0.8,sz:0.5,in:0.6},creases,
-    gh:{x0:D.gtop[D.gtop.length-1][0],x1:D.gtop[0][0],GB:D.GB||(SUP?18.6:19.6),GT:D.GT||(SUP?13.4:15.6),roof:D.roof,roofMat:D.roofMat||0,wrap:D.wrap,top:D.gtop,rearSide:D.rearSide||(SUP?3.6:2.8),gbF:D.gbF,gtF:D.gtF,side:(x,y)=>sed(D)(x,y,bpTab(D.gtop)(x))},
+    gh:{sn:D.sn||0,x0:D.gtop[D.gtop.length-1][0],x1:D.gtop[0][0],GB:D.GB||(SUP?18.6:19.6),GT:D.GT||(SUP?13.4:15.6),roof:D.roof,roofMat:D.roofMat||0,wrap:D.wrap,top:D.gtop,rearSide:D.rearSide||(SUP?3.6:2.8),gbF:D.gbF,gtF:D.gtF,side:(x,y)=>sed(D)(x,y,bpTab(D.gtop)(x))},
     mirror:D.mirror,cuts:D.cuts,handles:D.handles,handleMat:D.handleMat,rocker:D.rocker,rockerY:D.rockerY,
     trim:({M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood,shell,flushLamp})=>{
       const W=D.W,TL=D.TAIL,NO=D.NOSE;
@@ -8343,6 +8500,123 @@ function buildLux(kind,colorHex,name){
         disc(-1,0,27.4,1.0,M.chrome,0.32,0.72);
         ribbon(-1,-5.4,5.4,6,()=>[17.6,21.4],0.14,M.dark);ribbon(-1,-5,5,6,()=>[17.9,21.1],0.22,M.plate);
         ribbon(-1,-19,19,24,()=>[11.2,14.6],0.16,M.gloss);[1,-1].forEach(s=>ribbon(-1,s*16,s*19,3,()=>[15,15.6],0.24,M.tail));
+        return;}
+      // ===== Infiniti G37 Coupe / Q50 / Q60 =====
+      if(kind==='g37c'||kind==='q50'||kind==='q60'){
+        const HL=new TH.MeshStandardMaterial({color:0xd3d9e0,roughness:0.18,metalness:0.35,emissive:0x2c3138});   // clear lens over a chrome reflector
+        const band=(yf,k,nb)=>a=>{const q=yf(a);return[q[0]+(q[1]-q[0])*k/nb,q[0]+(q[1]-q[0])*(k+1)/nb];};
+        // lamps laid on the curved nose / tail as stacked thin bands so the lens hugs the surface
+        const LF=(z0,z1,yf,mat)=>{const yb=a=>{const q=yf(Math.min(z1,Math.max(z0,a)));return[q[0]-0.3,q[1]+0.3];};
+          for(let k=0;k<4;k++){F(z0-0.25,z1+0.25,band(yb,k,4),0.24,M.gloss,24);F(z0,z1,band(yf,k,4),0.36,mat||M.lens,24);}};
+        const LR=(z0,z1,yf,mat)=>{const yb=a=>{const q=yf(Math.min(z1,Math.max(z0,a)));return[q[0]-0.25,q[1]+0.25];};
+          for(let k=0;k<3;k++){R(z0-0.2,z1+0.2,band(yb,k,3),0.24,M.gloss,22);R(z0,z1,band(yf,k,3),0.36,mat||M.tail,22);}};
+        const hoodLine=(x0,x1,zf,lift)=>{for(let x=x0;x<=x1;x+=0.9)[1,-1].forEach(s=>onHood(1.0,0.06,0.2,M.paintDk,x,s*zf(x),lift||0.03));};
+        const badge=(dir,y,r)=>{const o=disc(dir,0,y,r,M.chrome,0.34,0.72);const i=disc(dir,0,y,r*0.55,M.chrome,0.36,0.7);o.scale.set(1.5,0.9,1);i.scale.set(1.5,0.9,1);};
+        const tipO=(z,y,rx,ry)=>[1,-1].forEach(s=>{const a=disc(-1,s*z,y,ry,M.chrome,0.5),b=disc(-1,s*z,y,ry*0.78,M.dark,0.56);a.scale.set(rx/ry,1,1);b.scale.set(rx/ry,1,1);});
+        // side lamp wrap: the lens continues round the corner a few inches
+        // dark 3D mesh inside a shaped opening: yf(|z|)->[y0,y1]
+        const gridIn=(zm,yf,st)=>{for(let y=0;y<30;y+=st){ribbon(1,-zm,zm,24,z=>{const q=yf(Math.abs(z)),lo=Math.max(q[0]+0.1,y-0.07);return[lo,Math.max(lo,Math.min(q[1]-0.1,y+0.07))];},0.26,M.satin);}
+          for(let z=-zm+st/2;z<zm;z+=st)ribbon(1,z-0.07,z+0.07,1,()=>{const q=yf(Math.abs(z));return[q[0]+0.1,q[1]-0.1];},0.26,M.satin);};
+        // chrome belt molding under the side glass, from the A-pillar back to the C-pillar
+        const beltChrome=(x0,x1)=>sideStrip(x1,x0,x=>{const y=bpTab(D.top)(x);return[y-0.5,y-0.1];},0.08,M.chrome,0.4);
+        beltChrome(D.front,D.cE(D.belt)+0.4);
+        const sideWrap=(x0,x1,y0,y1,mat)=>sideStrip(x0,x1,()=>[y0,y1],0.1,mat,0.3);
+        // mirror turn-signal repeaters (Q50 / Q60)
+        const repeater=(x,y,zOut)=>[1,-1].forEach(s=>{const b=box(2.0,0.3,0.25,M.amber,x-0.6,y-0.6,s*zOut);b.rotation.y=s*0.25;});
+        if(kind==='g37c'){
+          const spt=/sport|limited/.test(n);
+          // ---- front: big rounded "wave" headlamps with twin projectors, chrome slatted grille, trapezoid intake, fogs ----
+          const hf=a=>{const t=Math.min(1,Math.max(0,(a-12.6)/9.1)),r=Math.sqrt(Math.max(0,1-Math.pow(Math.max(0,t-0.8)/0.2,2)));
+            return[15.5+1.6*t,17.9+4.5*Math.pow(t,0.85)*(0.55+0.45*r)];};
+          LF(12.6,21.7,hf,HL);
+          [1,-1].forEach(s=>{[[18.8,17.7,1.05],[16.0,17.4,0.95]].forEach(([z,y,r])=>{disc(1,s*z,y,r,M.chrome,0.44,0.7);disc(1,s*z,y,r*0.7,M.dark,0.46);disc(1,s*z,y,r*0.42,M.head,0.48);});
+            ribbon(1,s*13.4,s*20.4,10,z=>{const q=hf(Math.abs(z));return[q[1]-0.55,q[1]-0.25];},0.48,M.drl);              // LED strip along the top of the lamp
+            ribbon(1,s*20.2,s*21.4,2,()=>[18.4,19.4],0.46,M.amber);});                                                        // turn signal
+          const gf=a=>[15.2+Math.pow(a/12.6,2)*0.8,19.5-Math.pow(a/12.6,2)*0.6];
+          F(0,12.9,a=>{const q=gf(Math.min(a,12.6));return[q[0]-0.3,q[1]+0.3];},0.14,M.chrome,12);F(0,12.6,gf,0.2,M.gloss,12);
+          [16.1,17.2,18.3].forEach(yy=>F(0,12.2,a=>[yy-0.18,yy+0.18],0.3,M.chrome,10));                                    // horizontal chrome slats
+          badge(1,17.4,1.0);
+          const lf=a=>{const t=Math.max(0,(a-10)/2.6);return[7.2+t*4.6,12.3];};                                                 // trapezoid lower intake
+          F(0,12.9,a=>{const q=lf(Math.min(a,12.6));return[q[0]-0.3,q[1]+0.3];},0.14,M.dark,12);F(0,12.6,lf,0.2,M.gloss,12);mesh(1,-10.8,10.8,7.4,12.0,1.1);
+          [1,-1].forEach(s=>{ribbon(1,s*15.5,s*20.9,6,()=>[7.9,10.8],0.18,M.gloss);disc(1,s*18.2,9.3,1.0,M.head,0.3);});      // fog lamps in black pockets
+          ribbon(1,-21,21,26,()=>[4.4,5.4],0.3,M.dark);                                                                         // lower lip
+          // hood: twin power-bulge lines and lines flowing back from the lamps
+          hoodLine(31,55,x=>6.8-(55-x)*0.03);hoodLine(26,50,x=>12.2+(50-x)*0.12);
+          sideStrip(21.2,24.6,()=>[17.8,18.4],0.12,M.gloss,0.3);                                                                // fender side marker / vent slit
+          sideWrap(55.0,58.4,16.2,20.8,HL);
+          // ---- rear: "flame" lamps with round LED rings, chrome INFINITI, twin round tips ----
+          const tf=a=>{const t=Math.min(1,Math.max(0,(a-8.3)/12.6));return[19.9,20.4+4.5*Math.pow(t,0.7)];};
+          LR(8.3,20.9,tf);
+          [1,-1].forEach(s=>{[[18.4,22.7,1.35],[14.8,21.9,1.05]].forEach(([z,y,r])=>{disc(-1,s*z,y,r,M.led,0.42,0.62);disc(-1,s*z,y,r*0.55,M.tail,0.44);});
+            ribbon(-1,s*10.0,s*12.2,3,()=>[20.1,20.7],0.42,M.rev);});
+          sideWrap(-55.8,-51.8,20.4,25.4,M.tail);
+          badge(-1,24.4,1.0);for(let k=-3;k<=3;k++)ribbon(-1,k*1.1-0.3,k*1.1+0.3,1,()=>[22.7,23.2],0.3,M.chrome);
+          ribbon(-1,-11.8,-9.6,2,()=>[24.0,24.7],0.3,M.chrome);                                                                 // "G37" script
+          ribbon(-1,-6.6,6.6,8,()=>[8.0,11.8],0.14,M.dark);ribbon(-1,-6.2,6.2,8,()=>[8.3,11.5],0.22,M.plate);                // plate in the bumper
+          ribbon(-1,-21.5,21.5,28,()=>[5.0,7.6],0.16,M.gloss);                                                                  // black lower valance
+          tips([12.6],8.0,1.45,1.0);
+          if(spt)box(1.4,0.35,2*planW(-52)-10,M.paint,-52.4,26.6,0,0.12);                                                         // Sport: decklid lip spoiler
+          return;}
+        if(kind==='q50'){
+          const rs=/red sport/.test(n);
+          // ---- front: slanted "human eye" LED headlamps, double-arch grille with 3D mesh, corner intakes with LED fogs ----
+          const hf=a=>{const t=Math.min(1,Math.max(0,(a-11.8)/9.9));return[15.9-1.1*t,16.7+3.4*Math.pow(t,0.8)];};
+          LF(11.8,21.7,hf,HL);
+          [1,-1].forEach(s=>{disc(1,s*18.9,17.3,1.15,M.dark,0.44);disc(1,s*18.9,17.3,0.75,M.head,0.46);disc(1,s*15.4,16.5,0.55,M.head,0.46);
+            ribbon(1,s*12.4,s*21.2,12,z=>{const q=hf(Math.abs(z));return[q[1]-0.45,q[1]-0.15];},0.48,M.drl);                  // eyebrow LED
+            ribbon(1,s*19.8,s*21.4,2,z=>{const q=hf(Math.abs(z));return[q[0]+0.1,q[0]+0.6];},0.46,M.amber);});
+          const gf=a=>{const b=a<8.6?7.8:7.8+(a-8.6)/3.2*6.8,top=16.3-0.25*Math.pow(a/11.8,2)+0.35*Math.sin(Math.min(1,a/11.8)*Math.PI);return[b,top];};
+          F(0,12.1,a=>{const q=gf(Math.min(a,11.8));return[q[0]-0.35,q[1]+0.3];},0.14,rs?M.gloss:M.chrome,14);F(0,11.8,gf,0.2,M.gloss,14);
+          gridIn(11.4,gf,0.75);badge(1,13.0,1.15);
+          F(0,13.6,()=>[5.3,8.8],0.16,M.gloss,10);mesh(1,-13.2,13.2,5.6,8.5,1.0);                                             // lower intake
+          [1,-1].forEach(s=>{ribbon(1,s*16.4,s*21.7,8,z=>{const t=(Math.abs(z)-16.4)/5.3;return[4.9,11.3-t*3.2];},0.16,M.gloss); // corner intakes
+            disc(1,s*19.0,6.4,0.7,M.head,0.3);ribbon(1,s*17.0,s*20.6,4,()=>[8.4,8.8],0.3,M.drl);});
+          ribbon(1,-22,22,30,()=>[3.8,4.9],0.6,rs?M.carbon:M.dark);                                                             // splitter
+          hoodLine(28,54,x=>10.6+(54-x)*0.11);                                                                                  // hood creases
+          sideWrap(53.8,57.4,15.0,19.4,HL);
+          repeater(21.6,25.4,planW(21.6)+2.6);
+          // ---- rear: L-shaped LED lamps, chrome INFINITI trunk strip, diffuser with dual tips ----
+          const tf=a=>{const t=Math.min(1,Math.max(0,(a-9.7)/11.3));return[21.9-0.5*t,23.4+2.0*t];};
+          LR(9.7,21.0,tf);
+          [1,-1].forEach(s=>{ribbon(-1,s*10.4,s*20.4,10,z=>{const q=tf(Math.abs(z));return[q[0]+0.3,q[0]+0.6];},0.42,M.led);
+            ribbon(-1,s*16.4,s*20.0,4,()=>[24.0,24.6],0.42,M.rev);ribbon(-1,s*12,s*15.6,4,()=>[23.0,23.4],0.42,M.led);});
+          sideWrap(-60.0,-55.4,22.2,25.0,M.tail);
+          ribbon(-1,-9.7,9.7,12,()=>[23.4,23.8],0.3,M.chrome);badge(-1,26.1,1.0);
+          ribbon(-1,-7.1,7.1,8,()=>[16.4,21.1],0.14,M.dark);ribbon(-1,-6.6,6.6,8,()=>[16.7,20.8],0.22,M.plate);
+          ribbon(-1,-21.7,21.7,30,()=>[5.8,9.9],0.16,M.gloss);
+          [1,-1].forEach(s=>disc(-1,s*19.4,13.2,0.4,M.tail,0.3));
+          if(rs)[1,-1].forEach(s=>[11.6,14.2].forEach(z=>{disc(-1,s*z,8.0,1.1,M.chrome,0.5);disc(-1,s*z,8.0,0.85,M.dark,0.56);}));
+          else tipO(12.9,8.0,2.0,1.15);
+          box(1.0,0.3,2*planW(-60.4)-12,M.paint,-60.6,26.5,0,0.1);                                                              // integrated trunk lip
+          return;}
+        // ---- Q60: crescent-cut coupe. Slim LED headlamps, double-arch grille with chrome surround ----
+        const rs=/red sport/.test(n);
+        const hf=a=>{const t=Math.min(1,Math.max(0,(a-13.5)/8.6));return[16.0-0.4*t,16.9+2.8*Math.pow(t,0.75)];};
+        LF(13.5,22.1,hf,HL);
+        [1,-1].forEach(s=>{disc(1,s*19.7,17.7,1.0,M.dark,0.44);disc(1,s*19.7,17.7,0.66,M.head,0.46);disc(1,s*16.4,16.9,0.5,M.head,0.46);
+          ribbon(1,s*14.2,s*21.6,12,z=>{const q=hf(Math.abs(z));return[q[1]-0.4,q[1]-0.12];},0.48,M.drl);
+          ribbon(1,s*20.6,s*22.0,2,z=>{const q=hf(Math.abs(z));return[q[0]+0.1,q[0]+0.55];},0.46,M.amber);});
+        const gf=a=>{const b=a<10.1?9.6:9.6+(a-10.1)/2.4*6.6,top=16.8-0.3*Math.pow(a/12.5,2)+0.3*Math.sin(Math.min(1,a/12.5)*Math.PI);return[b,top];};
+        F(0,12.8,a=>{const q=gf(Math.min(a,12.5));return[q[0]-0.35,q[1]+0.35];},0.14,rs?M.gloss:M.chrome,14);F(0,12.5,gf,0.2,M.gloss,14);
+        gridIn(12.1,gf,0.75);badge(1,13.4,1.15);
+        F(0,11.7,()=>[5.8,8.6],0.16,M.gloss,10);mesh(1,-11.3,11.3,6.0,8.4,1.0);
+        [1,-1].forEach(s=>{ribbon(1,s*17.8,s*21.8,6,()=>[7.2,10.5],0.16,M.gloss);disc(1,s*19.7,8.2,0.8,M.head,0.3);});
+        ribbon(1,-21.5,21.5,30,()=>[4.2,5.6],0.5,rs?M.carbon:M.dark);
+        hoodLine(26,54,x=>10.4+(54-x)*0.12);hoodLine(32,50,x=>4.6+(50-x)*0.04);                                                 // strong hood creases
+        sideWrap(53.6,57.0,16.0,19.6,HL);
+        repeater(19.0,26.9,planW(19)+2.6);
+        // ---- rear: slim swept LED lamps (double-wave), INFINITI script, lower red reflectors in black pods, diffuser + tips ----
+        const tf=a=>{const t=Math.min(1,Math.max(0,(a-8.4)/12.7));return[21.2-0.8*t,22.0+1.7*Math.pow(t,0.8)];};
+        LR(8.4,21.1,tf);
+        [1,-1].forEach(s=>{ribbon(-1,s*9.4,s*20.4,10,z=>{const q=tf(Math.abs(z));return[q[1]-0.6,q[1]-0.3];},0.42,M.led);
+          ribbon(-1,s*11.1,s*14.6,4,()=>[22.4,22.9],0.42,M.rev);
+          ribbon(-1,s*16.6,s*21.4,4,()=>[9.6,14.0],0.16,M.gloss);ribbon(-1,s*17.2,s*21.0,4,()=>[11.6,13.4],0.3,M.tail);});
+        sideWrap(-57.6,-53.4,21.6,24.4,M.tail);
+        badge(-1,23.6,1.0);for(let k=-3;k<=3;k++)ribbon(-1,k*1.0-0.28,k*1.0+0.28,1,()=>[21.9,22.3],0.3,M.chrome);
+        ribbon(-1,-7.6,7.6,8,()=>[12.3,18.2],0.14,M.dark);ribbon(-1,-7.0,7.0,8,()=>[12.6,17.9],0.22,M.plate);
+        ribbon(-1,-17.3,17.3,24,()=>[5.1,10.6],0.16,M.gloss);
+        tipO(11.5,8.2,1.9,1.4);
+        box(1.0,0.3,2*planW(-56.6)-10,M.paint,-56.8,26.0,0,0.1);
         return;}
       if(kind==='g80'||kind==='g70'){
         const g7=kind==='g70';
@@ -10501,7 +10775,7 @@ function rcLoadFromLane(){
   const ex=EXTRAOF.A||{};
   // a saved build re-opens from its stock car so the physics can be recalibrated
   const base=ex.base&&ex.build?JSON.parse(JSON.stringify(ex.base)):JSON.parse(JSON.stringify(c));
-  delete base.curve;delete base.naCurve;delete base.psiCurve;delete base.build;delete base.base;delete base.bPsi;delete base.bNaFrac;delete base.tau;
+  if(ex.build){delete base.curve;delete base.naCurve;delete base.psiCurve;}delete base.build;delete base.base;delete base.bPsi;delete base.bNaFrac;delete base.tau;
   RC.base=base;RC.E=rcEngine(base);RC.cal=rcCalibrate(RC.E);
   RC.P=ex.build?Object.assign(rcStockParts(),ex.build.parts):rcStockParts();
   RC.T=ex.build?JSON.parse(JSON.stringify(ex.build.tune)):rcStockTune(RC.E,rcHW(RC.E,RC.P));
@@ -11620,7 +11894,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='c3d5f7fa68';let dismissed=null;
+(function(){const V='a0c0c5c392';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
