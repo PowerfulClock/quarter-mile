@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="63b09fc0c9";</script>
+<head><script>window.QM_VER="197fba6efb";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -10376,6 +10376,8 @@ function dynoSheet(run,idx,s){
 function dynoStop(){if(DYNO.anim)cancelAnimationFrame(DYNO.anim);DYNO.anim=null;window.__racing=false;}
 function runDyno(){
   const box=document.getElementById('errBox');
+  // build bay: put the latest parts and tune on the car before it is strapped down; the run is what the Performance tab will use
+  if(typeof RC!=='undefined'&&RC.on&&RC.E){clearTimeout(RC.applyT);rcApply();RC.dynoPending={car:rcMakeCar(),sig:rcSig()};}
   if(laneEmpty('A')){box.textContent='Nothing Selected. Load a car into lane 1 to put it on the dyno.';box.classList.add('show');return;}
   const c=readCar('A');const errs=validate(c);if(errs.length){box.textContent=errs[0];box.classList.add('show');return;}
   box.classList.remove('show');reset();buildClusters();
@@ -10415,6 +10417,7 @@ function runDyno(){
     dynoView(t);rend.render(DYNO.scene,DYNO.cam);audio3D();
     if(t<run.end+0.1)DYNO.anim=requestAnimationFrame(frame);
     else{window.__racing=false;stopVoices();dynoSheet(run,run.S.length,run.S[run.S.length-1]);
+      if(typeof RC!=='undefined'&&RC.dynoPending){RC.dynoCar=RC.dynoPending.car;RC.dynoSig=RC.dynoPending.sig;RC.dynoWhp=run.pk.hp;RC.dynoPending=null;RC.perf=null;if(RC.on)rcRender();}
       const tot=combinedHp(c),loss=(1-run.pk.hp/tot)*100;
       document.getElementById('treeMsg').textContent='Run complete';
       document.getElementById('verdict').textContent=c.name+' on the dyno: '+run.pk.hp.toFixed(1)+' whp @ '+Math.round(run.pk.hpRpm).toLocaleString()+' rpm · '+
@@ -10796,6 +10799,7 @@ const RC_MSG={turbo:['Turbocharger Limit Reached','The compressor is out of flow
   rpm:['RPM Limit','The rev limiter is held at what the valvetrain/bottom end allows.']};
 function rcSupported(c){return c&&!((IND[c.ind]||{}).electric)&&c.gears&&c.gears.length;}
 function rcLoadFromLane(){
+  {const nm=laneEmpty('A')?'':(document.getElementById('nameAf').value||'');if(RC.dynoCar&&RC.dynoFor!==nm){RC.dynoCar=null;RC.dynoSig=null;}RC.dynoFor=nm;}
   if(laneEmpty('A')){RC.E=null;rcRender();return;}
   const c=readCar('A');
   if(!rcSupported(c)){RC.E=null;RC.base=c;rcRender();return;}
@@ -10979,10 +10983,14 @@ function rcTuneHTML(E,HW,B){
   }
   return h;
 }
+function rcSig(){return JSON.stringify([RC.P,RC.T]);}
 function rcPerfHTML(){
-  const p=RC.perf;
-  let h='<div class="rc-row"><button type="button" class="go" id="rcPerfRun">Calculate performance</button><span class="rc-note">Full simulation of the car with this build: its weight, tyres, drivetrain, gearing, shift speed, launch, drag and rolling resistance.</span></div>';
+  let p=RC.perf;
+  let h='<div class="rc-row"><button type="button" class="go" id="rcPerfRun">Calculate performance</button><span class="rc-note">Full simulation of the car: its weight, tyres, drivetrain, gearing, shift speed, launch, drag and rolling resistance. <b>This build</b> is the car as it was on its last dyno run.</span></div>';
+  if(!RC.dynoCar)h+='<div class="rc-row"><span class="rc-note" style="color:var(--amber)">This build hasn\'t been on the dyno yet — run it on the dyno to see what it really does.</span><button type="button" id="rcPerfDyno">Run it on the dyno</button></div>';
+  else if(RC.dynoSig!==rcSig())h+='<div class="rc-row"><span class="rc-note" style="color:var(--amber)">You\'ve changed parts or the tune since the last dyno run ('+Math.round(RC.dynoWhp||0)+' whp). This build below is still that dyno-tested car until you run it on the dyno again.</span><button type="button" id="rcPerfDyno">Run it on the dyno</button></div>';
   if(!p)return h;
+  if(!p.b)p=Object.assign({},p,{b:{}});
   const f=(v,d)=>v==null?'—':v.toFixed(d);
   const row=(l,a,b,d,u,lowBetter)=>'<tr><th>'+l+'</th><td>'+f(a,d)+u+'</td><td>'+f(b,d)+u+'</td><td class="'+(a!=null&&b!=null?((lowBetter?b<a:b>a)?'good':(b===a?'':'bad')):'')+'">'+(a!=null&&b!=null?(b-a>=0?'+':'')+(b-a).toFixed(d):'')+'</td></tr>';
   h+='<table class="rc-tbl rc-perf"><tr><th></th><th>Stock</th><th>This build</th><th>Change</th></tr>'+
@@ -11083,7 +11091,8 @@ document.addEventListener('click',e=>{if(!RC.on)return;const t=e.target.closest(
   else if(t.id==='rcStockTune'){RC.T=rcStockTune(RC.E,rcHW(RC.E,RC.P));rcRecalc();}
   else if(t.id==='rcStock'){RC.P=rcStockParts();RC.T=rcStockTune(RC.E,null);rcRecalc();}
   else if(t.id==='rcDynoRun'){clearTimeout(RC.applyT);rcApply();document.getElementById('dynoPanel').hidden=false;runDyno();}
-  else if(t.id==='rcPerfRun'){t.textContent='Calculating…';t.disabled=true;setTimeout(()=>{try{RC.perf={s:rcPerfFor(RC.base),b:rcPerfFor(rcMakeCar())};}catch(err){RC.perf=null;console.error(err);}rcRender();},30);}
+  else if(t.id==='rcPerfRun'){t.textContent='Calculating…';t.disabled=true;setTimeout(()=>{try{RC.perf={s:rcPerfFor(RC.base),b:RC.dynoCar?rcPerfFor(RC.dynoCar):null,sig:RC.dynoSig};}catch(err){RC.perf=null;console.error(err);}rcRender();},30);}
+  else if(t.id==='rcPerfDyno'){RC.tab='dyno';rcRender();const b=document.getElementById('rcDynoRun');if(b)b.click();}
   else if(t.id==='rcSave'){rcSave();}
   else if(t.id==='rcRace'){clearTimeout(RC.applyT);rcApply();const v=document.getElementById('venue');v.value=window.__lastRaceVenue||'road';v.dispatchEvent(new Event('change'));
     const room=(()=>{try{return MP.on&&!!mpCfg();}catch(e){return false;}})();
@@ -11101,7 +11110,7 @@ function rcSave(){
   populatePresets(document.getElementById('presetSearch').value);document.getElementById('presetPick').value='my:'+id;syncGarageBtns();
   msg.textContent=garageStorageOk?(same?'Updated “'+name+'” in My garage.':'Saved “'+name+'” to My garage — load it into any lane to race or dyno it, or back here to keep building.'):'Saved for this visit only — this browser is blocking storage.';
 }
-function rcEnter(){RC.on=true;document.getElementById('rcPanel').hidden=false;document.getElementById('dynoPanel').hidden=true;rcLoadFromLane();}
+function rcEnter(){RC.dynoCar=null;RC.dynoSig=null;RC.dynoPending=null;RC.on=true;document.getElementById('rcPanel').hidden=false;document.getElementById('dynoPanel').hidden=true;rcLoadFromLane();}
 function rcLeave(){RC.on=false;clearTimeout(RC.applyT);document.getElementById('rcPanel').hidden=true;}
 
 /* when a different car goes into lane 1 while in the build bay, start building that one */
@@ -11934,7 +11943,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='63b09fc0c9';let dismissed=null;
+(function(){const V='197fba6efb';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
