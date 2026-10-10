@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="197fba6efb";</script>
+<head><script>window.QM_VER="6855719546";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -11745,9 +11745,15 @@ function mpRaceCheck(){
   // start on the host's clock: same moment, same simulation on every screen
   window.__mpStart=c.race.at?{at:c.race.at-(MP.off||0)}:null;
   window.__preSeed=parseInt(mpHash(MP.code+':'+c.race.id),36)>>>0;
-  const rbtn=document.getElementById('runBtn');rbtn.disabled=false;rbtn.click();rbtn.disabled=true;
+  // start synchronously: shift points are worked out right here instead of on a deferred click,
+  // because the result of the run is read straight after it
+  const rbtn=document.getElementById('runBtn');rbtn.disabled=false;window.__spReady=true;rbtn.click();window.__spReady=false;rbtn.disabled=true;
   const info=window.lastRaceInfo;
-  if(!info){MP.racing=false;mpRender();return;}
+  if(!info){MP.racing=false;
+    const eb=document.getElementById('errBox');MP.err='The race could not start'+(eb&&eb.textContent?': '+eb.textContent:'')+'.';
+    // never leave the room stuck on "racing": the host puts it back to setup so it can be started again
+    if(MP.host&&MP.cfg){MP.cfg.ph='setup';mpPush();}
+    MP.lastSig=null;mpRender();mpLock();return;}
   const maxEt=Math.max(...info.lanes.map(L=>info.res[L].et||0));
   const wait=Math.max(0,(c.race.at?c.race.at-(MP.off||0)-Date.now():0))+info.stageMs+maxEt*1000+2500;
   const slots=mpSlots();
@@ -11943,7 +11949,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='197fba6efb';let dismissed=null;
+(function(){const V='6855719546';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
