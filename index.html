@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="a0c0c5c392";</script>
+<head><script>window.QM_VER="39a3859033";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -9843,18 +9843,24 @@ document.getElementById('dist').addEventListener('change',()=>{reset();activeLan
 function syncVenue(){
   {/* dyno: one car, no distance or rolling start, the dyno sheet under the 3D view */
     const v=document.getElementById('venue'),rc=document.getElementById('racerCount'),dy=v.value==='dyno'||v.value==='rc';
-    const mpOn=(()=>{try{return !!MP.on;}catch(e){return false;}})();
+    /* online: the dyno and the build bay are a private workshop, open in a Sandbox room only.
+       The room keeps racing on its own track; your lane 1 car is what you work on, and every
+       change you make to it is shared with the room like any other sandbox edit. */
+    const mpOn=(()=>{try{return !!MP.on&&mpMode()!=='sandbox';}catch(e){return false;}})();
+    const inRoom=(()=>{try{return !!MP.on&&!!mpCfg();}catch(e){return false;}})();
     const opt=v.querySelector('option[value=dyno]');if(opt)opt.disabled=mpOn;
     const opt2=v.querySelector('option[value=rc]');if(opt2)opt2.disabled=mpOn;
-    if(dy&&mpOn){v.value='road';}
+    if(dy&&mpOn){v.value=window.__lastRaceVenue||'road';}
+    if(v.value!=='dyno'&&v.value!=='rc')window.__lastRaceVenue=v.value;
     const on=v.value==='dyno'||v.value==='rc',isRc=v.value==='rc';
     if(typeof RC!=='undefined'&&RC){if(isRc&&!RC.on)setTimeout(rcEnter,0);else if(!isRc&&RC.on)rcLeave();}
     if(on&&!window.__dynoMode){window.__dynoMode=true;window.__preDynoRacers=window.activeRacers||2;applyRacerCount(1);}
     else if(!on&&window.__dynoMode){window.__dynoMode=false;if(typeof dynoStop==='function')dynoStop();applyRacerCount(window.__preDynoRacers||2);rc.value=String(window.activeRacers);ready=false;}
-    rc.disabled=on||mpOn;
+    rc.disabled=on||mpOn||inRoom;
     document.getElementById('dynoPanel').hidden=!on;
     document.getElementById('runBtn').textContent=on?'Run dyno':'Run the race';
     ['dist','startMph'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=on;});
+    try{if(MP.on)setTimeout(mpLock,0);}catch(e){}
     if(on){const note=document.getElementById('venueNote');note.textContent=isRc?'Your build bay · the car in lane 1 is on the dyno — build it, tune it, save it':'Chassis dyno · strapped down · pull in the gear closest to 1:1';
       if(typeof dynoSheet==='function')dynoSheet(null,0,null);return;}
   }
@@ -11035,8 +11041,9 @@ document.addEventListener('click',e=>{if(!RC.on)return;const t=e.target.closest(
   else if(t.id==='rcDynoRun'){clearTimeout(RC.applyT);rcApply();document.getElementById('dynoPanel').hidden=false;runDyno();}
   else if(t.id==='rcPerfRun'){t.textContent='Calculating…';t.disabled=true;setTimeout(()=>{try{RC.perf={s:rcPerfFor(RC.base),b:rcPerfFor(rcMakeCar())};}catch(err){RC.perf=null;console.error(err);}rcRender();},30);}
   else if(t.id==='rcSave'){rcSave();}
-  else if(t.id==='rcRace'){clearTimeout(RC.applyT);rcApply();const v=document.getElementById('venue');v.value='road';v.dispatchEvent(new Event('change'));
-    document.getElementById('treeMsg').textContent='Your build is in lane 1 — load an opponent into lane 2 and run the race.';}
+  else if(t.id==='rcRace'){clearTimeout(RC.applyT);rcApply();const v=document.getElementById('venue');v.value=window.__lastRaceVenue||'road';v.dispatchEvent(new Event('change'));
+    const room=(()=>{try{return MP.on&&!!mpCfg();}catch(e){return false;}})();
+    document.getElementById('treeMsg').textContent=room?'Your build is in lane 1 and everyone in the room has it — press Ready when you\'re set.':'Your build is in lane 1 — load an opponent into lane 2 and run the race.';}
 });
 function rcSave(){
   const name=(document.getElementById('rcName').value||'').trim();const msg=document.getElementById('rcSaved');
@@ -11527,10 +11534,15 @@ function mpDec(a){if(!Array.isArray(a)||a[0]==='-')return null;const c={};MP_KEY
   c.name=String(c.name||'Car').slice(0,48);c.garage=true;return c;}
 const mpJ=x=>JSON.stringify(x);
 const mpCar=a=>a?mpDec(a[1]):null;
-function mpSetLane(L,arr){if(Array.isArray(arr)&&arr[0]==='-'){if(!laneEmpty(L))clearLane(L);}else{const d=mpDec(arr);if(d)setLane(L,d);}}
+function mpSetLane(L,arr){if(Array.isArray(arr)&&arr[0]==='-'){if(!laneEmpty(L))clearLane(L);}else{const d=mpDec(arr);if(!d)return;
+  // the room only carries the car's curves; a Real Customization build's parts and tune stay with whoever has them
+  const E=EXTRAOF[L]||{},keep=E.build&&E.curve&&d.curve&&mpJ(E.curve)===mpJ(d.curve)?{build:E.build,base:E.base}:null;
+  if(keep){d.build=keep.build;d.base=keep.base;}
+  setLane(L,d);}}
 function mpHash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
+function mpInShop(){const v=document.getElementById('venue').value;return v==='dyno'||v==='rc';}
 function mpTrkRead(){return{d:document.getElementById('dist').value,s:document.getElementById('startMph').value,
-  v:document.getElementById('venue').value,t:document.getElementById('tod').value,a:document.getElementById('temp').value};}
+  v:mpInShop()?(window.__lastRaceVenue||'road'):document.getElementById('venue').value,t:document.getElementById('tod').value,a:document.getElementById('temp').value};}
 
 const MP={on:false,room:null,rm:null,me:null,code:'',nick:'',host:false,cfg:null,lastCfg:null,
   lastAuth:{},myCars:{},my:null,trk:null,b:null,rdy:false,racing:false,raceId:0,pendingRace:null,
@@ -11582,7 +11594,7 @@ function mpPush(){if(!MP.rm)return;clearTimeout(mpPushT);mpPushT=setTimeout(()=>
 
 /* ---- applying state to the page ---- */
 function mpApplyTrk(o){const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null&&el.value!==String(v)){el.value=v;el.dispatchEvent(new Event('change',{bubbles:true}));}};
-  set('venue',o.v);set('dist',o.d);set('startMph',o.s);set('tod',o.t);
+  if(mpInShop())window.__lastRaceVenue=o.v;else set('venue',o.v);set('dist',o.d);set('startMph',o.s);set('tod',o.t);
   const te=document.getElementById('temp');if(te&&o.a!=null&&te.value!==String(o.a)){te.value=o.a;te.dispatchEvent(new Event('input',{bubbles:true}));te.dispatchEvent(new Event('change',{bubbles:true}));
     const sl=document.getElementById('tempSlide');if(sl)sl.value=o.a;}}
 function mpSetRacers(n){const rc=document.getElementById('racerCount');
@@ -11590,7 +11602,7 @@ function mpSetRacers(n){const rc=document.getElementById('racerCount');
 function mpLock(){
   const inRoom=MP.on&&!!mpCfg(),c=mpCfg()||{},my=mpMyLane();
   document.getElementById('racerCount').disabled=inRoom;
-  const rb=document.getElementById('runBtn');rb.disabled=inRoom;
+  const rb=document.getElementById('runBtn');rb.disabled=inRoom&&!(mpInShop()&&!MP.racing);
   rb.title=inRoom?'In an online room the host starts every race, so everyone sees the same race at the same time.':'';
   document.getElementById('resetBtn').disabled=inRoom&&MP.racing;
   ['dist','startMph','tod','temp','tempSlide'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=inRoom&&!mpTrkEditable();});
@@ -11616,7 +11628,7 @@ function mpSync(){
   if(!MP.on||!mpCfg())return;
   const c=mpCfg();
   if(MP.racing)return;
-  mpSetRacers(mpNLanes());
+  if(!mpInShop())mpSetRacers(mpNLanes());
   // track
   const at=mpAuthTrk(),cur=mpTrkRead();
   if(at&&mpJ(at[1])!==MP.lastTrk){MP.lastTrk=mpJ(at[1]);mpApplyTrk(at[1]);if(c.m==='sandbox')MP.trk=at;}
@@ -11678,6 +11690,7 @@ function mpHostTick(){
 }
 function mpStartRace(){
   const c=MP.cfg;if(!c)return;
+  if(mpInShop()){if(typeof dynoStop==='function')dynoStop();const v=document.getElementById('venue');v.value=window.__lastRaceVenue||'road';v.dispatchEvent(new Event('change'));}
   const hs={};activeLanes().forEach(L=>{const a=mpAuthCar(L);hs[L]=a?mpHash(mpJ(a[1])):'';});
   c.race={id:(c.race?c.race.id:0)+1,hs,t:mpHash(mpJ(mpTrkRead())),at:Date.now()+5000};c.ph='race';MP.rdy=false;mpPush();mpRender();}
 function mpRaceCheck(){
@@ -11687,6 +11700,7 @@ function mpRaceCheck(){
   // a slow screen may only notice the start after the host has finished: still run it
   if(c.race.id<=MP.raceId||['race','results','final'].indexOf(c.ph)<0)return;
   if(!MP.pendingRace||MP.pendingRace.id!==c.race.id)MP.pendingRace={id:c.race.id,since:Date.now()};
+  if(mpInShop()){if(typeof dynoStop==='function')dynoStop();const v=document.getElementById('venue');v.value=window.__lastRaceVenue||'road';v.dispatchEvent(new Event('change'));}
   // wait (briefly) until we hold exactly the cars the host started with
   const ok=Object.keys(c.race.hs).every(L=>{const a=mpAuthCar(L);return (a?mpHash(mpJ(a[1])):'')===c.race.hs[L];});
   if(!ok&&Date.now()-MP.pendingRace.since<2500){mpSyncForRace();return;}
@@ -11835,7 +11849,8 @@ function mpRender(){
     if(!car)mine='<div class="mp-shop"><h4>'+mpEsc(MP_CLASSES[c.cls].label.toUpperCase())+' RULES</h4><p class="mp-note">'+mpEsc(MP_CLASSES[c.cls].desc)+' Load a car into your lane to start.</p></div>';else
     mine='<div class="mp-shop"><h4>'+mpEsc(MP_CLASSES[c.cls].label.toUpperCase())+' RULES</h4><p class="mp-note">'+mpEsc(MP_CLASSES[c.cls].desc)+' Load any car into your lane and tune it in your lane card below.</p><ul class="mp-checks">'+
       mpLegal(car,c.cls).map(x=>'<li class="'+(x[0]?'ok':'bad')+'">'+(x[0]?'✓ ':'✗ ')+mpEsc(x[1])+'</li>').join('')+'</ul></div>';}
-  if(c.m==='sandbox')mine='<p class="mp-note">Sandbox: anyone can change any lane or the track, and everyone sees the changes. Press Ready when you\'re set; the host starts the race.</p>';
+  if(c.m==='sandbox')mine='<p class="mp-note">Sandbox: anyone can change any lane or the track, and everyone sees the changes. Press Ready when you\'re set; the host starts the race.</p>'+
+    '<p class="mp-note">Workshop: pick <b>Dyno test</b> or <b>Real Customization</b> under Track to put your lane 1 car on the dyno or build and tune it — just on your screen, while the room stays on its track. Your build reaches everyone\'s lane 1, and when the host starts a race you\'re brought back to the line.</p>';
   el.innerHTML='<div class="mp-head"><span>ROOM <b class="mp-code">'+mpEsc(MP.code.toUpperCase())+'</b></span><button type="button" id="mpCopy" class="mp-sm">Copy code</button>'+
     '<span class="mp-mode">'+MP_MODES[c.m]+'</span><button type="button" id="mpLeave" class="mp-sm">Leave</button></div>'+
     (MP.err?'<p class="mp-err" role="alert">'+mpEsc(MP.err)+'</p>':'')+hostCtl+
@@ -11894,7 +11909,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='a0c0c5c392';let dismissed=null;
+(function(){const V='39a3859033';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
