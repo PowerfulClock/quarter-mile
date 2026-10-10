@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="39a3859033";</script>
+<head><script>window.QM_VER="63b09fc0c9";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -58,6 +58,8 @@ font-family:'Roboto Mono',monospace;font-size:13px;margin-bottom:5px}
 .rc-rel{display:flex;align-items:center;gap:8px;margin:8px 0}.rc-rel div{flex:1;height:8px;background:var(--asphalt-3);border-radius:4px;overflow:hidden}.rc-rel i{display:block;height:100%}
 .rc-warns div{border-left:3px solid var(--foul);background:rgba(229,72,77,.08);padding:5px 8px;margin:5px 0}.rc-warns b{display:block;color:var(--foul);font-size:11px}.rc-warns span{color:var(--dim);font-size:10.5px}
 .rc-ov{display:block;font-size:11px;color:var(--dim);margin:8px 0}.rc-btns{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.rc-btns button,.rc-save button,.rc-row button{padding:6px 10px;font-size:11px}
+.rc-wallet{font-size:11px;color:var(--dim);background:var(--asphalt-3);padding:8px 10px;margin-bottom:10px;line-height:1.5;border-left:3px solid var(--amber)}.rc-wallet b{color:var(--paint)}.rc-wallet span{font-size:10px}
+.rc-legal{list-style:none;padding:0;margin:4px 0 0}.rc-legal li.ok{color:var(--go)}.rc-legal li.bad{color:var(--foul)}
 .rc-save{display:flex;gap:6px;margin-top:10px}.rc-save input{flex:1;min-width:0}.rc-empty{padding:30px;text-align:center;color:var(--dim)}
 .dyno-panel{background:#0b0e12;border:1px solid var(--line);border-top:none}.dyno-panel canvas{display:block;width:100%;height:auto}
 .stage3d{position:relative;width:100%;height:340px;background:#11151b;border:1px solid var(--line);overflow:hidden}
@@ -9846,7 +9848,7 @@ function syncVenue(){
     /* online: the dyno and the build bay are a private workshop, open in a Sandbox room only.
        The room keeps racing on its own track; your lane 1 car is what you work on, and every
        change you make to it is shared with the room like any other sandbox edit. */
-    const mpOn=(()=>{try{return !!MP.on&&mpMode()!=='sandbox';}catch(e){return false;}})();
+    const mpOn=false;
     const inRoom=(()=>{try{return !!MP.on&&!!mpCfg();}catch(e){return false;}})();
     const opt=v.querySelector('option[value=dyno]');if(opt)opt.disabled=mpOn;
     const opt2=v.querySelector('option[value=rc]');if(opt2)opt2.disabled=mpOn;
@@ -9854,7 +9856,12 @@ function syncVenue(){
     if(v.value!=='dyno'&&v.value!=='rc')window.__lastRaceVenue=v.value;
     const on=v.value==='dyno'||v.value==='rc',isRc=v.value==='rc';
     if(typeof RC!=='undefined'&&RC){if(isRc&&!RC.on)setTimeout(rcEnter,0);else if(!isRc&&RC.on)rcLeave();}
-    if(on&&!window.__dynoMode){window.__dynoMode=true;window.__preDynoRacers=window.activeRacers||2;applyRacerCount(1);}
+    if(on&&!window.__dynoMode){
+      /* in a Build & Race or Class room your car lives in your own lane: bring a copy of it into the workshop */
+      try{if(MP.on&&mpCfg()&&mpMode()!=='sandbox'){const my=mpMyLane();if(my&&my!=='A'&&!laneEmpty(my)){const d=readCarRaw(my),ex=EXTRAOF[my]||{};
+        BUILD_KEYS.forEach(k=>{if(ex[k]!=null)d[k]=JSON.parse(JSON.stringify(ex[k]));});['sysHp','sysTq','vmax','burble'].forEach(k=>{if(ex[k])d[k]=ex[k];});
+        d.body=BODYOF[my];d.modes=MODESOF[my];d.cluster=CLUSTEROF[my];setLane('A',d);MP.shopCopy=true;}}}catch(e){}
+      window.__dynoMode=true;window.__preDynoRacers=window.activeRacers||2;applyRacerCount(1);}
     else if(!on&&window.__dynoMode){window.__dynoMode=false;if(typeof dynoStop==='function')dynoStop();applyRacerCount(window.__preDynoRacers||2);rc.value=String(window.activeRacers);ready=false;}
     rc.disabled=on||mpOn||inRoom;
     document.getElementById('dynoPanel').hidden=!on;
@@ -10522,6 +10529,9 @@ const RC_PARTS={
     {id:'ss',name:'Much shorter (≈ +20%)',desc:'',fd:1.20},{id:'l',name:'Taller (≈ −10%)',desc:'Longer gears, higher top speed per gear.',fd:0.9}]},
   {id:'shaft',label:'Driveshaft',opts:[{id:'stock',name:'Stock driveshaft',desc:''},{id:'cf',name:'Carbon / aluminum driveshaft',desc:'Lighter and stronger.',ie:0.97,trans:1.05}]},
   {id:'axles',label:'Axles',opts:[{id:'stock',name:'Stock axles',desc:''},{id:'up',name:'Upgraded axles',desc:'Raises the drivetrain torque limit.',axle:1.6}]}]},
+ chassis:{label:'Chassis & Tyres',parts:[
+  {id:'weight',label:'Weight reduction',opts:[{id:'stock',name:'Stock',desc:'Factory weight.'},{id:'lite',name:'Weight reduction I',desc:'Lightweight battery, spare-tyre delete: −60 lb.',wt:60},{id:'strip',name:'Weight reduction II',desc:'Rear-seat delete, carbon hood, lightweight wheels: −240 lb.',wt:240}]},
+  {id:'tyres',label:'Tyres',opts:[{id:'stock',name:'Stock tyres',desc:'What the car came with.'},{id:'summer',name:'Summer performance tyres',desc:'Grippier street tyres.',tyre:'summer'},{id:'drag',name:'Drag radials',desc:'Soft sidewalls and compound: huge bite on a prepped strip, a little better on the street.',tyre:'drag'},{id:'track',name:'R-compound tyres',desc:'Near-slick track tyres: the most grip on the street.',tyre:'track'}]}]},
  internals:{label:'Internals',parts:[
   {id:'pistons',label:'Pistons',opts:[{id:'stock',name:'Stock cast pistons',desc:''},{id:'forged',name:'Forged pistons',desc:'Take far more cylinder pressure and heat.',mech:{pis:1.45}}]},
   {id:'rods',label:'Connecting rods',opts:[{id:'stock',name:'Stock rods',desc:''},{id:'forged',name:'Forged rods',desc:'More torque and rpm capacity.',mech:{rod:1.5},rpm:{rod:500}}]},
@@ -10529,6 +10539,17 @@ const RC_PARTS={
   {id:'gasket',label:'Head gasket / studs',opts:[{id:'stock',name:'Stock gasket and bolts',desc:''},{id:'mls',name:'MLS gasket + head studs',desc:'Holds much higher cylinder pressure without lifting the head.',mech:{gsk:1.5}}]},
   {id:'disp',label:'Displacement',opts:[{id:'stock',name:'Stock bore and stroke',desc:''},{id:'stroker',name:'Stroker kit (+8%)',desc:'Longer stroke: more torque everywhere, a little less rpm.',disp:1.08},{id:'big',name:'Bore + stroke (+14%)',desc:'',disp:1.14}]}]}
 };
+/* typical parts-plus-install street prices, used where a room buys its parts (Build & Race) */
+const RC_PRICE={cam:{street:1600,aggr:2400,race:3200},heads:{port:1800,cnc:3200,after:4500},valves:{big:700},springs:{up:500,race:900},
+  cr:{p05:2500,p10:3500,m10:2500},flywheel:{light:700},filter:{hf:120,sri:250,cai:400},pipe:{big:300},tb:{ported:250,big:600},mani:{ported:800,big:1500},
+  kit:{turbo:7500,screw:8500,centri:7000},turbo:{hybrid:2200,larger:3800,big:5500},wg:{big:600},tman:{tubular:1500},ic:{up:900,large:1600},icpipe:{up:450},bov:{up:300},
+  pulley:{p5:350,p10:450,p15:550},blower:{big:6500},hdr:{shorty:700,long:1800},dp:{hf:1100,catless:600},mid:{x:450},res:{del:150},muf:{perf:600,catback:1200,full:2400},
+  octane:{'100':300,e85:1100},inj:{i35:600,i75:900,i150:1300},lpfp:{up:400,dual:900},hpfp:{up:1200,race:2200},rail:{up:450},
+  rad:{up:600,race:1200},oil:{up:500},tstat:{low:80},clutch:{stage2:900,twin:2200},tc:{stall:1900},trans:{built:4000,race:7500},diff:{lsd:1400},
+  fd:{s:1500,ss:1700,l:1500},shaft:{cf:1300},axles:{up:1600},pistons:{forged:2200},rods:{forged:1800},crank:{forged:2500},gasket:{mls:900},disp:{stroker:6000,big:9000},
+  weight:{lite:500,strip:4000},tyres:{summer:1200,drag:1600,track:1400}};
+const rcPrice=(id,v)=>(RC_PRICE[id]&&RC_PRICE[id][v])||0;
+function rcPartsCost(P){let s=0;for(const id in (P||{}))s+=rcPrice(id,P[id]);return s;}
 function rcEngine(base){
   const c=base,I=IND[c.ind]||IND.na,bi=boostInfo(Object.assign({},c,{bPsi:null}));
   const yr=parseInt(c.name,10)||2015,cyl=(ENGINES[c.engSound]||{cyl:6}).cyl;
@@ -10791,14 +10812,17 @@ function rcLoadFromLane(){
 function rcRecalc(apply){
   if(!RC.E)return;
   // the tune table must cover the rev range in use
-  const want=rcPts(RC.E,Math.max(RC.E.R,RC.T.rev));
-  if(want.length!==RC.T.rpm.length){['boost','afr','timing','icam','ecam'].forEach(k=>{const old=RC.T[k],R=RC.T.rpm;RC.T[k]=want.map(r=>{const i=R.indexOf(r);return i>=0?old[i]:old[old.length-1];});});RC.T.rpm=want;}
+  rcFitTune(RC.E,RC.T);
   RC.B=rcBuild(RC.E,RC.cal,RC.P,RC.T);RC.perf=null;
   rcRender();
   if(apply!==false){clearTimeout(RC.applyT);RC.applyT=setTimeout(rcApply,350);}
 }
-function rcMakeCar(){
-  const E=RC.E,B=RC.B,HW=B.HW,base=RC.base,T=RC.T;
+function rcFitTune(E,T){const want=rcPts(E,Math.max(E.R,T.rev));
+  if(want.length!==T.rpm.length){['boost','afr','timing','icam','ecam'].forEach(k=>{const old=T[k],R=T.rpm;T[k]=want.map(r=>{const i=R.indexOf(r);return i>=0?old[i]:old[old.length-1];});});T.rpm=want;}return T;}
+function rcChassis(c,P){const w=rcOpt('weight',(P||{}).weight),t=rcOpt('tyres',(P||{}).tyres);if(w&&w.wt)c.weight=Math.round(c.weight-w.wt);if(t&&t.tyre)c.tire=t.tyre;return c;}
+function rcMakeCar(){return rcCarFrom(RC.base,RC.E,RC.B,RC.T,RC.P);}
+function rcCarFrom(base,E,B,T,P){
+  const HW=B.HW;
   const c=JSON.parse(JSON.stringify(base));
   const pts=B.pts.filter(o=>o.rpm>=1000);
   c.curve=pts.map(o=>[o.rpm,+o.tq.toFixed(2)]);c.naCurve=pts.map(o=>[o.rpm,+o.na.toFixed(2)]);c.psiCurve=pts.map(o=>[o.rpm,+o.psi.toFixed(2)]);
@@ -10812,11 +10836,18 @@ function rcMakeCar(){
   c.gearBoost=T.gearBoost.map(v=>v/100);c.gearTq=T.gearTq.map(v=>v>=100?null:v/100);
   c.launch=T.lc?(base.launch&&base.launch!=='none'?base.launch:'lc'):'none';c.launchRpm=T.launch;
   if(HW.boosted&&!E.boosted){c.engSound=base.engSound;}
-  c.build={parts:Object.assign({},RC.P),tune:JSON.parse(JSON.stringify(T)),hp:c.hp,tq:c.tq,ts:Date.now()};
+  rcChassis(c,P);
+  c.build={parts:Object.assign({},P),tune:JSON.parse(JSON.stringify(T)),hp:c.hp,tq:c.tq};
   c.base=base;
   return c;
 }
-function rcApply(){if(!RC.E||!RC.on)return;const c=rcMakeCar();RC.applying=true;setLane('A',c);RC.applying=false;if(typeof refreshAll==='function')refreshAll();}
+function rcApply(){if(!RC.E||!RC.on)return;const c=rcMakeCar();RC.applying=true;setLane('A',c);RC.applying=false;if(typeof refreshAll==='function')refreshAll();
+  const room=rcRoom();if(!room)return;
+  try{MP.builds=MP.builds||{};MP.builds[mpJ(c.curve)]={build:c.build,base:c.base};
+    if(room.m==='build'&&MP.b){const st=rcStockParts(),rp={};for(const id in RC.P)if(RC.P[id]!==st[id])rp[id]=RC.P[id];
+      const plain=!Object.keys(rp).length&&mpJ(RC.T)===mpJ(rcStockTune(RC.E,rcHW(RC.E,RC.P)));
+      MP.b.rp=rp;MP.b.rt=plain?null:JSON.parse(mpJ(RC.T));MP.rdy=false;mpPush();MP.lastSig=null;mpRender();}
+    else if(room.m==='cls'){MP.my=mpEnc(Object.assign({},c,{name:c.name}));MP.rdy=false;mpPush();MP.lastSig=null;mpRender();}}catch(e){console.error(e);}}
 /* the "safe" tune a pro tuner would put on this hardware: boost, timing, AFR and cams per rpm,
    each pushed until the first real limit (with margin) */
 function rcAutoTune(){
@@ -10873,13 +10904,20 @@ function rcRender(){
   if(RC.tab==='dyno')rcChart();
   if(RC.tab!=='dyno'){const mini=document.getElementById('rcMini');if(mini)rcChart(mini);}
 }
+/* online rooms: Build & Race buys every part from the budget; Class racing is free but must stay legal */
+function rcRoom(){try{return MP.on?mpCfg():null;}catch(e){return null;}}
+function rcShopMode(){const c=rcRoom();return !c?'free':c.m==='build'?'buy':c.m==='cls'?'class':'free';}
+function rcMoneyLeft(P){const c=rcRoom();if(!c||!MP.b)return Infinity;return c.bud+(c.earn[MP.me]||0)-mpPrice(MP.b.k)-rcPartsCost(P);}
 function rcMechHTML(E,HW){
+  const buy=rcShopMode()==='buy',left=buy?rcMoneyLeft(RC.P):Infinity,locked=buy&&rcRoom().ph==='race';
   const g=RC_PARTS[RC.mtab]||RC_PARTS.engine;
   const peak=RC.B.pts.reduce((a,o)=>o.hp>a.hp?o:a,RC.B.pts[0]);
   let h='<div class="rc-sub">'+Object.keys(RC_PARTS).map(k=>'<button type="button" data-m="'+k+'" class="'+(k===RC.mtab?'on':'')+'">'+RC_PARTS[k].label+'</button>').join('')+'</div><div class="rc-parts">';
   g.parts.forEach(x=>{if(!rcPartVisible(x,E,HW))return;
     const cur=RC.P[x.id],o=rcOpt(x.id,cur);
-    h+='<div class="rc-part"><label>'+x.label+'</label><select data-part="'+x.id+'">'+x.opts.map(q=>'<option value="'+q.id+'"'+(q.id===cur?' selected':'')+'>'+rcEsc(q.name)+'</option>').join('')+'</select>'+
+    const curP=rcPrice(x.id,cur);
+    h+='<div class="rc-part"><label>'+x.label+'</label><select data-part="'+x.id+'"'+(locked?' disabled':'')+'>'+x.opts.map(q=>{const pr=rcPrice(x.id,q.id),can=q.id===cur||pr-curP<=left;
+      return '<option value="'+q.id+'"'+(q.id===cur?' selected':'')+(can?'':' disabled')+'>'+rcEsc(q.name)+(buy&&pr?' — '+mpMoney(pr):'')+'</option>';}).join('')+'</select>'+
       '<div class="rc-desc">'+rcEsc(o.desc||'')+'</div></div>';});
   if(RC.mtab==='fi'&&!HW.boosted&&E.boosted===false&&!g.parts.some(x=>x.naOnly))h+='';
   h+='</div><div class="rc-note">'+rcEsc(rcEngineNote(E,HW))+'</div>';
@@ -10959,7 +10997,13 @@ function rcSideHTML(E,B){
   const flags=[...B.flags];if(B.warn.cooling)flags.push('cooling');if(RC.T.rev>B.hwRpm)flags.push('rpm');
   const uniq=[...new Set(flags)].filter(f=>RC_MSG[f]);
   const relC=B.rel>75?'var(--go)':B.rel>45?'#e8a91a':'var(--foul)';
-  return '<div class="rc-card"><div class="rc-big"><span>'+Math.round(b.hp)+'</span> hp <small>'+d(s.hp,b.hp)+'</small></div>'+
+  let room='';const sm=rcShopMode();
+  if(sm==='buy'&&MP.b){const c=rcRoom(),cash=c.bud+(c.earn[MP.me]||0),car=mpPrice(MP.b.k),pa=rcPartsCost(RC.P),lf=cash-car-pa;
+    room='<div class="rc-wallet">Budget '+(c.bud>=5000000?'no limit':mpMoney(c.bud))+(c.earn[MP.me]?' + winnings '+mpMoney(c.earn[MP.me]):'')+'<br>Car '+mpMoney(car)+' · parts '+mpMoney(pa)+' · <b class="'+(lf<0?'mp-bad':'')+'">'+mpMoney(lf)+' left</b><br><span>Tuning is free. Every part is paid for from your budget; selling a part back refunds it.</span></div>';}
+  else if(sm==='class'){const c=rcRoom(),L=mpLegal(rcMakeCar(),c.cls),C=MP_CLASSES[c.cls]||{};
+    room='<div class="rc-wallet"><b>'+rcEsc(C.label||'Class')+'</b> — '+(L.every(x=>x[0])?'<span class="mp-ok">legal</span>':'<span class="mp-bad">not legal</span>')+
+      '<ul class="rc-legal">'+L.map(x=>'<li class="'+(x[0]?'ok':'bad')+'">'+(x[0]?'✓ ':'✗ ')+rcEsc(x[1])+'</li>').join('')+'</ul></div>';}
+  return '<div class="rc-card">'+room+'<div class="rc-big"><span>'+Math.round(b.hp)+'</span> hp <small>'+d(s.hp,b.hp)+'</small></div>'+
     '<div class="rc-big tq"><span>'+Math.round(b.tq)+'</span> lb-ft <small>'+d(s.tq,b.tq)+'</small></div>'+
     '<div class="rc-kv">Peak power @ '+b.hpRpm.toLocaleString()+' rpm · peak torque @ '+b.tqRpm.toLocaleString()+' rpm'+(B.HW.boosted?' · '+b.psi.toFixed(1)+' psi':'')+'</div>'+
     '<canvas id="rcMini" width="300" height="150"></canvas>'+
@@ -11445,32 +11489,6 @@ const mpBoost=c=>!!(IND[c.ind]&&IND[c.ind].boosted);
 const mpBlower=c=>['roots','centri','twincharge'].indexOf(c.ind)>=0;
 function mpPow(c,h,t){c.hp=Math.round(c.hp*h);c.tq=Math.round(c.tq*t);
   if(c.sysHp)c.sysHp=Math.round(c.sysHp*h);if(c.sysTq)c.sysTq=Math.round(c.sysTq*t);}
-/* Parts shop. Gains are typical bolt-on figures (dyno-proven ranges, toward the
-   conservative end); prices are typical parts-plus-install street prices. */
-const MP_PARTS=[
- {id:'tune',name:c=>mpEV(c)?'Inverter / power tune':'ECU tune',price:c=>mpEV(c)?1500:mpBoost(c)?900:700,
-  ok:()=>true,note:c=>mpEV(c)?'+6% power':mpBoost(c)?'+12% hp, +15% torque (more boost)':'+4% (timing, rev limit)',
-  fx:c=>mpEV(c)?mpPow(c,1.06,1.04):mpBoost(c)?mpPow(c,1.12,1.15):mpPow(c,1.04,1.04)},
- {id:'intake',name:()=>'Cold-air intake',price:()=>400,ok:c=>!mpEV(c),note:()=>'+2%',fx:c=>mpPow(c,1.02,1.02)},
- {id:'exhaust',name:()=>'Cat-back exhaust',price:()=>1200,ok:c=>!mpEV(c),note:()=>'+2% hp',fx:c=>mpPow(c,1.02,1.015)},
- {id:'headers',name:c=>mpBoost(c)&&!mpBlower(c)?'Downpipes':'Long-tube headers',price:c=>mpBoost(c)&&!mpBlower(c)?900:1800,
-  ok:c=>!mpEV(c),req:['tune'],note:()=>'+5%',fx:c=>mpPow(c,1.05,1.05)},
- {id:'boost',name:c=>mpBlower(c)?'Smaller supercharger pulley':'Bigger turbo(s)',price:c=>mpBlower(c)?900:(c.ind==='single'?4500:7000),
-  ok:c=>mpBoost(c),req:['tune'],note:c=>mpBlower(c)?'+10% hp, +8% torque':'+22% hp, +15% torque',
-  fx:c=>mpBlower(c)?mpPow(c,1.10,1.08):mpPow(c,1.22,1.15)},
- {id:'e85',name:()=>'E85 flex-fuel kit',price:()=>1100,ok:c=>mpBoost(c),req:['tune'],note:()=>'+9% hp, +10% torque',fx:c=>mpPow(c,1.09,1.10)},
- {id:'nitrous',name:()=>'75-shot nitrous',price:()=>900,ok:c=>!mpEV(c),note:()=>'+75 hp, +90 lb-ft',
-  fx:c=>{c.hp+=75;c.tq+=90;if(c.sysHp)c.sysHp+=75;if(c.sysTq)c.sysTq+=90;}},
- {id:'wt1',name:()=>'Weight reduction I',price:()=>500,ok:()=>true,note:()=>'−60 lb (light battery, spare delete)',fx:c=>{c.weight-=60;}},
- {id:'wt2',name:()=>'Weight reduction II',price:()=>3500,ok:()=>true,req:['wt1'],note:()=>'−180 lb (rear-seat delete, carbon hood)',fx:c=>{c.weight-=180;}},
- {id:'radials',name:()=>'Drag radials',price:()=>1600,ok:()=>true,grp:'tyre',note:()=>'Huge bite on a prepped strip',fx:c=>{c.tire='drag';}},
- {id:'rcomp',name:()=>'R-compound tyres',price:()=>1400,ok:()=>true,grp:'tyre',note:()=>'Best grip on the street',fx:c=>{c.tire='track';}},
- {id:'fd',name:()=>'Shorter final drive',price:()=>1500,ok:c=>!mpEV(c),note:()=>'10% shorter: harder pull, lower top speed',fx:c=>{c.fd=Math.round(c.fd*1.10*100)/100;}},
- {id:'trans',name:()=>'Transmission tune',price:()=>600,ok:c=>['auto','dct','amt'].indexOf(c.trans)>=0,note:()=>'25% quicker shifts',fx:c=>{c.shift=Math.round(c.shift*0.75*1000)/1000;}},
- {id:'stall',name:()=>'High-stall converter',price:()=>1900,ok:c=>c.trans==='auto',note:()=>'+600 rpm stall: harder launch',
-  fx:c=>{const s0=c.stallRpm||Math.max(1800,Math.min(2500,Math.round(c.redline*0.45)));c.stallRpm=Math.min(Math.round(c.redline*0.6),s0+600);c.stall=Math.round((c.stall||2)*1.10*100)/100;}},
- {id:'shaft',name:()=>'Carbon driveshaft',price:()=>1300,ok:c=>c.drive==='rwd'&&!mpEV(c),note:()=>'+1% to the wheels',fx:c=>{c.eff=Math.round(((c.eff||0.85)+0.01)*1000)/1000;}}
-];
 const MP_FREE=['mode','launch','launchRpm','shiftMode','shiftRpm'];
 /* Build a car from a dealership pick + parts list + the driver's own settings. */
 function mpBase(k){const p=PRESETS[k];const c=JSON.parse(JSON.stringify(p));
@@ -11479,19 +11497,25 @@ function mpBase(k){const p=PRESETS[k];const c=JSON.parse(JSON.stringify(p));
   if(!c.stallRpm)c.stallRpm=Math.max(1800,Math.min(2500,Math.round(c.redline*0.45)));
   if(!c.shiftRpm)c.shiftRpm=Math.round(c.redline*0.95);if(!c.redFrac)c.redFrac=IND[c.ind].redFrac;
   return c;}
-function mpPartOk(pt,c,owned){return pt.ok(c)&&(pt.req||[]).every(r=>owned.indexOf(r)>=0);}
+/* A Build & Race car is the dealership car plus the Real Customization parts and tune its owner paid for.
+   Every screen rebuilds it from that list with the same physics, so nobody can send a car they did not buy. */
+const MP_DCACHE=new Map();
 function mpDerive(b){
   if(!b||!PRESETS[b.k])return null;
-  const c=mpBase(b.k),base=mpBase(b.k),owned=(b.p||[]).slice();
-  let n=0;MP_PARTS.forEach(pt=>{if(owned.indexOf(pt.id)>=0&&mpPartOk(pt,base,owned)){pt.fx(c);n++;}});
+  const key=mpJ([b.k,b.rp||{},b.rt||null]);let c=MP_DCACHE.get(key);
+  if(!c){const base=mpBase(b.k),rp=b.rp||{};
+    if((Object.keys(rp).length||b.rt)&&rcSupported(base)){
+      try{const E=rcEngine(base),cal=rcCalibrate(E),P=Object.assign(rcStockParts(),rp);
+        const T=rcFitTune(E,b.rt?JSON.parse(mpJ(b.rt)):rcStockTune(E,rcHW(E,P)));
+        c=rcCarFrom(base,E,rcBuild(E,cal,P,T),T,P);}catch(e){c=rcChassis(base,rp);}}
+    else c=rcChassis(base,rp);
+    c.name=PRESETS[b.k].name+(Object.keys(rp).length?' (built)':'');
+    if(MP_DCACHE.size>60)MP_DCACHE.clear();MP_DCACHE.set(key,c);}
+  c=JSON.parse(mpJ(c));
   const f=b.f||{};MP_FREE.forEach(k=>{if(f[k]!==undefined&&f[k]!==null&&f[k]!=='')c[k]=f[k];});
   if((c.modes||['normal']).indexOf(c.mode)<0)c.mode='normal';
-  c.name=PRESETS[b.k].name+(n?' (stage '+Math.min(3,Math.ceil(n/3))+')':'');
   c.garage=true;return c;}
-function mpCost(b){if(!b||!PRESETS[b.k])return{car:0,parts:0};
-  const base=mpBase(b.k),owned=b.p||[];let parts=0;
-  MP_PARTS.forEach(pt=>{if(owned.indexOf(pt.id)>=0&&mpPartOk(pt,base,owned))parts+=pt.price(base);});
-  return{car:mpPrice(b.k),parts};}
+function mpCost(b){if(!b||!PRESETS[b.k])return{car:0,parts:0};return{car:mpPrice(b.k),parts:rcPartsCost(b.rp)};}
 
 /* Class rules. Each test returns [pass, label]. A few global checks keep the
    hidden physics knobs honest in every class. */
@@ -11536,7 +11560,8 @@ const mpJ=x=>JSON.stringify(x);
 const mpCar=a=>a?mpDec(a[1]):null;
 function mpSetLane(L,arr){if(Array.isArray(arr)&&arr[0]==='-'){if(!laneEmpty(L))clearLane(L);}else{const d=mpDec(arr);if(!d)return;
   // the room only carries the car's curves; a Real Customization build's parts and tune stay with whoever has them
-  const E=EXTRAOF[L]||{},keep=E.build&&E.curve&&d.curve&&mpJ(E.curve)===mpJ(d.curve)?{build:E.build,base:E.base}:null;
+  const E=EXTRAOF[L]||{};let keep=E.build&&E.curve&&d.curve&&mpJ(E.curve)===mpJ(d.curve)?{build:E.build,base:E.base}:null;
+  if(!keep&&d.curve&&MP.builds&&MP.builds[mpJ(d.curve)])keep=MP.builds[mpJ(d.curve)];
   if(keep){d.build=keep.build;d.base=keep.base;}
   setLane(L,d);}}
 function mpHash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
@@ -11634,6 +11659,8 @@ function mpSync(){
   if(at&&mpJ(at[1])!==MP.lastTrk){MP.lastTrk=mpJ(at[1]);mpApplyTrk(at[1]);if(c.m==='sandbox')MP.trk=at;}
   else if(mpTrkEditable()&&mpJ(cur)!==MP.lastTrk){const v=(at?at[0]:0)+1;MP.trk=[v,cur];MP.lastTrk=mpJ(cur);MP.rdy=false;mpPush();}
   else if(at&&mpJ(cur)!==mpJ(at[1]))mpApplyTrk(at[1]);
+  if(mpInShop()&&c.m!=='sandbox'){mpLock();return;}
+  if(MP.shopCopy){MP.shopCopy=false;MP.lastAuth.A=null;const a=mpAuthCar('A');if(a)mpSetLane('A',a[1]);else if(!laneEmpty('A'))clearLane('A');}
   // cars
   let changed=false;
   activeLanes().forEach(L=>{
@@ -11845,10 +11872,10 @@ function mpRender(){
     stand='<div class="mp-res"><h4>'+(c.ph==='final'?'🏁 FINAL STANDINGS':'STANDINGS')+'</h4><ol>'+st.map(id=>'<li><b>'+mpEsc(mpPres(id).n||'Player')+'</b> <span class="mp-pts">'+(c.pts[id]||0)+' pts</span>'+(c.m==='build'?' <span class="mp-money">won '+mpMoney(c.earn[id]||0)+'</span>':'')+'</li>').join('')+'</ol></div>';}
   let mine='';
   if(c.m==='build'&&my)mine=mpShopHtml(c);
-  if(c.m==='cls'&&my){const car=mpCar(mpAuthCar(my));
+  if(c.m==='cls'&&my){const car=mpCar(mpAuthCar(my)),btn='<button type="button" id="mpOpenShop2"'+(c.ph==='race'?' disabled':'')+'>Open the build bay — modify within the class rules</button>';
     if(!car)mine='<div class="mp-shop"><h4>'+mpEsc(MP_CLASSES[c.cls].label.toUpperCase())+' RULES</h4><p class="mp-note">'+mpEsc(MP_CLASSES[c.cls].desc)+' Load a car into your lane to start.</p></div>';else
-    mine='<div class="mp-shop"><h4>'+mpEsc(MP_CLASSES[c.cls].label.toUpperCase())+' RULES</h4><p class="mp-note">'+mpEsc(MP_CLASSES[c.cls].desc)+' Load any car into your lane and tune it in your lane card below.</p><ul class="mp-checks">'+
-      mpLegal(car,c.cls).map(x=>'<li class="'+(x[0]?'ok':'bad')+'">'+(x[0]?'✓ ':'✗ ')+mpEsc(x[1])+'</li>').join('')+'</ul></div>';}
+    mine='<div class="mp-shop"><h4>'+mpEsc(MP_CLASSES[c.cls].label.toUpperCase())+' RULES</h4><p class="mp-note">'+mpEsc(MP_CLASSES[c.cls].desc)+' Load any car into your lane, then modify it in the build bay — parts and tuning are free, but the car has to stay legal.</p><ul class="mp-checks">'+
+      mpLegal(car,c.cls).map(x=>'<li class="'+(x[0]?'ok':'bad')+'">'+(x[0]?'✓ ':'✗ ')+mpEsc(x[1])+'</li>').join('')+'</ul>'+btn+'</div>';}
   if(c.m==='sandbox')mine='<p class="mp-note">Sandbox: anyone can change any lane or the track, and everyone sees the changes. Press Ready when you\'re set; the host starts the race.</p>'+
     '<p class="mp-note">Workshop: pick <b>Dyno test</b> or <b>Real Customization</b> under Track to put your lane 1 car on the dyno or build and tune it — just on your screen, while the room stays on its track. Your build reaches everyone\'s lane 1, and when the host starts a race you\'re brought back to the line.</p>';
   el.innerHTML='<div class="mp-head"><span>ROOM <b class="mp-code">'+mpEsc(MP.code.toUpperCase())+'</b></span><button type="button" id="mpCopy" class="mp-sm">Copy code</button>'+
@@ -11865,10 +11892,10 @@ function mpShopHtml(c){
     ' · car '+mpMoney(co.car)+' · parts '+mpMoney(co.parts)+' · <b class="'+(left<0?'mp-bad':'')+'">'+mpMoney(left)+' left</b></p>'+
     '<label for="mpDealer">DEALERSHIP (approx. price new)</label><select id="mpDealer"'+(c.ph==='race'?' disabled':'')+'><option value="">Pick a car…</option>'+
     keys.map(k=>{const pr=mpPrice(k),afford=pr+(b.k===k?co.parts:0)<=cash;return '<option value="'+k+'"'+(b.k===k?' selected':'')+(afford||b.k===k?'':' disabled')+'>'+mpEsc(PRESETS[k].name)+' — '+mpMoney(pr)+'</option>';}).join('')+'</select>';
-  if(b.k&&PRESETS[b.k]){const base=mpBase(b.k);
-    h+='<div class="mp-parts">'+MP_PARTS.map(pt=>{const okc=pt.ok(base);if(!okc)return '';const has=partsOwned.indexOf(pt.id)>=0,pr=pt.price(base);
-      const reqOk=(pt.req||[]).every(r=>partsOwned.indexOf(r)>=0),can=has||(reqOk&&pr<=left);
-      return '<label class="mp-part'+(can?'':' off')+'"><input type="checkbox" data-part="'+pt.id+'"'+(has?' checked':'')+(can&&c.ph!=='race'?'':' disabled')+'> <b>'+mpEsc(pt.name(base))+'</b> <span class="mp-price">'+mpMoney(pr)+'</span><span class="mp-pn">'+mpEsc(pt.note(base))+((pt.req&&!reqOk)?' · needs '+pt.req.map(r=>MP_PARTS.find(x=>x.id===r).name(base)).join(', '):'')+'</span></label>';}).join('')+'</div>'+
+  if(b.k&&PRESETS[b.k]){const owned=Object.keys(b.rp||{});
+    h+='<p class="mp-note">'+(owned.length?owned.length+' part'+(owned.length>1?'s':'')+' fitted ('+mpMoney(co.parts)+')'+(b.rt?' · custom tune':''):'Stock — no parts yet')+'</p>'+
+      '<button type="button" class="go" id="mpOpenShop"'+(c.ph==='race'?' disabled':'')+'>Open the build bay — buy parts &amp; tune</button>'+
+      '<p class="mp-note">Every part in Real Customization is for sale here: engine, intake, turbo / supercharger, exhaust, fuel, cooling, drivetrain, internals, weight and tyres. Tuning is free. The Dyno is there too, to see what you paid for.</p>'+
       '<p class="mp-note">Drive mode, launch method, launch rpm and shift strategy stay yours to set in your lane card.</p>';}
   return h+'</div>';}
 
@@ -11880,6 +11907,8 @@ document.addEventListener('click',e=>{const t=e.target;if(!t||!t.id)return;
   else if(t.id==='mpCopy'){try{navigator.clipboard.writeText(MP.code.toUpperCase());t.textContent='Copied';setTimeout(()=>{t.textContent='Copy code';},1500);}catch(err){}}
   else if(t.id==='mpReady'){MP.rdy=!MP.rdy;mpPush();MP.lastSig=null;mpRender();}
   else if(t.id==='mpStart')mpStartRace();
+  else if(t.id==='mpOpenShop'||t.id==='mpOpenShop2'){const v=document.getElementById('venue');v.value='rc';v.dispatchEvent(new Event('change'));
+    const pn=document.getElementById('rcPanel');if(pn)pn.scrollIntoView({behavior:'smooth',block:'start'});}
   else if(t.id==='mpNew'&&MP.host){const c=MP.cfg;c.rd=0;c.earn={};c.pts={};c.last=null;c.ph='setup';mpPush();MP.lastSig=null;mpRender();}
 });
 document.addEventListener('change',e=>{const t=e.target;if(!t)return;
@@ -11888,11 +11917,7 @@ document.addEventListener('change',e=>{const t=e.target;if(!t)return;
   else if(MP.host&&MP.cfg&&t.id==='mpBud'){MP.cfg.bud=parseInt(t.value,10)||50000;mpPush();MP.lastSig=null;mpRender();}
   else if(MP.host&&MP.cfg&&t.id==='mpCls'){MP.cfg.cls=t.value;mpPush();MP.lastSig=null;mpRender();}
   else if(MP.host&&MP.cfg&&t.id==='mpRds'){MP.cfg.rds=parseInt(t.value,10)||3;mpPush();MP.lastSig=null;mpRender();}
-  else if(t.id==='mpDealer'){const k=t.value;if(!k){MP.b=null;}else MP.b={k,p:[],f:{}};MP.rdy=false;mpSync();mpPush();MP.lastSig=null;mpRender();}
-  else if(t.dataset&&t.dataset.part&&MP.b){const id=t.dataset.part;let p=(MP.b.p||[]).filter(x=>x!==id);
-    if(t.checked){const pt=MP_PARTS.find(x=>x.id===id);if(pt.grp)p=p.filter(x=>{const o=MP_PARTS.find(y=>y.id===x);return !o||o.grp!==pt.grp;});p.push(id);}
-    else{p=p.filter(x=>{const o=MP_PARTS.find(y=>y.id===x);return !o||!o.req||o.req.every(r=>p.indexOf(r)>=0);});}
-    MP.b.p=p;MP.rdy=false;mpSync();mpPush();MP.lastSig=null;mpRender();}
+  else if(t.id==='mpDealer'){const k=t.value;if(!k){MP.b=null;}else MP.b={k,rp:{},rt:null,f:{}};MP.rdy=false;mpSync();mpPush();MP.lastSig=null;mpRender();}
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target&&e.target.id==='mpCode'){e.preventDefault();document.getElementById('mpJoin').click();}});
 MP.nick=mpStore('qm_nick')||'Driver';
@@ -11909,7 +11934,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='39a3859033';let dismissed=null;
+(function(){const V='63b09fc0c9';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
