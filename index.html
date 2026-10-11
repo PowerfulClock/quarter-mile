@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="6855719546";</script>
+<head><script>window.QM_VER="dbe50e844e";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -942,7 +942,8 @@ function sndPackFor(c){
     if(/corvette/.test(nm))return /\bc8\b/.test(nm)||yr>=2020?'vettec8':'vettec7';
     if(/camaro/.test(nm)&&v8)return 'vettec7';
     if(/viper/.test(nm))return 'viper';
-    if(/mclaren/.test(nm))return 'mclaren';}
+    if(/mclaren/.test(nm))return 'mclaren';
+    if(/\burus\b/.test(nm))return 'urus';if(/hurac[aá]n/.test(nm))return 'huracan';if(/aventador/.test(nm))return 'aventador';}
   {const nm=(c.name||'').toLowerCase();
     if(/\bbmw\b/.test(nm)){const es=c.engSound||'';
       if(/\bm2\b/.test(nm))return 'bmwm2';                                  // S58 (M2 mod)
@@ -1357,12 +1358,12 @@ const PRESETS={
  mustang09v6:Object.assign({},P0,{engSound:"v6",modes:['normal'],mode:'normal',body:'mustang',name:"2009 Mustang V6",hp:210,hpRpm:5300,tq:240,tqRpm:3500,redline:6250,
   ind:"na",disp:4.0,gears:[3.22,2.29,1.54,1.00,0.71],fd:3.31,drive:"rwd",trans:"auto",
   layout:"front",tire:"allseason",weight:3336,dist:52,tireD:26.5,cda:8.0,wb:107.1,cg:21,stall:1.9,stallRpm:2500,launch:'bb'}),
- bmw230i:Object.assign({},P0,{engSound:"i4",modes:['normal','sport'],mode:'normal',name:"2024 BMW 230i xDrive",hp:255,hpRpm:5000,tq:295,tqRpm:1550,redline:6500,redFrac:0.98,
+ bmw230i:Object.assign({},P0,{engSound:"i4",modes:['normal','sport'],mode:'normal',name:"2024 BMW 230i xDrive",hp:268,hpRpm:5000,tq:310,tqRpm:1550,redline:6500,redFrac:0.98,
   ind:"single",disp:2.0,gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:2.81,drive:"awd",trans:"auto",
-  layout:"front",tire:"summer",weight:3594,dist:52,tireD:26.3,cda:6.9,wb:108,cg:20}),
- bmwM2:Object.assign({},P0,{burble:0.7,engSound:"i6",modes:['normal','sport','track'],mode:'normal',name:"2023 BMW M2 (G87)",hp:453,hpRpm:6250,tq:406,tqRpm:2650,redline:7200,redFrac:0.95,
+  layout:"front",tire:"summer",weight:3594,dist:52,tireD:26.3,cda:6.9,wb:108,cg:20,rated:[255,295]}),
+ bmwM2:Object.assign({},P0,{burble:0.7,engSound:"i6",modes:['normal','sport','track'],mode:'normal',name:"2023 BMW M2 (G87)",hp:503,hpRpm:6250,tq:451,tqRpm:2650,redline:7200,redFrac:0.95,
   ind:"twin",disp:3.0,gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"rwd",trans:"auto",
-  layout:"front",tire:"summer",weight:3803,dist:52,tireD:26.6,cda:7.1,gripAdj:1.08,wb:108,cg:20,launchRpm:3200}),
+  layout:"front",tire:"summer",weight:3803,dist:52,tireD:26.6,cda:7.1,gripAdj:1.08,wb:108,cg:20,launchRpm:3200,rated:[453,406]}),
  challSXT11:Object.assign({},P0,{engSound:"v6",modes:['normal'],mode:'normal',body:'challenger',name:"2011 Challenger SE",hp:305,hpRpm:6350,tq:268,tqRpm:4800,redline:6400,
   ind:"na",disp:3.6,gears:[3.59,2.19,1.41,1.00,0.83],fd:2.65,drive:"rwd",trans:"auto",
   layout:"front",tire:"allseason",weight:3865,dist:55,tireD:27.6,cda:8.6,wb:116,cg:21.5,stall:2.1,stallRpm:3000,launch:'bb'}),
@@ -1475,34 +1476,34 @@ Object.assign(PRESETS,{
 });
 
 Object.assign(PRESETS,{
- m3comp:Object.assign({},P1,{burble:0.7,name:"2023 BMW M3 Competition xDrive",mfr:"BMW",hp:503,hpRpm:6250,tq:479,tqRpm:2750,redline:7200,
+ m3comp:Object.assign({},P1,{burble:0.7,name:"2023 BMW M3 Competition xDrive",mfr:"BMW",hp:589,hpRpm:6250,tq:560,tqRpm:2750,redline:7200,
   ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4050,dist:51,tireD:26.8,cda:7.3,wb:112.5,cg:20,
-  launchRpm:3200,modes:['normal','sport','track'],mode:'normal'}),
- m4comp:Object.assign({},P1,{burble:0.7,name:"2023 BMW M4 Competition xDrive",mfr:"BMW",hp:503,hpRpm:6250,tq:479,tqRpm:2750,redline:7200,
+  launchRpm:3200,modes:['normal','sport','track'],mode:'normal',rated:[503,479]}),
+ m4comp:Object.assign({},P1,{burble:0.7,name:"2023 BMW M4 Competition xDrive",mfr:"BMW",hp:589,hpRpm:6250,tq:560,tqRpm:2750,redline:7200,
   ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:3970,dist:51,tireD:26.8,cda:7.1,wb:112.5,cg:20,
-  launchRpm:3200,modes:['normal','sport','track'],mode:'normal'}),
- m5comp:Object.assign({},P1,{burble:0.45,name:"2021 BMW M5 Competition",mfr:"BMW",hp:617,hpRpm:6000,tq:553,tqRpm:1800,redline:7200,
+  launchRpm:3200,modes:['normal','sport','track'],mode:'normal',rated:[503,479]}),
+ m5comp:Object.assign({},P1,{burble:0.45,name:"2021 BMW M5 Competition",mfr:"BMW",hp:666,hpRpm:6000,tq:597,tqRpm:1800,redline:7200,
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4345,dist:53,tireD:27.6,cda:7.9,wb:117.4,cg:20.5,
-  launchRpm:3000,modes:['normal','sport','track'],mode:'normal'}),
- m8comp:Object.assign({},P1,{burble:0.5,name:"2021 BMW M8 Competition Coupe",mfr:"BMW",hp:617,hpRpm:6000,tq:553,tqRpm:1800,redline:7200,
+  launchRpm:3000,modes:['normal','sport','track'],mode:'normal',rated:[617,553]}),
+ m8comp:Object.assign({},P1,{burble:0.5,name:"2021 BMW M8 Competition Coupe",mfr:"BMW",hp:666,hpRpm:6000,tq:597,tqRpm:1800,redline:7200,
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4295,dist:53,tireD:27.6,cda:7.7,wb:111.0,cg:19.5,
-  launchRpm:3000,modes:['normal','sport','track'],mode:'normal'}),
- x3m:Object.assign({},P1,{burble:0.5,name:"2022 BMW X3 M Competition",mfr:"BMW",hp:503,hpRpm:6250,tq:479,tqRpm:2600,redline:7200,
+  launchRpm:3000,modes:['normal','sport','track'],mode:'normal',rated:[617,553]}),
+ x3m:Object.assign({},P1,{burble:0.5,name:"2022 BMW X3 M Competition",mfr:"BMW",hp:589,hpRpm:6250,tq:560,tqRpm:2600,redline:7200,
   ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
-  layout:"front",tire:"summer",weight:4240,dist:54,tireD:28.5,cda:8.6,wb:112.8,cg:24,
-  launchRpm:3200,modes:['normal','sport','track'],mode:'normal'}),
- x5m:Object.assign({},P1,{burble:0.4,name:"2021 BMW X5 M Competition",mfr:"BMW",hp:617,hpRpm:6000,tq:553,tqRpm:1800,redline:7200,
+  layout:"front",tire:"summer",weight:4590,dist:54,tireD:28.5,cda:8.6,wb:112.8,cg:24,
+  launchRpm:3200,modes:['normal','sport','track'],mode:'normal',rated:[503,479]}),
+ x5m:Object.assign({},P1,{burble:0.4,name:"2021 BMW X5 M Competition",mfr:"BMW",hp:666,hpRpm:6000,tq:597,tqRpm:1800,redline:7200,
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:5275,dist:54,tireD:29.5,cda:9.8,wb:117.1,cg:26,
-  launchRpm:3000,modes:['normal','sport','track'],mode:'normal'}),
- x7m60i:Object.assign({},P1,{burble:0.6,name:"2023 BMW X7 M60i",mfr:"BMW",hp:523,hpRpm:5500,tq:553,tqRpm:1800,redline:6500,
+  launchRpm:3000,modes:['normal','sport','track'],mode:'normal',rated:[617,553]}),
+ x7m60i:Object.assign({},P1,{burble:0.6,name:"2023 BMW X7 M60i",mfr:"BMW",hp:617,hpRpm:5500,tq:653,tqRpm:1800,redline:6500,
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.31,drive:"awd",trans:"auto",
-  layout:"front",tire:"summer",weight:5650,dist:55,tireD:30.5,cda:11.2,wb:126.4,cg:28,
-  launchRpm:2800,modes:['normal','sport'],mode:'normal'}),
+  layout:"front",tire:"summer",weight:5890,dist:55,tireD:30.5,cda:11.2,wb:126.4,cg:28,
+  launchRpm:2800,modes:['normal','sport'],mode:'normal',rated:[523,553]}),
 });
 
 const PEV={gripAdj:1.0,stall:2.0,stallRpm:0,launch:'none',launchRpm:2000,shiftMode:'redline',
@@ -1879,30 +1880,30 @@ Object.assign(PRESETS,{
   layout:"front",tire:"summer",weight:3475,dist:53,tireD:26.8,cda:7.8,wb:107.1,cg:20.5,
   launchRpm:2500,modes:['normal']}),
  /* --- BMW M-Performance (a step below each M car) --- */
- m340i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M340i xDrive",mfr:"BMW",hp:382,hpRpm:5800,tq:369,tqRpm:2000,redline:6500,
+ m340i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M340i xDrive",mfr:"BMW",hp:447,hpRpm:5800,tq:432,tqRpm:2000,redline:6500,
   ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:3980,dist:52,tireD:26.6,cda:7.1,wb:112.2,cg:20.5,
-  launchRpm:2800,modes:['normal','sport']}),
- m440i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M440i xDrive",mfr:"BMW",hp:382,hpRpm:5800,tq:369,tqRpm:2000,redline:6500,
+  launchRpm:2800,modes:['normal','sport'],rated:[382,369]}),
+ m440i:Object.assign({},P1,{burble:1.0,name:"2023 BMW M440i xDrive",mfr:"BMW",hp:447,hpRpm:5800,tq:432,tqRpm:2000,redline:6500,
   ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4010,dist:52,tireD:26.6,cda:7.0,wb:112.2,cg:20,
-  launchRpm:2800,modes:['normal','sport']}),
- m550i:Object.assign({},P1,{burble:0.65,name:"2022 BMW M550i xDrive",mfr:"BMW",hp:523,hpRpm:5500,tq:553,tqRpm:1800,redline:6500,
+  launchRpm:2800,modes:['normal','sport'],rated:[382,369]}),
+ m550i:Object.assign({},P1,{burble:0.65,name:"2022 BMW M550i xDrive",mfr:"BMW",hp:565,hpRpm:5500,tq:597,tqRpm:1800,redline:6500,
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4390,dist:52,tireD:27.4,cda:7.6,wb:117.1,cg:20.5,
-  launchRpm:3000,modes:['normal','sport']}),
- m850i:Object.assign({},P1,{burble:0.75,name:"2022 BMW M850i xDrive",mfr:"BMW",hp:523,hpRpm:5500,tq:553,tqRpm:1800,redline:6500,
+  launchRpm:3000,modes:['normal','sport'],rated:[523,553]}),
+ m850i:Object.assign({},P1,{burble:0.75,name:"2022 BMW M850i xDrive",mfr:"BMW",hp:565,hpRpm:5500,tq:597,tqRpm:1800,redline:6500,
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4478,dist:52,tireD:27.4,cda:7.5,wb:111.1,cg:19.5,
-  launchRpm:3000,modes:['normal','sport']}),
- x3m40i:Object.assign({},P1,{burble:1.0,name:"2022 BMW X3 M40i",mfr:"BMW",hp:382,hpRpm:5800,tq:365,tqRpm:2000,redline:6500,
+  launchRpm:3000,modes:['normal','sport'],rated:[523,553]}),
+ x3m40i:Object.assign({},P1,{burble:1.0,name:"2022 BMW X3 M40i",mfr:"BMW",hp:447,hpRpm:5800,tq:427,tqRpm:2000,redline:6500,
   ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
-  layout:"front",tire:"summer",weight:4291,dist:54,tireD:28.0,cda:8.5,wb:112.8,cg:24,
-  launchRpm:2800,modes:['normal','sport']}),
- x5m50i:Object.assign({},P1,{burble:0.6,name:"2022 BMW X5 M50i",mfr:"BMW",hp:523,hpRpm:5500,tq:553,tqRpm:1800,redline:6500,
+  layout:"front",tire:"summer",weight:4370,dist:54,tireD:28.0,cda:8.5,wb:112.8,cg:24,
+  launchRpm:2800,modes:['normal','sport'],rated:[382,365]}),
+ x5m50i:Object.assign({},P1,{burble:0.6,name:"2022 BMW X5 M50i",mfr:"BMW",hp:565,hpRpm:5500,tq:597,tqRpm:1800,redline:6500,
   ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:5170,dist:53,tireD:29.5,cda:9.8,wb:117.1,cg:26,
-  launchRpm:2800,modes:['normal','sport']}),
+  launchRpm:2800,modes:['normal','sport'],rated:[523,553]}),
  /* --- Audi RS7 --- */
  rs7_2026:Object.assign({},P1,{burble:0.55,name:"2026 Audi RS7 Performance",mfr:"Audi",hp:621,hpRpm:6000,tq:627,tqRpm:2300,redline:6800,
   ind:"twin",disp:4.0,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.20,drive:"awd",trans:"auto",
@@ -2133,6 +2134,80 @@ Object.assign(PRESETS,{
  q60_17rs400awd:Object.assign({},P1,{name:"2017 Infiniti Q60 Red Sport 400 AWD",mfr:"Infiniti",hp:400,hpRpm:6400,tq:350,tqRpm:1600,redline:7000,
   ind:"twin",disp:3.0,engSound:"v6",gears:[4.887, 3.17, 2.027, 1.412, 1.0, 0.864, 0.775],fd:3.133,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:3975,dist:57,tireD:26.3,cda:6.3,wb:112.2,cg:20,launch:"bb",launchRpm:2000,gripAdj:1.0,modes:['normal','sport','track'],mode:"normal",curve:[[1000,235],[1600,350],[5200,350],[6400,328.2],[7000,286]]}),
+});
+Object.assign(PRESETS,{
+ bmw230irwd:Object.assign({},P1,{burble:0.3,name:"2024 BMW 230i",mfr:"BMW",hp:268,hpRpm:5000,tq:310,tqRpm:1550,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:2.81,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3450,dist:51,tireD:26.3,cda:6.9,wb:108,cg:20,launch:"lc",launchRpm:2600,modes:['normal','sport'],mode:"normal",rated:[255,295]}),
+ bmwm240i:Object.assign({},P1,{burble:1.0,name:"2024 BMW M240i xDrive",mfr:"BMW",hp:447,hpRpm:5800,tq:432,tqRpm:1900,redline:6500,
+  ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:3871,dist:52,tireD:26.3,cda:7.0,wb:108,cg:20,launch:"lc",launchRpm:2800,modes:['normal','sport'],mode:"normal",rated:[382,369]}),
+ bmwM2m:Object.assign({},P1,{burble:0.7,name:"2023 BMW M2 (G87) 6-Speed Manual",mfr:"BMW",hp:503,hpRpm:6250,tq:451,tqRpm:2650,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[4.11,2.32,1.54,1.18,1.00,0.85],fd:3.46,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3867,dist:52,tireD:26.6,cda:7.1,wb:108,cg:20,launch:"none",launchRpm:3500,modes:['normal','sport','track'],mode:"normal",rated:[453,406]}),
+ bmwM2_25:Object.assign({},P1,{burble:0.7,name:"2025 BMW M2",mfr:"BMW",hp:544,hpRpm:6250,tq:509,tqRpm:2650,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3840,dist:52,tireD:26.6,cda:7.1,wb:108,cg:20,launch:"lc",launchRpm:3200,modes:['normal','sport','track'],mode:"normal",rated:[473,443]}),
+ bmw330i:Object.assign({},P1,{burble:0.3,name:"2023 BMW 330i",mfr:"BMW",hp:268,hpRpm:5000,tq:310,tqRpm:1550,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:2.81,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3582,dist:51,tireD:26.6,cda:7.0,wb:112.2,cg:20.5,launch:"lc",launchRpm:2600,modes:['normal','sport'],mode:"normal",rated:[255,295]}),
+ m340irwd:Object.assign({},P1,{burble:1.0,name:"2023 BMW M340i",mfr:"BMW",hp:447,hpRpm:5800,tq:432,tqRpm:1900,redline:6500,
+  ind:"single",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3826,dist:51,tireD:26.6,cda:7.1,wb:112.2,cg:20.5,launch:"lc",launchRpm:2800,modes:['normal','sport'],mode:"normal",rated:[382,369]}),
+ m3base:Object.assign({},P1,{burble:0.7,name:"2023 BMW M3 6-Speed Manual",mfr:"BMW",hp:501,hpRpm:6250,tq:430,tqRpm:2650,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[4.11,2.32,1.54,1.18,1.00,0.85],fd:3.62,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3840,dist:51,tireD:26.8,cda:7.3,wb:112.5,cg:20,launch:"none",launchRpm:3800,modes:['normal','sport','track'],mode:"normal",rated:[473,406]}),
+ m3comprwd:Object.assign({},P1,{burble:0.7,name:"2023 BMW M3 Competition",mfr:"BMW",hp:589,hpRpm:6250,tq:560,tqRpm:2750,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3890,dist:51,tireD:26.8,cda:7.3,wb:112.5,cg:20,launch:"lc",launchRpm:3200,modes:['normal','sport','track'],mode:"normal",rated:[503,479]}),
+ m3cs:Object.assign({},P1,{burble:0.8,name:"2024 BMW M3 CS",mfr:"BMW",hp:624,hpRpm:6250,tq:551,tqRpm:2750,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:3915,dist:51,tireD:26.8,cda:7.3,wb:112.5,cg:20,launch:"lc",launchRpm:3200,modes:['normal','sport','track'],mode:"normal",rated:[543,479]}),
+ bmw430i:Object.assign({},P1,{burble:0.3,name:"2023 BMW 430i",mfr:"BMW",hp:268,hpRpm:5000,tq:310,tqRpm:1550,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:2.81,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3659,dist:51,tireD:26.6,cda:6.9,wb:112.2,cg:20,launch:"lc",launchRpm:2600,modes:['normal','sport'],mode:"normal",rated:[255,295]}),
+ m4base:Object.assign({},P1,{burble:0.7,name:"2023 BMW M4 6-Speed Manual",mfr:"BMW",hp:501,hpRpm:6250,tq:430,tqRpm:2650,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[4.11,2.32,1.54,1.18,1.00,0.85],fd:3.62,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3830,dist:51,tireD:26.8,cda:7.1,wb:112.5,cg:20,launch:"none",launchRpm:3800,modes:['normal','sport','track'],mode:"normal",rated:[473,406]}),
+ m4comprwd:Object.assign({},P1,{burble:0.7,name:"2023 BMW M4 Competition",mfr:"BMW",hp:589,hpRpm:6250,tq:560,tqRpm:2750,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3880,dist:51,tireD:26.8,cda:7.1,wb:112.5,cg:20,launch:"lc",launchRpm:3200,modes:['normal','sport','track'],mode:"normal",rated:[503,479]}),
+ m4csl:Object.assign({},P1,{burble:0.9,name:"2023 BMW M4 CSL",mfr:"BMW",hp:624,hpRpm:6250,tq:551,tqRpm:2750,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3640,dist:51,tireD:26.8,cda:7.0,wb:112.5,cg:19.5,launch:"lc",launchRpm:3200,modes:['normal','sport','track'],mode:"normal",rated:[543,479]}),
+ m4cs:Object.assign({},P1,{burble:0.8,name:"2025 BMW M4 CS",mfr:"BMW",hp:624,hpRpm:6250,tq:551,tqRpm:2750,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:3850,dist:51,tireD:26.8,cda:7.1,wb:112.5,cg:19.5,launch:"lc",launchRpm:3200,modes:['normal','sport','track'],mode:"normal",rated:[543,479]}),
+ bmw540i:Object.assign({},P1,{burble:0.6,name:"2021 BMW 540i xDrive",mfr:"BMW",hp:392,hpRpm:5500,tq:388,tqRpm:1650,redline:6500,
+  ind:"single",disp:3.0,engSound:"i6",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:2.81,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4095,dist:52,tireD:26.9,cda:7.4,wb:117.1,cg:20.5,launch:"lc",launchRpm:2800,modes:['normal','sport'],mode:"normal",rated:[335,332]}),
+ m5base:Object.assign({},P1,{burble:0.45,name:"2021 BMW M5",mfr:"BMW",hp:648,hpRpm:6000,tq:597,tqRpm:1800,redline:7200,
+  ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4370,dist:53,tireD:27.6,cda:7.9,wb:117.4,cg:20.5,launch:"lc",launchRpm:3000,modes:['normal','sport','track'],mode:"normal",rated:[600,553]}),
+ m5cs:Object.assign({},P1,{burble:0.6,name:"2022 BMW M5 CS",mfr:"BMW",hp:680,hpRpm:6000,tq:600,tqRpm:1800,redline:7200,
+  ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4110,dist:53,tireD:27.6,cda:7.8,wb:117.4,cg:20.3,launch:"lc",launchRpm:3000,modes:['normal','sport','track'],mode:"normal",rated:[627,553]}),
+ bmw840i:Object.assign({},P1,{burble:0.7,name:"2022 BMW 840i",mfr:"BMW",hp:392,hpRpm:5000,tq:431,tqRpm:1600,redline:6500,
+  ind:"single",disp:3.0,engSound:"i6",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:2.81,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3915,dist:51,tireD:27.4,cda:7.4,wb:111.1,cg:19.5,launch:"lc",launchRpm:2800,modes:['normal','sport'],mode:"normal",rated:[335,368]}),
+ bmw840ix:Object.assign({},P1,{burble:0.7,name:"2022 BMW 840i xDrive",mfr:"BMW",hp:392,hpRpm:5000,tq:431,tqRpm:1600,redline:6500,
+  ind:"single",disp:3.0,engSound:"i6",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:2.81,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4090,dist:52,tireD:27.4,cda:7.4,wb:111.1,cg:19.5,launch:"lc",launchRpm:2800,modes:['normal','sport'],mode:"normal",rated:[335,368]}),
+ x3_30i:Object.assign({},P1,{burble:0.2,name:"2022 BMW X3 xDrive30i",mfr:"BMW",hp:258,hpRpm:5200,tq:268,tqRpm:1450,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.08,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4175,dist:52,tireD:28.0,cda:8.4,wb:112.8,cg:24,launch:"lc",launchRpm:2400,modes:['normal','sport'],mode:"normal",rated:[248,258]}),
+ x3mbase:Object.assign({},P1,{burble:0.5,name:"2022 BMW X3 M",mfr:"BMW",hp:520,hpRpm:6250,tq:486,tqRpm:2600,redline:7200,
+  ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4560,dist:54,tireD:28.5,cda:8.6,wb:112.8,cg:24,launch:"lc",launchRpm:3000,modes:['normal','sport','track'],mode:"normal",rated:[473,442]}),
+ x5_40i:Object.assign({},P1,{burble:0.4,name:"2022 BMW X5 xDrive40i",mfr:"BMW",hp:392,hpRpm:5500,tq:387,tqRpm:1500,redline:6500,
+  ind:"single",disp:3.0,engSound:"i6",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4900,dist:53,tireD:29.5,cda:9.6,wb:117.1,cg:26,launch:"lc",launchRpm:2600,modes:['normal','sport'],mode:"normal",rated:[335,331]}),
+ x5mbase:Object.assign({},P1,{burble:0.4,name:"2021 BMW X5 M",mfr:"BMW",hp:648,hpRpm:6000,tq:597,tqRpm:1800,redline:7200,
+  ind:"twin",disp:4.4,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:5260,dist:54,tireD:29.5,cda:9.8,wb:117.1,cg:26,launch:"lc",launchRpm:3000,modes:['normal','sport','track'],mode:"normal",rated:[600,553]}),
+ x7_40i:Object.assign({},P1,{burble:0.4,name:"2023 BMW X7 xDrive40i",mfr:"BMW",hp:435,hpRpm:5200,tq:462,tqRpm:1850,redline:6500,
+  ind:"single",disp:3.0,engSound:"i6",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.15,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:5480,dist:55,tireD:30.5,cda:11.0,wb:126.4,cg:28,launch:"lc",launchRpm:2600,modes:['normal','sport'],mode:"normal",rated:[375,398]}),
 });
 // Tag manufacturer on existing presets for search/grouping
 const MFR_MAP={mustang25eco:"Ford",mustang18eco:"Ford",mustang25gt:"Ford",mustang09v6:"Ford",
@@ -4840,6 +4915,9 @@ function refresh(lane){
     else ind.innerHTML='Specific output <b>'+bi.specific.toFixed(0)+' hp/L</b> from '+c.disp.toFixed(1)+' L'+
       (bi.specific>130?' — very high for a road engine':'');
   }
+  /* a car whose maker understates its output: show the factory figure next to what it really makes */
+  if(ind){const pr=Object.values(PRESETS).find(q=>q.rated&&q.name===c.name);
+    if(pr&&(pr.rated[0]!==pr.hp))ind.innerHTML+='<br>Factory rating <b>'+pr.rated[0]+' hp / '+pr.rated[1]+' lb-ft</b>. Like most of BMW\'s turbo engines it makes more than that: dyno and test-track results put it at about <b>'+pr.hp+' hp / '+pr.tq+' lb-ft</b> at the crank, which is what it races with here.';}
   const drv=document.getElementById('drvNote'+lane);
   if(drv&&!isNaN(c.hp)&&!isNaN(c.tq)){
     const w=(typeof dynoWheel==='function'&&dynoWheel(c))||{hp:c.hp*c.eff,tq:c.tq*c.eff};
@@ -5315,6 +5393,7 @@ function wheelSpec(body,name){
       bmw5:M?[[20,275,35],[20,285,35]]:[[20,245,35],[20,275,30]],bmw8:M?[[20,275,35],[20,285,35]]:[[20,245,35],[20,275,30]],bmwx3:M?[[21,255,40],[21,265,40]]:[[20,245,45],[20,275,40]],
       bmwx5:M?[[21,295,35],[22,315,30]]:[[21,275,40],[21,315,35]],bmwx7:[[22,275,40],[22,315,35]]}[body]||[[19,245,40],[19,275,35]];
     f=ty(...T[0]);r=ty(...T[1]);style=M?'split5':(body==='bmwx7'?'multi':'ten');finish=M?'black':(/230i/.test(n)?'silver':'gunmetal');cal=M?'red':(/230i/.test(n)?'silver':'blue');
+    if(/\bcsl?\b/.test(n)){finish='bronze';cal='red';style='multi';}
   }else if(body==='accord17'){f=r=ty(19,235,40);style='split5';finish='gunmetal';
   }else if(body==='accord18'){f=r=ty(19,235,40);style='multi';finish='gunmetal';
   }else if(body==='elantran'){f=r=ty(19,245,35);style='multi';finish='gunmetal';cal='red';
@@ -5352,7 +5431,8 @@ const WHEEL_FIN={
   silver:{color:0xd2d8de,metalness:0.5,roughness:0.3,emissive:0x2a2d31},
   chrome:{color:0xf0f3f6,metalness:0.55,roughness:0.15,emissive:0x3a3d42},
   gunmetal:{color:0x5c6168,metalness:0.5,roughness:0.35,emissive:0x121416},
-  black:{color:0x202226,metalness:0.4,roughness:0.4,emissive:0x07080a}};
+  black:{color:0x202226,metalness:0.4,roughness:0.4,emissive:0x07080a},
+  bronze:{color:0x8a6a3a,metalness:0.6,roughness:0.32,emissive:0x1a1208}};
 function buildWheelX(R,rimR,W,style,finish,cal){
   if(style==='steel')return buildSteelWheel(R,rimR,W);
   const grp=new TH.Group(),fz=W*0.5;
@@ -7699,7 +7779,7 @@ function buildChevyBP(kind,colorHex,name){
    X5 M F95 LCI 4938 x 2015 x 1748 (2972); X7 G07 LCI 5163 x 2000 x 1805 (3105). */
 function bmwKind(name){const n=(name||'').toLowerCase();if(!/bmw/.test(n))return null;
   if(/x7/.test(n))return 'bmwx7';if(/x5/.test(n))return 'bmwx5';if(/x3/.test(n))return 'bmwx3';
-  if(/\bm2\b|23\di|2 series/.test(n))return 'bmw2';if(/\bm3\b|3\d\di/.test(n))return 'bmw3';if(/\bm4\b|4\d\di/.test(n))return 'bmw4';
+  if(/\bm2\b|\bm?2\d\di\b|2 series/.test(n))return 'bmw2';if(/\bm3\b|3\d\di/.test(n))return 'bmw3';if(/\bm4\b|4\d\di/.test(n))return 'bmw4';
   if(/\bm5\b|5\d\di/.test(n))return 'bmw5';if(/\bm8\b|8\d\di/.test(n))return 'bmw8';return null;}
 function buildBMW(kind,colorHex,name){
   const n=(name||'').toLowerCase(),fullM=/\bm[2-8]\b|x[357] m\b/.test(n),base=/230i/.test(n);
@@ -7779,6 +7859,9 @@ function buildBMW(kind,colorHex,name){
     mirror:D.mirror,cuts:D.cuts,handles:D.handles,handleMat:D.handleMat,rocker:D.rocker,rockerY:D.rockerY,
     trim:({M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood})=>{
       const W=D.W;
+      // M5 CS / M4 CSL: yellow daytime running lights (from BMW's GT racing cars) and a carbon hood
+      if(/\bm5 cs\b|\bm4 csl\b/.test(n)){M.drl=new TH.MeshStandardMaterial({color:0xffe066,roughness:0.2,metalness:0,emissive:0xffcf2a,emissiveIntensity:1.5});
+        for(let x=D.NOSE-22;x<D.NOSE-6;x+=2.2)onHood(2.1,0.08,9,M.carbon,x,0,0.06);}
       const roundel=(dir,y,r)=>{disc(dir,0,y,r,M.chrome,0.32);disc(dir,0,y,r*0.8,M.dark,0.36);disc(dir,0,y,r*0.55,M.blue,0.4);};
       // headlamp: swept lens with two BMW "L"/hexagon light-pipe signatures
       const head=(zi,zo,yi,yo,hi,ho,thin)=>{const yf=z=>{const t=Math.min(1,Math.max(0,(Math.abs(z)-zi)/(zo-zi)));const c=yi+(yo-yi)*t,h=hi+(ho-hi)*t;return[c-h/2,c+h/2];};
@@ -11949,7 +12032,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='6855719546';let dismissed=null;
+(function(){const V='dbe50e844e';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
