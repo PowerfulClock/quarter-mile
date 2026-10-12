@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="c8658bf18e";</script>
+<head><script>window.QM_VER="8c811aa63d";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1740,14 +1740,29 @@ Object.assign(PRESETS,{
 });
 
 Object.assign(PRESETS,{
+ /* 5th-generation launch years, sold as the SRT Viper: 640 hp / 600 lb-ft 8.4 V10, Tremec TR6060.
+    The GTS adds two-mode Bilstein dampers and a leather cabin (heavier); the 2014 TA (Time Attack)
+    has the track suspension, two-piece brakes and Corsa tyres. */
+ viper13:Object.assign({},P1,{body:'viper',name:"2013 SRT Viper",mfr:"Dodge",hp:640,hpRpm:6150,tq:600,tqRpm:4950,redline:6400,
+  ind:"na",disp:8.4,engSound:"v10",gears:[2.26,1.58,1.19,1.00,0.77,0.63],fd:3.55,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3297,dist:50,tireD:27.4,cda:9.0,wb:98.8,cg:18.5,
+  launch:'none',launchRpm:4200,gripAdj:1.0,shift:0.4,modes:['normal','track'],mode:'normal'}),
+ viper13gts:Object.assign({},P1,{body:'viper',name:"2013 SRT Viper GTS",mfr:"Dodge",hp:640,hpRpm:6150,tq:600,tqRpm:4950,redline:6400,
+  ind:"na",disp:8.4,engSound:"v10",gears:[2.26,1.58,1.19,1.00,0.77,0.63],fd:3.55,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3374,dist:50,tireD:27.4,cda:9.0,wb:98.8,cg:18.5,
+  launch:'none',launchRpm:4200,gripAdj:1.05,shift:0.4,modes:['normal','sport','track'],mode:'normal'}),
+ viper14ta:Object.assign({},P1,{body:'viper',name:"2014 SRT Viper TA",mfr:"Dodge",hp:640,hpRpm:6150,tq:600,tqRpm:4950,redline:6400,
+  ind:"na",disp:8.4,engSound:"v10",gears:[2.26,1.58,1.19,1.00,0.77,0.63],fd:3.55,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3297,dist:50,tireD:27.4,cda:9.0,wb:98.8,cg:18.5,
+  launch:'none',launchRpm:4200,gripAdj:1.06,shift:0.4,modes:['normal','track'],mode:'normal'}),
  viper_acr:Object.assign({},P1,{body:'viperacr',name:"2017 Dodge Viper ACR",mfr:"Dodge",hp:645,hpRpm:6200,tq:600,tqRpm:5000,redline:6400,
   ind:"na",disp:8.4,engSound:"v10",gears:[2.26,1.58,1.19,1.00,0.77,0.63],fd:3.55,drive:"rwd",trans:"manual",
-  layout:"front",tire:"track",weight:3392,dist:50,tireD:27.8,cda:9.4,wb:98.8,cg:18.5,
-  launchRpm:4200,gripAdj:1.22,shift:0.24,modes:['normal','sport','track'],mode:'normal'}),
+  layout:"front",tire:"track",weight:3392,dist:50,tireD:27.8,cda:13,wb:98.8,cg:18.5,
+  launchRpm:4200,gripAdj:0.68,shift:0.4,modes:['normal','sport','track'],mode:'normal'}),
  viper_gts:Object.assign({},P1,{body:'viper',name:"2017 Dodge Viper GTS",mfr:"Dodge",hp:645,hpRpm:6200,tq:600,tqRpm:5000,redline:6400,
   ind:"na",disp:8.4,engSound:"v10",gears:[2.26,1.58,1.19,1.00,0.77,0.63],fd:3.55,drive:"rwd",trans:"manual",
-  layout:"front",tire:"summer",weight:3374,dist:50,tireD:27.8,cda:8.2,wb:98.8,cg:18.5,
-  launchRpm:4200,gripAdj:0.92,shift:0.24,modes:['normal','sport','track'],mode:'normal'}),
+  layout:"front",tire:"summer",weight:3374,dist:50,tireD:27.8,cda:9.0,wb:98.8,cg:18.5,
+  launchRpm:4200,gripAdj:1.05,shift:0.4,modes:['normal','sport','track'],mode:'normal'}),
 });
 
 Object.assign(PRESETS,{
@@ -7989,6 +8004,91 @@ function buildVW(kind,colorHex,name){
       box(0.2,0.3,9,M.led,sx-(R||cs?5.25:3.95),sy-0.35,0);
     }});
 }
+/* ---------- Dodge / SRT Viper, 5th generation (2013-17), from the scaled 2013 SRT Viper GTS blueprint ----------
+   4462 x 1940 x 1247 mm, 2509 wb. Long clamshell hood with the central power bulge and its front scoop,
+   slanted hood vents near the nose, cabin set far back with a double-bubble roof, fastback glass into a
+   ducktail; swept teardrop headlamps, the wide low mouth with its centre bar, black corner ducts,
+   deep side sculpt from the front wheel into the door, side-exit exhaust in the black sills ahead of the
+   rear wheels, black C-pillar trim, wedge LED tail lamps either side of a black centre panel, diffuser.
+   The ACR adds its carbon splitter and dive planes, louvred hood, bigger diffuser and the tall wing. */
+function buildViperBP(colorHex,acr,name){
+  const n=(name||'').toLowerCase(),striped=/stripe/.test(n);
+  const D={NOSE:54.5,TAIL:-58.8,W:24.64,wx:31.86,wr:8.4,
+    plan:[[54.5,3],[53.5,12.4],[52.1,16.2],[50.7,18.4],[49.4,20.2],[48.0,21.6],[46.6,22.5],[45.3,23.2],[43.9,23.5],[42.5,24.1],[41.1,24.2],[39.8,24.6],[21.9,24.6],[20.6,24.3],[16.5,23.9],[5.5,23.9],[4.1,24.2],[-1.4,24.2],[-5.5,24.5],[-23.3,24.5],[-24.7,24.64],[-31.5,24.64],[-32.9,24.6],[-39.8,24.6],[-41.1,24.2],[-43.9,23.9],[-46.6,23.2],[-49.4,22.5],[-52.1,20.8],[-54.9,17.2],[-56.2,14.3],[-57.6,9.3],[-58.8,3]],
+    top:[[54.5,10.5],[53.5,13.4],[52.5,14.4],[51.4,15.1],[50.4,15.8],[49.4,16.5],[48.3,17.1],[47.3,17.5],[46.3,18.2],[45.3,18.5],[44.2,18.9],[43.2,19.5],[42.2,19.9],[40.1,20.2],[38.1,20.9],[36,21.3],[33.9,21.6],[31.9,21.9],[27.8,22.3],[12,22.3],[10.5,21.8],[5,21.4],[0,21.6],[-15,22.4],[-25,23.0],[-30,23.6],[-36,24.0],[-47,24.0],[-54.5,24.0],[-56.6,24.4],[-57.2,22],[-57.8,18],[-58.6,14],[-58.8,11.5]],
+    bot:[[54.5,8],[53.5,5.6],[45,5.5],[40,5.5],[24,3.9],[-24,3.9],[-40,4.5],[-50,5.5],[-54.5,6.2],[-56.6,7.2],[-58,9.9],[-58.8,11]],
+    gtop:[[10.5,22.1],[9.3,22.6],[8.2,23.3],[6.2,24.3],[5.1,25.0],[1.0,27.1],[-1.0,28.1],[-3.1,29.1],[-5.1,29.8],[-8.2,30.5],[-11.3,31.2],[-13.4,31.5],[-18.5,31.5],[-22.6,31.2],[-26.7,30.5],[-28.8,29.8],[-30.9,29.2],[-35,27.6],[-40.1,26.0],[-44.2,25.0],[-47.6,24.6]]};
+  // side glass: behind a body-colour door corner (mirror base), to the black C-pillar trim
+  // the wrap-round screen shows in profile ahead of the door glass (body-colour sail at the mirror base);
+  // black A-pillar trim, black frame at the door glass's front edge, black C-pillar trim, hatch glass over the haunch
+  const side=(x,y,gt)=>{const fe=-3.0-(y-21.3)*0.65;
+    if(y>gt-1.6)return x>-8&&x<9?2:0;
+    if(x>fe+0.7)return(y<24.2&&x<2.5)?0:1;if(x>fe)return 2;
+    if(x>-21.8+(y-22)*0.12)return 1;if(x>-26.4)return 2;return y>25.2?1:0;};
+  return bpCar(colorHex,name,{body:acr?'viperacr':'viper',NOSE:D.NOSE,TAIL:D.TAIL,W:D.W,wx:D.wx,wr:D.wr,AR:9.8,
+    plan:D.plan,top:D.top,bot:D.bot,tumbleY:11,tumble:2.8,crown:[52,13,0.9],
+    flare:{r:0.1,t:0.9,arc:0.8,sz:0.5,in:0.6},
+    creases:[{x0:1.6,x1:23.3,y:x=>19.6-(x-1.6)*0.21},{x0:-18,x1:10,y:x=>9.3+Math.max(0,x-4)*0.6},{x0:-46,x1:-30,y:x=>20.6+(-30-x)*0.05}],
+    gh:{sn:14,x0:-47.6,x1:10.5,GB:20.4,GT:14.6,roof:[-6.4,-27.0],roofMat:0,top:D.gtop,rearSide:2.3,side:(x,y)=>side(x,y,bpTab(D.gtop)(x))},
+    mirror:[-3.0,22.8,[4.0,2.6,3.6]],cuts:[[10.0,5,21],[-20.5,6,22.5]],handles:[],rocker:null,
+    wheelOut:[D.W-0.9,D.W-0.6],
+    trim:({M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood,flushLamp,yTop,crown})=>{
+      const clear=new TH.MeshStandardMaterial({color:0xc8ccd2,roughness:0.06,metalness:0.7,emissive:0x2a2c30});
+      const F=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+      const Rr=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(-1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+      const lin=(a0,a1,p0,p1)=>a=>{const t=Math.min(1,Math.max(0,(a-a0)/(a1-a0)));return[p0[0]+(p1[0]-p0[0])*t,p0[1]+(p1[1]-p0[1])*t];};
+      const fang=(dir,y,sc)=>{ribbon(dir,-1.1*sc,1.1*sc,4,z=>{const a=Math.abs(z)/sc;return[y-0.9*sc+a*0.5*sc,y+0.5*sc-a*0.2*sc];},0.34,M.chrome);   // "Stryker" snake-head badge
+        ribbon(dir,-0.5*sc,0.5*sc,2,()=>[y-0.3*sc,y+0.1*sc],0.38,M.redL);};
+      // ---- headlamps: swept teardrops, inner end tapering down toward the mouth; projector, LED eyebrow, turn signal ----
+      const hl=lin(13.2,21.2,[14.1,15.6],[15.0,19.0]);
+      F(12.9,21.6,a=>{const r=hl(a);return[r[0]-0.3,r[1]+0.3];},0.12,M.gloss,12);
+      F(13.2,21.2,hl,0.2,clear,12);
+      F(13.8,21.0,a=>{const r=hl(a);return[r[1]-0.6,r[1]-0.25];},0.3,M.drl,12);
+      F(14.0,17.0,a=>{const r=hl(a);return[r[0]+0.2,r[0]+0.55];},0.3,M.amber,6);
+      [1,-1].forEach(s=>{disc(1,s*18.6,16.4,1.35,M.dark,0.32);disc(1,s*18.6,16.4,0.85,M.head,0.36);disc(1,s*15.6,15.6,0.6,M.head,0.34);});
+      // ---- mouth: wide black grille with the centre bar and a mesh, corner ducts, splitter ----
+      ribbon(1,-15.1,15.1,24,a=>{const z=Math.abs(a);return[6.4+Math.max(0,z-12)*0.5,11.9-Math.max(0,z-10)*0.55];},0.14,M.gloss);
+      for(let i=1;i<4;i++){const y=6.6+i*1.25;ribbon(1,-14,14,18,()=>[y-0.07,y+0.07],0.22,M.satin);}
+      for(let k=-6;k<=6;k++){if(!k)continue;const z=k*2.1;ribbon(1,z-0.07,z+0.07,1,()=>[6.8,11.4],0.22,M.satin);}
+      ribbon(1,-0.45,0.45,1,()=>[6.5,11.8],0.3,M.paint);ribbon(1,-14.4,14.4,16,()=>[9.0,9.4],0.3,M.paint);   // the crosshair bars
+      fang(1,13.6,0.9);
+      F(19.6,22.2,a=>{const t=(a-19.6)/2.6;return[7.6+t*0.4,11.6-t*0.8];},0.14,M.gloss,4);       // corner brake ducts
+      [1,-1].forEach(s=>ribbon(1,s*21.2,s*22.6,2,()=>[12.4,13.2],0.2,M.amber));                   // front side reflector
+      if(acr){ribbon(1,-23.5,23.5,34,()=>[2.4,4.6],2.6,M.carbon);
+        [1,-1].forEach(s=>{const x=surfX(1,s*21,9.6);box(5.4,0.35,3.2,M.carbon,x-1.2,9.6,s*22.2,0.18);box(4.4,0.35,2.6,M.carbon,x-2.0,12.0,s*22.6,0.22);});}
+      else ribbon(1,-22,22,30,()=>[4.0,5.4],0.6,M.gloss);
+      // ---- hood: centre power bulge with its front scoop, slanted vents near the nose, clamshell lines ----
+      for(let x=18;x<43;x+=1.6)onHood(1.8,0.55,10.4-Math.max(0,x-36)*0.5,M.paint,x,0,0.05);          // centre power bulge
+      onHood(1.4,0.45,8.6,M.gloss,43.2,0,0.32);                                                  // its scoop mouth
+      [1,-1].forEach(s=>{for(let k=0;k<4;k++){const x=37.8+k*1.3,z=s*(7.2+k*1.4);const b=onHood(1.0,0.12,5.2,M.gloss,x,z,0.04);b.rotation.y=s*0.45;}});
+      if(acr)[1,-1].forEach(s=>{for(let k=0;k<7;k++)onHood(0.4,0.4,6.4,M.carbon,18+k*1.4,s*13.4,0.15);});
+      for(let x=14;x<50;x+=1.0)[1,-1].forEach(s=>onHood(1.1,0.07,0.22,M.paintDk,x,s*(15.2-(x-14)*0.09),0.02));
+      if(striped)[1,-1].forEach(s=>{for(let x=12;x<53;x+=2)onHood(2.1,0.05,3.6,M.plate,x,s*3.0,0.75);});
+      // ---- sides: sill with the side-exit exhaust ahead of the rear wheel, markers ----
+      sideStrip(-22.5,-8,()=>[3.6,7.0],0.25,M.gloss,0.5);
+      [1,-1].forEach(s=>{const z=s*(planW(-17.3)+0.35);const t=new TH.Mesh(new TH.TorusGeometry(1.0,0.32,8,20),M.chrome);t.scale.set(2.2,1,1);t.position.set(-17.3,5.2,z);
+        t.add(new TH.Mesh(new TH.CircleGeometry(0.95,16),M.dark));box(0.01,0.01,0.01,M.dark,0,-50,0).parent.add(t);});
+      sideStrip(-22.4,-21.2,()=>[11.6,12.6],0.12,M.tail,0.3);
+      sideStrip(44,47,()=>[12.6,13.4],0.12,M.amber,0.3);
+      // ---- rear: wedge LED tail lamps, black centre panel with the plate, corner vents, diffuser ----
+      const tl=lin(10,21.2,[18.6,20.0],[17.4,20.8]);
+      Rr(9.6,21.6,a=>{const r=tl(a);return[r[0]-0.3,r[1]+0.3];},0.12,M.gloss,12);
+      Rr(10,21.2,tl,0.2,M.tail,12);
+      Rr(11.2,20.6,a=>{const r=tl(a);return[(r[0]+r[1])/2-0.2,(r[0]+r[1])/2+0.25];},0.3,M.led,12);
+      Rr(11.4,13.4,a=>{const r=tl(a);return[r[0]+0.25,r[1]-0.25];},0.32,M.rev,3);               // reverse lamp, inner end
+      sideStrip(-56.4,-50,x=>{const t=Math.min(1,(-50-x)/6.4);return[18.8-t*1.4,20.2+t*0.5];},0.12,M.tail,0.3);   // lamps wrap onto the quarters
+      ribbon(-1,-10,10,14,a=>{const z=Math.abs(a);return[16.1+Math.max(0,z-8)*0.6,21.2-Math.max(0,z-8)*0.3];},0.14,M.gloss);
+      ribbon(-1,-5.8,5.8,8,()=>[16.8,20.0],0.22,M.plate);
+      fang(-1,22.9,0.8);
+      Rr(20.4,21.4,()=>[13.7,15.3],0.14,M.gloss,2);
+      Rr(13.0,16.3,()=>[8.6,9.7],0.22,M.tail,4);Rr(9.4,12.8,()=>[8.6,9.7],0.22,M.rev,4);
+      ribbon(-1,-18,18,26,a=>{const z=Math.abs(a);return[4.1,10.4-Math.max(0,z-15)*0.8];},acr?0.4:0.14,acr?M.carbon:M.gloss);
+      for(let k=-3;k<=3;k++)ribbon(-1,k*3.6-0.14,k*3.6+0.14,1,()=>[acr?2.6:4.2,7.4],acr?1.4:0.5,acr?M.carbon:M.satin);
+      ribbon(-1,-4,4,6,()=>[24.0,24.4],0.24,M.led);                                             // CHMSL in the ducktail
+      if(acr){const ww=2*planW(-50)-2;box(10,0.6,ww,M.carbon,-53,35.8,0,0.12);
+        [1,-1].forEach(s=>{box(1.6,10.2,0.6,M.carbon,-51.2,30.0,s*11);box(10.6,4.2,0.4,M.carbon,-53,35.2,s*ww/2);});}
+    }});
+}
 /* C6 Corvette details, from the 2013 blueprint (front / side / rear / top views):
    - front: exposed clear teardrop lamps on the fender tops (two big projectors + a small one, amber
      park/turn at the outer end), wide low grille with horizontal slats, round-cornered fog lamps
@@ -9143,7 +9243,7 @@ function buildCarRaw(bodyKey,colorHex,carName){
   {const vk=vwKind(carName);if(vk)return buildVW(vk,colorHex,carName);}
   if(bodyKey==='crownvic')return buildFordBP('crownvic',colorHex,carName);
   if(bodyKey==='challenger')return buildChallengerBP(colorHex,carName);
-  if(bodyKey==='viper'||bodyKey==='viperacr')return buildViper(colorHex,bodyKey==='viperacr',carName);
+  if(bodyKey==='viper'||bodyKey==='viperacr')return buildViperBP(colorHex,bodyKey==='viperacr',carName);
   const S=SHAPES[bodyKey]||SHAPES.sedan;
   const depth=S.wx*1.28;
   const hw=depth/2;
@@ -11856,7 +11956,7 @@ const MP_PRICE={mustang25eco:32500,mustang18eco:26000,mustang25gt:43000,mustang0
  ms_lr:75000,ms_perf:95000,mx_perf:100000,my_perf:61000,p911_carrera:98000,p911_4s:121000,p911_turbos:204000,
  mazda3turbo:34000,mx5_2024:29000,focusrs:41000,fusionsport:40000,taurussho:44000,g80_25t:49000,g80_35t:60000,
  g80_33t:56000,g70_20t:35000,g70_33t:45000,g70_25t:40000,s60_t5:37000,s60_t6:45000,s60_t8:67000,viper_acr:120000,
- viper_gts:105000,agera_rs:2500000,jesko:3000000,regera:2000000,venom_gt:1200000,crownvic_lx:27000,
+ viper_gts:105000,viper13:97395,viper13gts:121395,viper14ta:122385,agera_rs:2500000,jesko:3000000,regera:2000000,venom_gt:1200000,crownvic_lx:27000,
  crownvic_sport:30000,crownvic_p71:25000,impala_ls06:22000,impala_ss06:28000,impala_ltz14:36000,accord_v6:34000,
  accord_20t:31000,camaro12ss:33000,camaro12v6:24000,camaro19_20t:26000,camaro21rs:30000,chall11rt:31000,
  chall11srt8:44000,chall11rtm:31990,chall11rtc:32995,chall11srt8m:44775,chall11srt8ie:46770,camaro12ls:23345,camaro12ssm:32535,camaro12zl1:54995,camaro12zl1a:56180,corvetteC7:55900,corvetteC7Z51:60900,corvetteC7GS:65900,corvetteC7ZR1:119995,charger14rt:33000,charger19sxt:29500,charger19sxtawd:32500,charger19gt:31000,charger19gtawd:33500,charger19rt:37000,charger19scat:40000,charger19hellcat:69000,charger19pursuitv6:30000,charger19pursuitv8:34000,charger19pursuitrwd:32500,mustang16v6:25000,mustang16eco:27000,mustang14gt:31000,mustang08gt:26000,
@@ -12325,7 +12425,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='c8658bf18e';let dismissed=null;
+(function(){const V='8c811aa63d';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
