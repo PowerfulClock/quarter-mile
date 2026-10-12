@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="8c811aa63d";</script>
+<head><script>window.QM_VER="38f7267240";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -2416,7 +2416,7 @@ function modelFamily(name,mfr){
 function hasCustomModel(body,name){
   if(body==='mustang'&&(isS550(name)||isS197(name)||isS650(name)))return true;
   if(['durango','charger','camaro','crownvic','challenger','viper','viperacr'].indexOf(body)>=0)return true;
-  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name)||vwKind(name));
+  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name)||vwKind(name)||bp3Kind(name));
 }
 function hasCustomCluster(body,name){
   const nm=name||'',yr=parseInt(nm,10)||0;
@@ -5489,6 +5489,9 @@ function wheelSpec(body,name){
   }else if(body==='focusrs'){f=r=ty(19,235,35);style='ten';finish='gunmetal';cal='blue';
   }else if(body==='fusion'){f=r=ty(19,235,40);style='split5';finish='black';cal='silver';
   }else if(body==='taurus'){if(/police|interceptor/.test(n)){f=r=ty(18,245,55);style='steel';}else{f=r=ty(20,245,45);style='split5';finish='silver';}
+  }else if(body==='mkz17'){if(/3\.0t/.test(n)){f=r=ty(19,245,40);style='multi';finish='silver';}else if(/hybrid/.test(n)){f=r=ty(17,225,55);style='ten';finish='silver';}else{f=r=ty(18,245,45);style='multi';finish='silver';}cal='silver';
+  }else if(body==='tlx17'){if(/3\.5/.test(n)){f=r=ty(19,245,40);style='split5';finish='gunmetal';cal='silver';}else{f=r=ty(18,225,50);style='ten';finish='silver';cal='silver';}
+  }else if(body==='cayman718'){f=ty(20,245,35);r=ty(20,295,30);style='ten';finish='gunmetal';cal=/gt4/.test(n)?'red':'black';
   }else if(body==='golf8'){
     if(/golf r\b/.test(n)){f=r=ty(19,235,35);style='multi';finish='gunmetal';cal='blue';}
     else if(/clubsport/.test(n)){f=r=ty(19,235,35);style='split5';finish='black';cal='red';}
@@ -8089,6 +8092,176 @@ function buildViperBP(colorHex,acr,name){
         [1,-1].forEach(s=>{box(1.6,10.2,0.6,M.carbon,-51.2,30.0,s*11);box(10.6,4.2,0.4,M.carbon,-53,35.2,s*ww/2);});}
     }});
 }
+/* ---------- Lincoln MKZ (2017-20), Acura TLX (2017-20, 1st gen refresh), Porsche 718 Cayman GT4, from scaled blueprints ----------
+   MKZ 4930 x 1864 x 1476 (2850 wb); TLX 4869 x 1854 x 1447 (2776); 718 Cayman GT4 4456 x 1801 x 1269 (2484). */
+function bp3Kind(name){const n=(name||'').toLowerCase(),yr=parseInt(name,10)||0;
+  if(/lincoln mkz/.test(n))return 'mkz17';
+  if(/acura tlx/.test(n)&&yr&&yr<=2020)return 'tlx17';
+  if(/718|cayman/.test(n))return 'cayman718';return null;}
+function buildBP3(kind,colorHex,name){
+  const n=(name||'').toLowerCase();
+  const T={
+  mkz17:{NOSE:61.8,TAIL:-63.4,W:23.67,wx:36.19,wr:8.9,AR:10.6,tumbleY:18,tumble:1.1,crown:[60,28,0.6],
+    plan:[[61.8,6],[61.0,12.4],[59.8,15.8],[58.4,18.0],[57.0,19.8],[55.6,20.8],[54.3,21.7],[52.9,22.2],[51.5,22.7],[50.1,23.2],[48.8,23.4],[47.4,23.6],[42,23.67],[20,23.67],[17,23.4],[-46,23.4],[-49,23.2],[-52,22.9],[-54.4,22.4],[-56.2,21.9],[-57.6,21.5],[-58.9,20.6],[-60.3,19.6],[-61.7,18.2],[-63.0,14],[-63.4,6]],
+    top:[[61.8,13],[61.6,14.1],[60.6,17.5],[59.6,18.9],[58.6,20.6],[57.6,21.6],[56.5,22.3],[55.5,22.7],[54.5,23.0],[52.4,23.7],[50.3,24.4],[48.3,25.1],[46.2,25.4],[44.2,25.8],[42.1,26.1],[36.9,26.8],[33.8,27.1],[28.7,27.1],[27.3,27.0],[24,26.2],[14.6,25.9],[0,26.6],[-15,27.4],[-31,28.2],[-40,29.0],[-47.2,29.8],[-50,29.8],[-54,29.2],[-58,28.6],[-60.4,28.4],[-61.1,25],[-62.1,20.5],[-63.1,19],[-63.4,15]],
+    bot:[[61.8,9],[61,6.5],[58,5.2],[48,4.8],[30,5.8],[-30,5.9],[-48,6.5],[-55,7.8],[-60,9.0],[-63.4,10.6]],
+    gtop:[[27.3,27.4],[26.6,28.2],[24.6,29.2],[22.5,30.2],[20.4,31.3],[17,32.0],[14.3,32.6],[11.2,33.7],[8.1,34.8],[5.0,36.0],[2.9,36.7],[-4.3,37.4],[-14,37.4],[-19.8,36.5],[-24.9,35.7],[-28,35.1],[-32.2,34.3],[-34.2,33.7],[-37.3,32.6],[-39.3,32.0],[-41.4,31.3],[-43.5,30.6],[-46,30.1],[-47.2,29.9]],
+    GB:19.6,GT:16.2,roof:[3,-20],rearSide:2.4,
+    side:(x,y,gt)=>{if(y>gt-1.9)return 0;if(x>27.2-(y-27)*2.45)return 0;if(x>-4.3)return 1;if(x>-7.7)return 2;if(x>-27.7)return 1;if(x>-28.5)return 2;if(x>-36+(y-28)*1.0)return 1;return 0;},
+    mirror:[18.4,26.8,[3.6,2.6,3.6]],cuts:[[23,8,26],[-6,7,27],[-31,10,28]],handles:[[0.3,21.9],[-25.8,23.6]],handleMat:'chrome',rocker:[-28,26],rockerY:7.0,
+    creases:[{x0:-58,x1:52,y:x=>21.6-x*0.012},{x0:-30,x1:24,y:12.6}]},
+  tlx17:{NOSE:60.4,TAIL:-63.2,W:23.55,wx:35.26,wr:8.8,AR:10.4,tumbleY:17,tumble:1.2,crown:[59,22,0.6],
+    plan:[[60.4,6],[59.8,12.8],[58.6,16.4],[57.2,19.0],[55.8,20.8],[54.4,21.8],[53.0,22.6],[51.6,23.1],[50.2,23.4],[48,23.55],[22,23.55],[18,23.3],[-30,23.4],[-38,23.55],[-46,23.3],[-50,22.8],[-53,22.1],[-55.8,21.3],[-58.6,19.8],[-61.0,17.6],[-62.6,13.5],[-63.2,6]],
+    top:[[60.4,11],[59.9,15.2],[58.5,17.5],[55.9,19.7],[52,21],[45.6,22.6],[40,23.5],[34.2,24.3],[28,25.2],[21.7,26.0],[20,25.2],[14.8,24.4],[0,25.4],[-15,26.2],[-30,27.0],[-40,27.6],[-48,28.2],[-51.4,27.9],[-56,27.6],[-60.6,27.1],[-61.6,25.4],[-62.4,21],[-62.8,17],[-63.2,14]],
+    bot:[[60.4,8],[59.5,6.2],[55,6.0],[30,6.0],[-30,6.0],[-50,6.8],[-58,7.2],[-62,8.5],[-63.2,10]],
+    gtop:[[21.7,26.3],[18,28.5],[14.9,30.6],[10,32.6],[5.7,34.3],[0,35.6],[-5.7,36.3],[-17.1,36.3],[-22,35.8],[-26.3,35.2],[-31,33.9],[-36.6,32.3],[-42,30.7],[-46.9,29.4],[-48,28.6]],
+    GB:19.6,GT:14.8,roof:[3,-24],rearSide:2.2,
+    side:(x,y,gt)=>{if(y>gt-1.8)return 0;if(x>21.7-(y-26)*1.93)return 0;if(x>15.5&&y<28.6)return 2;if(x>-5.1)return 1;if(x>-8.6)return 2;if(x>-26.7)return 1;if(x>-27.5)return 2;if(x>-34.7+(y-27)*1.1)return 1;return 0;},
+    mirror:[15.8,25.6,[3.4,2.6,3.6]],cuts:[[23,8,25],[-6.2,7,26],[-34,11,27]],handles:[[-1.7,21.5],[-27.4,23.2]],handleMat:'chrome',rocker:[-27,24],rockerY:7.0,
+    creases:[{x0:-58,x1:55,y:x=>21.5-x*0.03},{x0:-55,x1:22,y:x=>9.6+(22-x)*0.06}]},
+  cayman718:{NOSE:58.6,TAIL:-54.6,W:23.0,wx:31.55,wr:8.65,AR:9.1,tumbleY:11,tumble:2.2,crown:[56,24,0.6],
+    plan:[[58.6,7.9],[57.2,12.0],[55.9,14.4],[54.5,16.8],[53.1,18.9],[51.7,20.6],[50.4,21.4],[49.0,21.6],[46.3,21.9],[44.9,22.1],[40.8,22.5],[13.3,22.6],[6.5,22.3],[-7.2,22.1],[-10,22.6],[-16.9,23.0],[-40.2,23.0],[-41.5,22.3],[-42.9,21.8],[-44.3,20.9],[-45.6,20.6],[-47.0,19.7],[-48.4,18.7],[-49.7,17.0],[-51.1,15.1],[-52.5,12.2],[-54.0,8],[-54.6,5]],
+    top:[[58.6,9],[57.6,11.5],[56.6,12.6],[55.6,13.3],[54.6,14.0],[53.5,14.6],[52.5,15.3],[51.4,15.7],[50.4,16.4],[48.3,17.0],[46.3,18.1],[44.2,18.8],[42.1,19.4],[40.1,20.1],[37.0,20.8],[35.9,21.2],[32.8,21.5],[30.9,21.8],[27.8,22.2],[23.7,22.2],[21,22.0],[15,20.4],[0,20.8],[-12,21.6],[-16,22.4],[-22,23.6],[-30,24.4],[-36,24.0],[-39.2,23.4],[-42.3,22.9],[-46,22.0],[-50,21.3],[-52.5,21.0],[-53.6,19],[-54.3,16],[-54.6,12]],
+    bot:[[58.6,6],[57.5,4.6],[50,4.4],[24,3.8],[-24,3.8],[-40,4.2],[-50,4.6],[-54,6.5],[-54.6,8]],
+    gtop:[[21.0,22.4],[20.6,23.6],[17,25.6],[15.5,26.3],[13.4,27.3],[11.4,28.4],[10.4,28.7],[7.3,30.1],[6.2,30.8],[4.2,31.4],[2.1,31.8],[-2,32.1],[-4,32.5],[-8,32.1],[-12,31.8],[-14.4,31.4],[-17.5,31.1],[-19.6,30.4],[-22.7,29.7],[-25.8,28.4],[-29.9,27.0],[-33,26.0],[-36.1,24.8],[-39.2,23.9],[-41.5,23.4]],
+    GB:18.8,GT:13.8,roof:[3,-20],rearSide:2.6,
+    side:(x,y,gt)=>{if(y>gt-1.5)return 0;if(x>21-(y-22.4)*1.89)return 0;if(x>-13.4)return 1;if(x>-14.2)return 2;if(x>-19.2+(y-22)*0.55)return 1;return 0;},
+    mirror:[9.4,22.6,[3.6,2.4,3.4]],cuts:[[18,5,20.4],[-14,5,21.6]],handles:[[-9.4,21.0]],handleMat:'paint',rocker:null,
+    creases:[{x0:-13,x1:18,y:x=>17.0-(18-x)*0.02}]}};
+  const D=T[kind];
+  return bpCar(colorHex,name,{body:kind,NOSE:D.NOSE,TAIL:D.TAIL,W:D.W,wx:D.wx,wr:D.wr,AR:D.AR,
+    plan:D.plan,top:D.top,bot:D.bot,tumbleY:D.tumbleY,tumble:D.tumble,crown:D.crown,
+    flare:{r:0.1,t:0.7,arc:0.8,sz:0.5,in:0.6},creases:D.creases,
+    gh:{sn:12,x0:D.gtop[D.gtop.length-1][0],x1:D.gtop[0][0],GB:D.GB,GT:D.GT,roof:D.roof,roofMat:kind==='mkz17'&&/3\.0t/.test(n)?1:0,top:D.gtop,rearSide:D.rearSide,side:(x,y)=>D.side(x,y,bpTab(D.gtop)(x))},
+    mirror:D.mirror,cuts:D.cuts,handles:D.handles,handleMat:D.handleMat,rocker:D.rocker,rockerY:D.rockerY,
+    trim:(c)=>BP3_TRIM[kind](Object.assign({},c,{D,n}))});
+}
+const BP3_TRIM={
+  mkz17(c){const {M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood,yTop,D,n}=c;
+    const clear=new TH.MeshStandardMaterial({color:0xc8ccd2,roughness:0.06,metalness:0.7,emissive:0x2a2c30});
+    const F=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+    const Rr=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(-1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+    const lin=(a0,a1,p0,p1)=>a=>{const t=Math.min(1,Math.max(0,(a-a0)/(a1-a0)));return[p0[0]+(p1[0]-p0[0])*t,p0[1]+(p1[1]-p0[1])*t];};
+    const hyb=/hybrid/.test(n);
+    // headlamps: upper edge sweeping up outboard; row of five LED projector cubes, LED eyebrow, turn signal outboard
+    const hl=lin(11.4,21.9,[16.4,19.6],[16.1,20.6]);
+    F(11.1,22.2,a=>{const r=hl(a);return[r[0]-0.3,r[1]+0.3];},0.12,M.gloss,12);F(11.4,21.9,hl,0.2,clear,12);
+    F(11.8,21.6,a=>{const r=hl(a);return[r[1]-0.5,r[1]-0.2];},0.3,M.drl,12);
+    [1,-1].forEach(s=>{for(let k=0;k<5;k++){const z=12.6+k*1.75;ribbon(1,s*z,s*(z+1.2),2,()=>[17.0,18.3],0.32,M.dark);disc(1,s*(z+0.6),17.65,0.42,M.head,0.36);}});
+    F(20.4,21.7,a=>{const r=hl(a);return[r[0]+0.2,r[0]+1.0];},0.3,M.amber,3);
+    // shield grille: wide top tapering to the bottom, chrome frame, black mesh, Lincoln star
+    const gw=y=>8+(y-11)/8.6*2.2;
+    ribbon(1,-10.6,10.6,16,a=>{const z=Math.abs(a);return[11+Math.max(0,(z-8)/2.2)*8.6-0.4,20.0];},0.16,M.chrome);
+    ribbon(1,-10.1,10.1,16,a=>{const z=Math.abs(a);return[11.4+Math.max(0,(z-7.6)/2.2)*8.6,19.6];},0.2,M.gloss);
+    for(let i=1;i<7;i++){const y=11.4+i*1.15;ribbon(1,-gw(y)+0.3,gw(y)-0.3,12,()=>[y-0.08,y+0.08],0.26,M.satin);}
+    for(let k=-4;k<=4;k++)ribbon(1,k*2.0-0.07,k*2.0+0.07,1,z=>[11.6+Math.max(0,(Math.abs(k*2)-7.6)/2.2)*8.6,19.4],0.26,M.satin);
+    [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dz,dy])=>ribbon(1,dz*0.9-0.25+(dz?0:0),dz*0.9+0.25,1,()=>[15.6+dy*0.9-0.25,15.6+dy*0.9+0.25],0.34,M.chrome));
+    ribbon(1,-0.4,0.4,1,()=>[14.4,16.8],0.32,M.chrome);ribbon(1,-1.2,1.2,2,()=>[15.4,15.8],0.32,M.chrome);
+    // lower bumper: fog-lamp pods with LED lamps and slats, slatted centre intake, chrome strip
+    F(13.7,20.7,a=>{const t=(a-13.7)/7;return[7.6+t*0.3,11.6-t*0.4];},0.14,M.gloss,8);
+    [1,-1].forEach(s=>{ribbon(1,s*17.2,s*20.2,4,()=>[9.4,10.4],0.28,M.head);for(let k=0;k<2;k++)ribbon(1,s*14.2,s*16.8,3,()=>[8.4+k*1.5,8.6+k*1.5],0.24,M.satin);});
+    ribbon(1,-11.4,11.4,18,()=>[7.6,10.1],0.14,M.gloss);for(let k=-5;k<=5;k++)ribbon(1,k*2-0.08,k*2+0.08,1,()=>[7.8,9.9],0.22,M.satin);
+    ribbon(1,-19,19,26,()=>[6.6,7.0],0.24,M.chrome);
+    for(let x=30;x<56;x+=1.0)[1,-1].forEach(s=>onHood(1.1,0.07,0.22,M.paintDk,x,s*(6.2+(x-30)*0.12),0.02));
+    // sides: chrome belt moulding, rocker chrome strip, fuel door
+    sideStrip(-34,23,x=>[yTop(x)-0.45,yTop(x)-0.1],0.16,M.chrome,0.5);
+    sideStrip(-28,26,()=>[7.6,8.0],0.7,M.chrome,0.5);
+    // rear: full-width light bar with taller outer lamps, LINCOLN lettering, reflectors, plate, exhaust
+    Rr(13.6,20.4,a=>{const t=(a-13.6)/6.8;return[22.4+t*0.0,24.4+t*0.2];},0.12,M.gloss,8);
+    ribbon(-1,-20,20,40,a=>{const z=Math.abs(a);return z>13.6?[22.6,24.4]:[23.0,23.8];},0.22,M.tail);
+    ribbon(-1,-19.6,19.6,40,()=>[23.25,23.55],0.3,M.led);
+    Rr(13.8,15.6,()=>[22.7,23.2],0.32,M.rev,2);
+    for(let k=-3;k<=3;k++)ribbon(-1,k*1.6-0.4,k*1.6+0.4,1,()=>[25.0,25.6],0.24,M.chrome);
+    Rr(9,16.1,()=>[13.7,14.6],0.22,M.tail,6);
+    ribbon(-1,-5.4,5.4,8,()=>[10.7,15.8],0.12,M.gloss);ribbon(-1,-4.8,4.8,8,()=>[11.1,15.4],0.2,M.plate);
+    ribbon(-1,-19,19,26,()=>[5.6,9.0],0.14,M.gloss);
+    if(!hyb)[1,-1].forEach(s=>{ribbon(-1,s*14.2,s*19.6,6,()=>[9.0,10.8],0.28,M.chrome);ribbon(-1,s*14.6,s*19.2,6,()=>[9.3,10.5],0.32,M.dark);});
+    box(4.2,0.5,10,M.paint,-61.0,28.9,0,0.1);ribbon(-1,-5,5,6,()=>[28.6,29.0],0.3,M.led);
+  },
+  tlx17(c){const {M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood,yTop,D,n}=c;
+    const clear=new TH.MeshStandardMaterial({color:0xc8ccd2,roughness:0.06,metalness:0.7,emissive:0x2a2c30});
+    const F=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+    const Rr=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(-1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+    const lin=(a0,a1,p0,p1)=>a=>{const t=Math.min(1,Math.max(0,(a-a0)/(a1-a0)));return[p0[0]+(p1[0]-p0[0])*t,p0[1]+(p1[1]-p0[1])*t];};
+    const v6=/3\.5/.test(n);
+    // Jewel Eye headlamps: inner end pointing down to the grille; five jewel LEDs, LED eyebrow, amber outboard
+    const hl=lin(12.1,21.8,[16.0,17.6],[16.7,19.9]);
+    F(11.8,22.1,a=>{const r=hl(a);return[r[0]-0.3,r[1]+0.3];},0.12,M.gloss,12);F(12.1,21.8,hl,0.2,clear,12);
+    F(12.6,21.4,a=>{const r=hl(a);return[r[1]-0.5,r[1]-0.2];},0.3,M.drl,12);
+    [1,-1].forEach(s=>{for(let k=0;k<5;k++){const z=13.4+k*1.6;disc(1,s*z,17.2+k*0.18,0.55,M.dark,0.32);disc(1,s*z,17.2+k*0.18,0.36,M.head,0.36);}});
+    F(20.4,21.6,a=>{const r=hl(a);return[r[0]+0.3,r[0]+1.0];},0.3,M.amber,3);
+    // diamond pentagon grille: chrome frame, black diamond mesh, Acura logo
+    const pg=a=>{const z=Math.min(12.1,a);return[z<9?12.3+z/9*4.4:16.7+(z-9)/3.1*1.6,19.2-z*0.04];};
+    ribbon(1,-12.5,12.5,20,a=>{const r=pg(Math.abs(a));return[r[0]-0.4,r[1]+0.3];},0.16,M.chrome);
+    ribbon(1,-12.1,12.1,20,a=>pg(Math.abs(a)),0.2,M.gloss);
+    for(let i=0;i<5;i++)for(let k=-6;k<=6;k++){const z=k*1.8+(i%2)*0.9,y=13.6+i*1.1;if(pg(Math.abs(z))[0]<y-0.5&&Math.abs(z)<11.6)disc(1,z,y,0.42,M.satin,0.26);}
+    ribbon(1,-1.3,1.3,3,()=>[15.0,17.0],0.32,M.chrome);ribbon(1,-0.9,0.9,2,()=>[15.4,16.6],0.36,M.gloss);
+    // lower: fog-lamp pods (round lamp, black surround), black centre intake, splitter lip
+    F(12.6,21.8,a=>{const t=(a-12.6)/9.2;return[7.2+t*0.6,11.6-t*0.8];},0.14,M.gloss,8);
+    [1,-1].forEach(s=>{disc(1,s*19.2,9.4,1.05,M.chrome,0.24);disc(1,s*19.2,9.4,0.85,M.head,0.3);});
+    ribbon(1,-12,12,18,a=>{const z=Math.abs(a);return[7.4,9.9-Math.max(0,z-10)*0.4];},0.14,M.gloss);
+    for(let k=-5;k<=5;k++)ribbon(1,k*2.1-0.07,k*2.1+0.07,1,()=>[7.6,9.6],0.22,M.satin);
+    ribbon(1,-20,20,28,()=>[5.6,6.4],0.4,M.gloss);
+    for(let x=18;x<55;x+=1.0)onHood(1.1,0.07,0.22,M.paintDk,x,0,0.03);
+    for(let x=28;x<54;x+=1.0)[1,-1].forEach(s=>onHood(1.1,0.07,0.22,M.paintDk,x,s*(9.6-(x-28)*0.08),0.02));
+    sideStrip(-34.7,21.7,x=>[yTop(x)-0.45,yTop(x)-0.1],0.16,M.chrome,0.5);
+    // rear: L-shaped tail lamps across body and trunk lid, chrome garnish, TLX badge, diffuser with fins, big round tips
+    const tl=lin(8.1,20.7,[21.6,23.4],[19.9,23.9]);
+    Rr(7.8,21.0,a=>{const r=tl(a);return[r[0]-0.3,r[1]+0.3];},0.12,M.gloss,12);Rr(8.1,20.7,tl,0.2,M.tail,12);
+    Rr(9,20.2,a=>{const r=tl(a);return[r[1]-0.6,r[1]-0.3];},0.3,M.led,12);Rr(17.5,20.2,a=>{const r=tl(a);return[r[0]+0.2,r[1]-0.4];},0.3,M.led,3);
+    Rr(9.0,11.6,()=>[22.0,22.9],0.32,M.rev,3);
+    sideStrip(-62.4,-56,x=>{const t=Math.min(1,(-56-x)/6.4);return[22.0-t*1.8,23.9];},0.12,M.tail,0.3);
+    ribbon(-1,-8,8,12,()=>[18.7,19.1],0.24,M.chrome);
+    ribbon(-1,-1.2,1.2,3,()=>[24.0,25.2],0.3,M.chrome);ribbon(-1,-7.4,-5.2,2,()=>[20.4,21.0],0.26,M.chrome);
+    ribbon(-1,-5.8,5.8,8,()=>[14.1,17.6],0.2,M.plate);
+    [1,-1].forEach(s=>ribbon(-1,s*18.2,s*19.8,2,()=>[11.9,12.5],0.22,M.tail));
+    ribbon(-1,-18.5,18.5,26,()=>[4.3,12.0],0.14,M.gloss);
+    for(let k=-3;k<=3;k++)ribbon(-1,k*2.4-0.15,k*2.4+0.15,1,()=>[4.6,10.4],0.3,M.satin);
+    const tr=v6?1.8:1.4;[1,-1].forEach(s=>{disc(-1,s*15,7.8,tr,M.chrome,0.5);disc(-1,s*15,7.8,tr*0.78,M.dark,0.56);});
+    box(3.4,0.6,2*planW(-60)-8,M.paint,-60.4,27.6,0,0.12);ribbon(-1,-4,4,6,()=>[28.2,28.6],0.3,M.led);
+  },
+  cayman718(c){const {M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood,yTop,crown,flushLamp,D,n}=c;
+    const clear=new TH.MeshStandardMaterial({color:0xc8ccd2,roughness:0.06,metalness:0.7,emissive:0x2a2c30});
+    const F=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+    const Rr=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(-1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+    const gt4=/gt4/.test(n);
+    // headlamps: oval lenses on the fender fronts, Porsche four-point LED daytime lights round the projector
+    const ang=0.4,lx=45.2,ly=17.2,yRay=ly+Math.tan(ang)*(D.NOSE-lx);
+    [1,-1].forEach(s=>flushLamp(1,yRay,s*17.0,4.3,3.6,ang,[[1.1,0.88,0.18,M.gloss],[1,0,0.24,clear,36],
+      [0.32,0,0.32,M.dark,20,0,0],[0.2,0,0.36,M.head,14,0,0],
+      [0.12,0,0.36,M.drl,10,s*2.4,1.3],[0.12,0,0.36,M.drl,10,-s*2.4,1.3],[0.12,0,0.36,M.drl,10,s*2.4,-1.3],[0.12,0,0.36,M.drl,10,-s*2.4,-1.3],
+      [0.18,0,0.32,M.amber,12,s*3.4,0]],s*0.08,0));
+    // front: big black side intakes with mesh, centre intake, plate, splitter; front-lid air outlet (GT4)
+    F(11.0,21.2,a=>{const t=(a-11)/10.2;return[4.7+t*0.4,11.0-t*0.6];},0.14,M.gloss,8);
+    [1,-1].forEach(s=>{for(let i=1;i<4;i++){const y=4.9+i*1.5;ribbon(1,s*11.4,s*20.6,8,()=>[y-0.07,y+0.07],0.22,M.satin);}
+      for(let k=0;k<5;k++)ribbon(1,s*(12+k*2)-0.07,s*(12+k*2)+0.07,1,()=>[5,10.6],0.22,M.satin);});
+    ribbon(1,-7.6,7.6,12,()=>[4.2,8.1],0.14,M.gloss);for(let k=1;k<3;k++){const y=4.2+k*1.3;ribbon(1,-7.2,7.2,10,()=>[y-0.07,y+0.07],0.22,M.satin);}
+    ribbon(1,-6.4,6.4,8,()=>[9.3,11.6],0.2,M.plate);
+    if(gt4){ribbon(1,-21.5,21.5,30,()=>[2.6,3.9],1.6,M.gloss);onHood(2.0,0.25,16,M.gloss,51.5,0,0.15);for(let k=0;k<3;k++)onHood(0.25,0.3,15,M.satin,50.8+k*0.7,0,0.25);}
+    else ribbon(1,-20,20,28,()=>[3.6,4.6],0.4,M.gloss);
+    disc(1,0,13.4,0.9,M.amber,0.34);
+    // sides: black intake behind the door, black side skirts, markers
+    sideStrip(-18.5,-12.9,x=>{const t=(x+18.5)/5.6;return[7.1+t*1.2,16.8-t*0.6];},0.12,M.gloss,0.25);
+    for(let k=1;k<4;k++)sideStrip(-18.2,-13.3,x=>{const y=8+k*2.2;return[y-0.1,y+0.1];},0.2,M.satin,0.25);
+    sideStrip(-24,20,()=>[3.8,5.4],0.3,M.gloss,0.6);
+    sideStrip(47,50.5,()=>[11.2,12.0],0.12,M.amber,0.3);
+    // rear: smoked lamps joined by the black lettered strip, four-point brake lights, reverse inner
+    Rr(13.0,21.4,a=>{const t=(a-13)/8.4;return[17.2+t*0.2,20.6+t*0.2];},0.12,M.gloss,10);
+    Rr(13.4,21.0,a=>{const t=(a-13.4)/7.6;return[17.5+t*0.2,20.3+t*0.2];},0.2,M.tail,10);
+    [1,-1].forEach(s=>{[[15.4,19.6],[15.4,18.0],[17.6,19.6],[17.6,18.0]].forEach(([z,y])=>disc(-1,s*z,y,0.38,M.led,0.32));disc(-1,s*19.8,18.8,0.5,M.rev,0.32);});
+    ribbon(-1,-13,13,20,()=>[18.6,20.2],0.14,M.gloss);for(let k=-3;k<=3;k++)ribbon(-1,k*1.5-0.35,k*1.5+0.35,1,()=>[19.1,19.7],0.22,M.chrome);
+    sideStrip(-53.8,-48,x=>{const t=Math.min(1,(-48-x)/5.8);return[18.2-t*0.8,20.2+t*0.2];},0.12,M.tail,0.3);
+    ribbon(-1,-5.9,5.9,8,()=>[11.5,14.3],0.2,M.plate);
+    [1,-1].forEach(s=>ribbon(-1,s*17.6,s*19.5,2,()=>[10.0,10.8],0.22,M.tail));
+    ribbon(-1,-19.5,19.5,28,()=>[3.6,9.4],gt4?0.5:0.14,M.gloss);
+    for(let k=-4;k<=4;k++)if(Math.abs(k)!==2)ribbon(-1,k*3.4-0.15,k*3.4+0.15,1,()=>[gt4?2.4:3.8,8.0],gt4?1.3:0.4,M.satin);
+    [1,-1].forEach(s=>{disc(-1,s*7.9,5.6,1.15,M.chrome,0.7);disc(-1,s*7.9,5.6,0.9,M.dark,0.76);});
+    ribbon(-1,-3,3,4,()=>[21.6,22.0],0.3,M.led);
+    if(gt4){// swan-neck wing over the engine lid
+      const ww=32.2;box(9.8,0.45,ww,M.gloss,-47.6,25.4,0,0.05);box(1.6,1.6,ww,M.gloss,-52.2,26.4,0,-0.6);
+      [1,-1].forEach(s=>{box(9.8,2.6,0.35,M.gloss,-47.6,25.0,s*ww/2);const p=box(1.2,4.0,0.5,M.gloss,-46.4,23.6,s*7.5);p.rotation.z=-0.35;});
+      box(2.2,0.6,2*planW(-52)-6,M.gloss,-52,21.4,0,0.2);}
+  }};
 /* C6 Corvette details, from the 2013 blueprint (front / side / rear / top views):
    - front: exposed clear teardrop lamps on the fender tops (two big projectors + a small one, amber
      park/turn at the outer end), wide low grille with horizontal slats, round-cornered fog lamps
@@ -9241,6 +9414,7 @@ function buildCarRaw(bodyKey,colorHex,carName){
   {const jk=jpKind(carName);if(jk)return buildJP(jk,colorHex,carName);}
   {const lk=luxKind(carName);if(lk)return buildLux(lk,colorHex,carName);}
   {const vk=vwKind(carName);if(vk)return buildVW(vk,colorHex,carName);}
+  {const k3=bp3Kind(carName);if(k3)return buildBP3(k3,colorHex,carName);}
   if(bodyKey==='crownvic')return buildFordBP('crownvic',colorHex,carName);
   if(bodyKey==='challenger')return buildChallengerBP(colorHex,carName);
   if(bodyKey==='viper'||bodyKey==='viperacr')return buildViperBP(colorHex,bodyKey==='viperacr',carName);
@@ -12425,7 +12599,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='8c811aa63d';let dismissed=null;
+(function(){const V='38f7267240';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
