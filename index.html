@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="dbe50e844e";</script>
+<head><script>window.QM_VER="c8658bf18e";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -939,7 +939,7 @@ function sndPackFor(c){
       return 'coyote';}}
   {const nm=(c.name||'').toLowerCase(),yr=parseInt(c.name,10)||0,v8=/^v8/.test(c.engSound||'');
     if(/crown victoria/.test(nm))return /sport|p71|police|interceptor/.test(nm)?'crownvicdual':'crownvic';
-    if(/corvette/.test(nm))return /\bc8\b/.test(nm)||yr>=2020?'vettec8':'vettec7';
+    if(/corvette/.test(nm))return /\bc6\b/.test(nm)?'vettec6':/\bc8\b/.test(nm)||yr>=2020?'vettec8':'vettec7';
     if(/camaro/.test(nm)&&v8)return 'vettec7';
     if(/viper/.test(nm))return 'viper';
     if(/mclaren/.test(nm))return 'mclaren';
@@ -1429,6 +1429,44 @@ Object.assign(PRESETS,{
  camaroZL1:Object.assign({},P1,{modes:['normal','sport','track'],mode:'normal',body:'camaro',name:"2019 Camaro ZL1",mfr:"Chevrolet",hp:650,hpRpm:6400,tq:650,tqRpm:3600,redline:6600,
   ind:"roots",disp:6.2,engSound:"v8x",gears:[4.62,3.04,2.07,1.66,1.26,1.00,0.85,0.67,0.63,0.55],fd:2.85,drive:"rwd",trans:"auto",
   layout:"front",tire:"summer",weight:3983,dist:53,tireD:27.6,cda:8.2,wb:110.7,cg:19.5,launchRpm:2600,gripAdj:1.15}),
+ /* 2013 C6 Corvette, the last C6 year (60th anniversary), every model GM sold that year.
+    LS3 6.2 (430 hp, 436 with the dual-mode exhaust that the Grand Sport gets as standard), LS7 7.0
+    (Z06, 427 Convertible), supercharged LS9 6.2 (ZR1). Tremec 6-speed manual (close-ratio
+    2.97 first in the Grand Sport, tall 2.29 first in the ZR1) or the 6L80 paddle-shift automatic.
+    Gearing, axles, tyres and weights from GM's 2013 specification sheets. */
+ c6coupe:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Coupe (C6)",mfr:"Chevrolet",hp:430,hpRpm:5900,tq:424,tqRpm:4600,redline:6600,
+  ind:"na",disp:6.2,engSound:"v8x",gears:[2.66,1.78,1.30,1.00,0.74,0.50],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3208,dist:51,tireD:26.85,cda:6.9,wb:105.7,cg:18.5,launch:'none',launchRpm:3600,gripAdj:0.9}),
+ c6coupeA:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Coupe Automatic (C6)",mfr:"Chevrolet",hp:430,hpRpm:5900,tq:424,tqRpm:4600,redline:6600,
+  ind:"na",disp:6.2,engSound:"v8x",gears:[4.03,2.36,1.53,1.15,0.85,0.67],fd:2.56,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3237,dist:51,tireD:26.85,cda:6.9,wb:105.7,cg:18.5,launch:'bb',launchRpm:2000,stall:2.1,gripAdj:0.9}),
+ c6conv:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Convertible (C6)",mfr:"Chevrolet",hp:430,hpRpm:5900,tq:424,tqRpm:4600,redline:6600,
+  ind:"na",disp:6.2,engSound:"v8x",gears:[2.66,1.78,1.30,1.00,0.74,0.50],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3221,dist:51,tireD:26.85,cda:7.2,wb:105.7,cg:18.5,launch:'none',launchRpm:3600,gripAdj:0.9}),
+ c6convA:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Convertible Automatic (C6)",mfr:"Chevrolet",hp:430,hpRpm:5900,tq:424,tqRpm:4600,redline:6600,
+  ind:"na",disp:6.2,engSound:"v8x",gears:[4.03,2.36,1.53,1.15,0.85,0.67],fd:2.56,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3250,dist:51,tireD:26.85,cda:7.2,wb:105.7,cg:18.5,launch:'bb',launchRpm:2000,stall:2.1,gripAdj:0.9}),
+ c6gs:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Grand Sport Coupe (C6)",mfr:"Chevrolet",hp:436,hpRpm:5900,tq:428,tqRpm:4600,redline:6600,
+  ind:"na",disp:6.2,engSound:"v8x",gears:[2.97,2.07,1.43,1.00,0.74,0.50],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3311,dist:51,tireD:26.68,cda:7.2,wb:105.7,cg:18.4,launch:'none',launchRpm:3800,gripAdj:1.0}),
+ c6gsA:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Grand Sport Coupe Automatic (C6)",mfr:"Chevrolet",hp:436,hpRpm:5900,tq:428,tqRpm:4600,redline:6600,
+  ind:"na",disp:6.2,engSound:"v8x",gears:[4.03,2.36,1.53,1.15,0.85,0.67],fd:2.73,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3340,dist:51,tireD:26.68,cda:7.2,wb:105.7,cg:18.4,launch:'bb',launchRpm:2100,stall:2.1,gripAdj:1.0}),
+ c6gsconv:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Grand Sport Convertible (C6)",mfr:"Chevrolet",hp:436,hpRpm:5900,tq:428,tqRpm:4600,redline:6600,
+  ind:"na",disp:6.2,engSound:"v8x",gears:[2.97,2.07,1.43,1.00,0.74,0.50],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3289,dist:51,tireD:26.68,cda:7.5,wb:105.7,cg:18.4,launch:'none',launchRpm:3800,gripAdj:1.0}),
+ c6z06:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Z06 (C6)",mfr:"Chevrolet",hp:505,hpRpm:6300,tq:470,tqRpm:4800,redline:7000,
+  ind:"na",disp:7.0,engSound:"v8x",gears:[2.66,1.78,1.30,1.00,0.74,0.50],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3175,dist:52,tireD:26.68,cda:7.3,wb:105.7,cg:18.3,launch:'none',launchRpm:4000,gripAdj:1.05}),
+ c6z07:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette Z06 with Z07 Package (C6)",mfr:"Chevrolet",hp:505,hpRpm:6300,tq:470,tqRpm:4800,redline:7000,
+  ind:"na",disp:7.0,engSound:"v8x",gears:[2.66,1.78,1.30,1.00,0.74,0.50],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3175,dist:52,tireD:26.59,cda:7.3,wb:105.7,cg:18.3,launch:'none',launchRpm:4000,gripAdj:1.12}),
+ c6427:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette 427 Convertible (C6)",mfr:"Chevrolet",hp:505,hpRpm:6300,tq:470,tqRpm:4800,redline:7000,
+  ind:"na",disp:7.0,engSound:"v8x",gears:[2.66,1.78,1.30,1.00,0.74,0.50],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3355,dist:50,tireD:26.59,cda:7.8,wb:105.7,cg:18.5,launch:'none',launchRpm:4000,gripAdj:1.0}),
+ c6zr1:Object.assign({},P1,{modes:['normal','track'],mode:'normal',name:"2013 Corvette ZR1 (C6)",mfr:"Chevrolet",hp:638,hpRpm:6500,tq:604,tqRpm:3800,redline:6600,
+  ind:"roots",disp:6.2,engSound:"v8x",gears:[2.29,1.61,1.21,1.00,0.84,0.57],fd:3.42,drive:"rwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3350,dist:52,tireD:26.59,cda:7.8,wb:105.7,cg:18.3,launch:'none',launchRpm:3000,gripAdj:1.08}),
  corvetteC7Z06:Object.assign({},P1,{modes:['normal','sport','track'],mode:'normal',name:"2019 Corvette Z06 (C7)",mfr:"Chevrolet",hp:650,hpRpm:6400,tq:650,tqRpm:3600,redline:6600,
   ind:"roots",disp:6.2,engSound:"v8x",gears:[2.66,1.78,1.30,1.00,0.74,0.50,0.43,0.39],fd:3.70,drive:"rwd",trans:"auto",
   layout:"front",tire:"summer",weight:3624,dist:51,tireD:27.4,cda:7.7,wb:106.7,cg:18.5,launchRpm:2500,gripAdj:1.2}),
@@ -1532,10 +1570,42 @@ Object.assign(PRESETS,{
   ind:"single",disp:2.0,engSound:"i4",gears:[3.40,2.063,1.320,0.92,0.70,0.5625,0.4725],fd:4.16,drive:"fwd",trans:"dct",
   layout:"front",tire:"summer",weight:3190,dist:61,tireD:25.6,cda:7.0,wb:103.6,cg:21.5,
   launchRpm:3400,gripAdj:1.0,modes:['normal','sport','track'],mode:'normal'}),
- golfr_mk8:Object.assign({},P1,{burble:0.6,name:"2022 VW Golf R (Mk8)",mfr:"Volkswagen",hp:375,hpRpm:5900,tq:345,tqRpm:2100,redline:6800,
+ golfr_mk8:Object.assign({},P1,{burble:0.6,name:"2022 VW Golf R (Mk8)",mfr:"Volkswagen",hp:371,hpRpm:5900,tq:341,tqRpm:2100,redline:6800,
   ind:"single",disp:2.0,engSound:"i4",gears:[3.19,2.030,1.403,1.04,0.79,0.635,0.487],fd:4.47,drive:"awd",trans:"dct",
   layout:"front",tire:"summer",weight:3481,dist:58,tireD:25.9,cda:7.1,wb:103.5,cg:21.5,
-  launchRpm:3800,gripAdj:1.35,modes:['normal','sport','track'],mode:'normal'}),
+  launchRpm:3800,gripAdj:1.35,modes:['normal','sport','track'],mode:'normal',rated:[315,295]}),
+ /* More Mk8 / Mk8.5 Golfs. VW's EA888 2.0T makes more than its rating on a dyno, as the R
+    note above says, so each one's output is set to what matches its road-test trap speed and the
+    factory rating is kept in 'rated'. Manual ratios from VW's MQ350 / 02Q gearboxes,
+    DSG ratios from the DQ381 (GTI / R) and DQ200 (1.5 eTSI). */
+ gti_mk8m:Object.assign({},P1,{burble:0.45,name:"2022 VW Golf GTI 6-Speed Manual (Mk8)",mfr:"Volkswagen",hp:241,hpRpm:5000,tq:273,tqRpm:1750,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[3.769,2.087,1.469,1.103,0.920,0.767],fd:3.65,drive:"fwd",trans:"manual",
+  layout:"front",tire:"summer",weight:3150,dist:61,tireD:25.6,cda:7.0,wb:103.6,cg:21.5,launch:'none',
+  launchRpm:3600,gripAdj:1.0,modes:['normal','sport','track'],mode:'normal'}),
+ gti_cs:Object.assign({},P1,{burble:0.55,name:"2021 VW Golf GTI Clubsport (Mk8)",mfr:"Volkswagen",hp:296,hpRpm:5300,tq:295,tqRpm:2000,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[3.40,2.063,1.320,0.92,0.70,0.5625,0.4725],fd:4.47,drive:"fwd",trans:"dct",
+  layout:"front",tire:"summer",weight:3175,dist:61,tireD:25.9,cda:7.1,wb:103.6,cg:21.3,
+  launchRpm:3600,gripAdj:1.08,modes:['normal','sport','track'],mode:'normal'}),
+ golf8_15:Object.assign({},P1,{burble:0.2,name:"2021 VW Golf 1.5 eTSI (Mk8)",mfr:"Volkswagen",hp:148,hpRpm:5000,tq:184,tqRpm:1500,redline:6200,
+  ind:"single",disp:1.5,engSound:"i4",gears:[3.765,2.273,1.531,1.122,0.887,0.723,0.596],fd:4.30,drive:"fwd",trans:"dct",
+  layout:"front",tire:"allseason",weight:2950,dist:60,tireD:25.0,cda:7.0,wb:103.6,cg:22,
+  launchRpm:2400,gripAdj:1.0,modes:['normal','sport'],mode:'normal'}),
+ golfr_mk8m:Object.assign({},P1,{burble:0.6,name:"2022 VW Golf R 6-Speed Manual (Mk8)",mfr:"Volkswagen",hp:334,hpRpm:5900,tq:315,tqRpm:2100,redline:6800,
+  ind:"single",disp:2.0,engSound:"i4",gears:[3.36,2.09,1.47,1.10,0.92,0.75],fd:3.94,drive:"awd",trans:"manual",
+  layout:"front",tire:"summer",weight:3404,dist:58,tireD:25.9,cda:7.1,wb:103.5,cg:21.5,launch:'none',
+  launchRpm:4000,gripAdj:1.3,modes:['normal','sport','track'],mode:'normal',rated:[315,295]}),
+ golfr_20th:Object.assign({},P1,{burble:0.6,name:"2023 VW Golf R 20th Anniversary Edition (Mk8)",mfr:"Volkswagen",hp:370,hpRpm:5900,tq:340,tqRpm:2100,redline:6800,
+  ind:"single",disp:2.0,engSound:"i4",gears:[3.19,2.030,1.403,1.04,0.79,0.635,0.487],fd:4.47,drive:"awd",trans:"dct",
+  layout:"front",tire:"summer",weight:3474,dist:58,tireD:25.9,cda:7.1,wb:103.5,cg:21.5,
+  launchRpm:3800,gripAdj:1.35,modes:['normal','sport','track'],mode:'normal',rated:[315,295]}),
+ gti_mk85:Object.assign({},P1,{burble:0.45,name:"2025 VW Golf GTI (Mk8.5)",mfr:"Volkswagen",hp:250,hpRpm:5000,tq:284,tqRpm:1750,redline:6500,
+  ind:"single",disp:2.0,engSound:"i4",gears:[3.40,2.063,1.320,0.92,0.70,0.5625,0.4725],fd:4.16,drive:"fwd",trans:"dct",
+  layout:"front",tire:"summer",weight:3197,dist:61,tireD:25.6,cda:7.0,wb:103.6,cg:21.5,
+  launchRpm:3400,gripAdj:1.0,modes:['normal','sport','track'],mode:'normal',rated:[241,273]}),
+ golfr_mk85:Object.assign({},P1,{burble:0.6,name:"2025 VW Golf R (Mk8.5)",mfr:"Volkswagen",hp:358,hpRpm:5600,tq:320,tqRpm:2100,redline:6800,
+  ind:"single",disp:2.0,engSound:"i4",gears:[3.19,2.030,1.403,1.04,0.79,0.635,0.487],fd:4.47,drive:"awd",trans:"dct",
+  layout:"front",tire:"summer",weight:3466,dist:58,tireD:25.9,cda:7.1,wb:103.5,cg:21.5,
+  launchRpm:3800,gripAdj:1.35,modes:['normal','sport','track'],mode:'normal',rated:[328,295]}),
  /* --- Tesla, 2020 --- */
  m3_srp:Object.assign({},PEV,{name:"2020 Tesla Model 3 Standard Range+",mfr:"Tesla",hp:283,tq:302,
   tqRpm:4922,hpRpm:4922,redline:17600,fd:9.00,drive:"rwd",layout:"mid",tire:"allseason",
@@ -2331,13 +2401,13 @@ function modelFamily(name,mfr){
 function hasCustomModel(body,name){
   if(body==='mustang'&&(isS550(name)||isS197(name)||isS650(name)))return true;
   if(['durango','charger','camaro','crownvic','challenger','viper','viperacr'].indexOf(body)>=0)return true;
-  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name));
+  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name)||vwKind(name));
 }
 function hasCustomCluster(body,name){
   const nm=name||'',yr=parseInt(nm,10)||0;
   if(['challenger','camaro','mustang'].indexOf(body)>=0)return true;
   if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti/i.test(nm))return true;
-  if(/corvette/i.test(nm)&&/\bC[78]\b/.test(nm))return true;
+  if(/corvette/i.test(nm)&&/\bC[678]\b/.test(nm))return true;
   if(/mustang|shelby/i.test(nm)&&yr>=2005)return true;
   if(/charger/i.test(nm)&&yr>=2011)return true;
   if(/challenger/i.test(nm)&&yr>=2008&&yr<=2014)return true;
@@ -3783,6 +3853,30 @@ function displayElantraN(l,c,tk,rf){
 /* Volkswagen Golf (Mk8): blue digital cockpit. Arc tach with an outer light-blue
    line, an inner tick ring turning red near the limit, a blue sweep, the speed
    in the middle, torque-split bars on the left and temperatures on the right. */
+/* Corvette C6 (2005-13): two big black dials in silver rings - speedo left (to 200 mph, 220 on the ZR1,
+   km/h inside), tach right - with small fuel and coolant gauges stacked between them over the DIC
+   read-out; white numerals, orange-red needles. */
+function displayC6(l,c,tk,rf){
+  const o=[],ch='url(#c6c'+l+')',zr1=/zr1/i.test(c.name||''),smax=zr1?220:200;
+  const face=(x,y,r)=>'<circle cx="'+x+'" cy="'+y+'" r="'+(r+4)+'" fill="#0b0c0e" stroke="'+ch+'" stroke-width="3"/>';
+  o.push(face(112,92,70),face(328,92,70),face(220,58,28),face(220,124,28));
+  o.push(gDial({cx:112,cy:92,R:66,a0:-135,span:270,scale:uniScale(smax/20,4,i=>i*20),
+    ticks:{lM:8,wM:2,lm:4,wm:0.9,cm:'#c9ced6',cM:'#f2f4f8'},lab:{r:51,sz:11,w:500,col:'#f2f4f8'},
+    needle:{id:'nd-spd-'+l,col:'#ff5a1e',r0:-6,r1:62,w:3,tw:1.2,hub:{r:8,fill:'#18191c',stroke:'#555'}}}));
+  o.push(gDial({cx:112,cy:92,R:36,a0:-135,span:270,scale:uniScale(Math.round(smax*1.609/40),1,i=>i%2?'':i*40),
+    ticks:{lM:3,wM:1,lm:0,wm:0,cm:'#8a9099',cM:'#8a9099'},lab:{r:28,sz:6,w:400,col:'#8a9099'}}));
+  o.push(T(112,74,'MPH',7,'#f2f4f8'),T(112,124,'km/h',6,'#8a9099'));
+  o.push(gDial({cx:328,cy:92,R:66,a0:-135,span:270,redFrac:rf,scale:uniScale(tk,2,i=>i),red:{r:63,col:'#d8141a',w:4},
+    ticks:{lM:8,wM:2,lm:4,wm:0.9,cm:'#c9ced6',cM:'#f2f4f8',red:'#ff3a2a'},lab:{r:51,sz:13,w:500,col:'#f2f4f8'},
+    needle:{id:'nd-rpm-'+l,col:'#ff5a1e',r0:-6,r1:62,w:3,tw:1.2,hub:{r:8,fill:'#18191c',stroke:'#555'}}}));
+  o.push(T(328,72,'RPM',7,'#f2f4f8'),T(328,80,'x1000',5.5,'#c9ced6'),T(328,128,zr1?'ZR1':/z06/i.test(c.name||'')?'Z06':'',8,'#ff5a1e',{it:true,w:700}));
+  o.push(ring(220,58,22,-60,60,'#c9ced6',1)+T(204,70,'E',7,'#f2f4f8')+T(236,70,'F',7,'#f2f4f8')+minNeedle(220,64,-2,22,-25,'#ff5a1e',2,4));
+  o.push(ring(220,124,22,-60,60,'#c9ced6',1)+T(204,136,'C',7,'#f2f4f8')+T(236,136,'H',7,'#f2f4f8')+minNeedle(220,130,-2,22,-10,'#ff5a1e',2,4));
+  o.push('<rect x="190" y="84" width="60" height="18" rx="3" fill="#06070a" stroke="#2a2c30"/>',
+    T(206,97,'D1',9,'#e8eef8',{id:'cl-gear2-'+l,fam:'Roboto Mono, monospace',extra:' data-pre="'+(c.trans==='manual'?'':'D')+'"'}),
+    T(234,97,'<tspan id="cl-g-'+l+'">0.00</tspan>g',7,'#e8eef8',{fam:'Roboto Mono, monospace'}));
+  return svgWrap(o.join(''),chromeGrad('c6c'+l),'<path d="M14 40 Q220 4 426 40 L432 130 Q420 176 330 174 H110 Q20 176 8 130 Z" fill="#141518" stroke="#2c2d31" stroke-width="2"/>');
+}
 function displayGolf(l,c,tk,rf){
   const cx=220,cy=94,R=72,o=[];
   o.push('<ellipse cx="220" cy="92" rx="210" ry="30" fill="url(#gfg'+l+')" opacity="0.7"/>');
@@ -4658,7 +4752,7 @@ function buildClusters(){
     const lambo=cs?cs==='lambo':/lamborghini/i.test(nm);
     const yr=parseInt(nm,10)||0;
     const isAcc=/\baccord\b/i.test(nm);
-    const NEWC={r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria/i,impala:/impala/i,
+    const NEWC={r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,c6:/corvette.*\bC6\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria/i,impala:/impala/i,
       venom:/venom/i,focusrs:/focus rs/i,agera:/agera|jesko/i,regera:/regera/i,lucid:/lucid/i,tesla:/tesla/i,taurus:/taurus/i,
       mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i,infiniti:/infiniti/i};
     let nstyle=null;
@@ -4677,7 +4771,7 @@ function buildClusters(){
     // the Durango speedo reads to 140 mph; SRT models print 200
     const durSpd=/srt|hellcat|392/i.test(nm)?200:140;
     // needle scale must match the numbers printed on each style of speedo
-    clusterMeta[l].spdMax=nstyle?({infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
+    clusterMeta[l].spdMax=nstyle?({c6:/zr1/i.test(nm)?220:200,infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
     if(nstyle==='charger15')clusterMeta[l].spdMax=/hellcat/i.test(nm)?200:/scat|392/i.test(nm)?180:160;
     const d=document.createElement('div');d.className='cluster'+(darkCluster?' cluster-muscle':'');
     // Build mode buttons from the car's available modes
@@ -4727,7 +4821,7 @@ function buildClusters(){
     if(nstyle){
       const tk=tachMax/1000,rf=rl/tachMax;
       const F={r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
-        golf:displayGolf,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,infiniti:displayInfiniti,g70:displayG70,g80:displayG80,
+        golf:displayGolf,c6:displayC6,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,infiniti:displayInfiniti,g70:displayG70,g80:displayG80,
         mustangD:displayMustangDigital,mustang6:displayMustangS550,mustang5:displayMustangS197,camaro6:(a,b,cc,dd)=>displayCamaro6(a,b,cc,dd,clusterMeta[l].boosted),
         camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,charger15:displayCharger15,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
         venom:displayVenom,focusrs:displayFocusRS,agera:displayAgera,regera:displayRegera,lucid:displayLucid,tesla:displayTesla,taurus:displayTaurus,acura17:displayAcura17,acura21:displayAcura21,bmwm5:displayBMWM5,bmwcurved:displayBMWCurved}[nstyle];
@@ -5380,6 +5474,18 @@ function wheelSpec(body,name){
   }else if(body==='focusrs'){f=r=ty(19,235,35);style='ten';finish='gunmetal';cal='blue';
   }else if(body==='fusion'){f=r=ty(19,235,40);style='split5';finish='black';cal='silver';
   }else if(body==='taurus'){if(/police|interceptor/.test(n)){f=r=ty(18,245,55);style='steel';}else{f=r=ty(20,245,45);style='split5';finish='silver';}
+  }else if(body==='golf8'){
+    if(/golf r\b/.test(n)){f=r=ty(19,235,35);style='multi';finish='gunmetal';cal='blue';}
+    else if(/clubsport/.test(n)){f=r=ty(19,235,35);style='split5';finish='black';cal='red';}
+    else if(/\bgti\b/.test(n)){f=r=ty(18,225,40);style='split5';finish='silver';cal='red';}
+    else{f=r=ty(17,225,45);style='ten';finish='silver';cal='silver';}
+  }else if(body==='c6'){
+    if(/zr1/.test(n)){f=ty(19,285,30);r=ty(20,335,25);style='multi';finish='silver';cal='blue';}
+    else if(/\b427\b/.test(n)){f=ty(19,285,30);r=ty(20,335,25);style='multi';finish='gunmetal';cal='red';}
+    else if(/z07/.test(n)){f=ty(19,285,30);r=ty(20,335,25);style='ten';finish='gunmetal';cal='red';}
+    else if(/z06/.test(n)){f=ty(18,275,35);r=ty(19,325,30);style='ten';finish='silver';cal='red';}
+    else if(/grand sport/.test(n)){f=ty(18,275,35);r=ty(19,325,30);style='split5';finish='gunmetal';cal='silver';}
+    else{f=ty(18,245,40);r=ty(19,285,35);style='five';finish='silver';cal='silver';}
   }else if(body==='c7'){
     if(/stingray/.test(n)){if(/z51/.test(n)){f=ty(19,245,35);r=ty(20,285,30);style='split5';finish='black';cal='red';}else{f=ty(18,245,40);r=ty(19,285,35);style='split5';finish='silver';cal='black';}}
     else if(/grand sport/.test(n)){f=ty(19,285,30);r=ty(20,335,25);style='split5';finish='black';cal='red';}
@@ -7581,12 +7687,23 @@ function buildFordBP(kind,colorHex,name){
    C7 Z06 4496 x 1965 x 1234 (2708 wb); C8 4630 x 1933 x 1234 (2722); Impala 5080 x 1855 x 1460 (2807);
    Impala 2014 5113 x 1854 x 1496 (2837). */
 function chevyKind(name){const n=(name||'').toLowerCase(),yr=parseInt(name,10)||0;
-  if(/corvette/.test(n))return /c8/.test(n)||yr>=2020?'c8':'c7';
+  if(/corvette/.test(n))return /\bc6\b/.test(n)?'c6':/c8/.test(n)||yr>=2020?'c8':'c7';
   if(/impala/.test(n))return yr>=2014?'impala14':'impala06';return null;}
 function buildChevyBP(kind,colorHex,name){
   const n=(name||'').toLowerCase(),ss=/\bss\b/.test(n);
   const c8z=/z06|zr1|grand sport/.test(n),zr1=/zr1/.test(n);
   const T={
+  // C6 (2005-13) coupe, from the 2013 blueprint: 4435 x 1844 x 1245, 2685 wb. Exposed teardrop lamps on the
+  // fender tops, low wide grille, fixed-glass fastback hatch, four round tail lamps, centre quad exhaust.
+  c6:{NOSE:57.4,TAIL:-55.2,W:23.42,wx:34.10,wr:8.5,AR:9.9,
+    plan:[[57.4,1],[56.7,5],[55.3,8.7],[53.9,13.9],[52.6,17.3],[51.2,19.2],[49.8,20.4],[48.4,21.2],[47.1,21.7],[45.7,22.1],[44.3,22.4],[43,22.8],[41.6,23.42],[33.4,23.42],[32,23.3],[12.8,23.1],[10,22.8],[4.6,22.8],[0.5,22.9],[-14.6,22.9],[-16,23.1],[-25.5,23.1],[-28,23.42],[-39,23.42],[-42,23.1],[-44.7,22.9],[-47.4,22.4],[-48.8,22.1],[-50.2,21.9],[-51.5,21.2],[-52.9,18.3],[-54.3,11.1],[-55.2,4]],
+    top:[[57.4,10.3],[56.4,12.7],[55.3,13.7],[54.3,14.4],[53.3,15.1],[52.3,15.75],[50.1,16.4],[48,17.4],[46,18.1],[43.9,18.8],[41.8,19.2],[39.8,19.85],[37.7,20.2],[34.7,20.5],[31.6,20.9],[28.5,21.2],[24.4,21.6],[20,21.6],[18.2,21.5],[14,21.1],[6,20.7],[0,21.0],[-10,21.4],[-20,22.0],[-24,23.6],[-28,25.4],[-35,25.7],[-45,25.6],[-50,25.4],[-53,25.2],[-54.6,24.8],[-55.0,23],[-55.2,18]],
+    bot:[[57.4,5.8],[55.3,4.8],[52.3,4.6],[48,4.2],[40,4.0],[34,4.1],[24,4.3],[-24,4.3],[-45,6.2],[-52,6.6],[-54,8.0],[-55.2,10]],
+    gtop:[[18.2,21.9],[16,23.2],[14.1,24.0],[12,25.0],[10,26.0],[6.9,27.4],[3.8,28.8],[0.8,30.1],[-1.3,30.8],[-4.5,31.5],[-10,31.8],[-16.7,31.5],[-21.8,31.0],[-25.4,30.8],[-28,30.4],[-32,29.6],[-36,28.6],[-40,27.6],[-43,26.8],[-45.2,26.0]],
+    x0:-45.2,x1:18.2,GB:19.0,GT:14.0,roof:[-1.3,-27.6],roofMat:0,rearSide:1.2,sn:14,
+    // side glass behind the A-pillar to the B-pillar, body-colour sail, then the hatch glass wrapping round
+    side:(x,y,gt)=>{if(x<-27.8)return y>26.2?1:0;if(y>gt-1.7)return 0;if(x>6.1-(y-20.9)*1.23)return 0;if(x>-20)return 1;return 0;},
+    mirror:[2.6,22.4,[3.6,2.4,3.2]],cuts:[[14.7,5,21],[-20.1,5,22]],handles:[],rocker:null,rockerY:4.6},
   c7:{NOSE:58,TAIL:-56.2,W:25.0,wx:34.39,wr:8.6,AR:10.2,
     plan:[[58,1],[57,8],[55.9,12],[53.9,15.5],[51.8,18.5],[49.8,21.1],[47.7,23.6],[45.7,25.0],[27,25.0],[25,24.1],[20,24.0],[10,24.6],[2,25.0],[-6,24.1],[-12,23.6],[-17,23.6],[-20.6,24.4],[-24.7,25.0],[-43.3,25.0],[-45.3,24.3],[-47.4,23.2],[-51.5,21.8],[-53.5,17.5],[-55.6,9],[-56.2,4]],
     top:[[58,9],[57,12],[55.9,13.7],[53.9,15.0],[51.8,16.1],[49.8,17.1],[47.7,18.1],[45.7,18.8],[41.6,19.5],[37.5,20.6],[33.4,21.3],[27.1,21.6],[20,21.6],[14.3,21.4],[0,21.3],[-10,22.2],[-17,23.0],[-19,24.0],[-24,24.2],[-30,24.6],[-40,25.0],[-47.4,24.7],[-49.4,25.4],[-53.5,25.8],[-55.4,25.6],[-55.9,20],[-56.2,14]],
@@ -7622,16 +7739,23 @@ function buildChevyBP(kind,colorHex,name){
   };
   // C7 trims: Stingray / Z51 use the narrow body (1877 mm vs the Z06 / Grand Sport / ZR1's 1965 mm)
   const c7zr1=kind==='c7'&&/zr1/.test(n),c7gs=kind==='c7'&&/grand sport/.test(n),c7sting=kind==='c7'&&/stingray/.test(n),c7z51=c7sting&&/z51/.test(n);
-  const D=c7sting?Object.assign({},T.c7,{W:23.85,plan:T.c7.plan.map(([x,w])=>[x,w*0.954])}):T[kind];
-  const creases={c7:[{x0:-22,x1:24,y:x=>9.4+Math.max(0,x)*0.06}],c8:[{x0:-20,x1:40,y:x=>14+(x+20)*0.05}],
+  const c6wide=kind==='c6'&&/z06|zr1|grand sport|\b427\b/.test(n),c6conv=kind==='c6'&&/convertible|\b427\b/.test(n);
+  let D=c7sting?Object.assign({},T.c7,{W:23.85,plan:T.c7.plan.map(([x,w])=>[x,w*0.954])}):T[kind];
+  if(c6wide)D=Object.assign({},D,{W:24.49,NOSE:58.0,plan:[[58.0,1]].concat(D.plan.slice(1).map(([x,w])=>[x,w*1.0457]))});   // 1928 mm wide, 4460 long (front splitter)
+  if(c6conv)D=Object.assign({},D,{roof:[-1.3,-41.5],roofMat:2,rearSide:3.0,      // black cloth top, small rear window
+    gtop:D.gtop.map(([x,y])=>[x,x<-24?y-Math.min(1.2,(-24-x)*0.08):y]),
+    side:(x,y,gt)=>{if(y>gt-1.7)return 0;if(x>6.1-(y-20.9)*1.23)return 0;if(x>-20)return 1;return 2;}});
+  if(kind==='c6'&&/zr1/.test(n))D=Object.assign({},D,{roofMat:2});              // ZR1: exposed carbon roof panel
+  const creases={c6:[{x0:-15,x1:15.5,y:x=>15.8+(15.5-x)*0.072},{x0:-21,x1:15,y:8.3}],c7:[{x0:-22,x1:24,y:x=>9.4+Math.max(0,x)*0.06}],c8:[{x0:-20,x1:40,y:x=>14+(x+20)*0.05}],
     impala06:[{x0:-58,x1:56,y:20.6},{x0:-24,x1:24,y:11.8}],impala14:[{x0:-60,x1:44,y:x=>22.4+(-x)*0.025},{x0:-26,x1:28,y:x=>10.2+(28-x)*0.03}]}[kind];
   return bpCar(colorHex,name,{body:kind,NOSE:D.NOSE,TAIL:D.TAIL,W:D.W,wx:D.wx,wr:D.wr,AR:D.AR,
     plan:D.plan,top:D.top,bot:D.bot,tumbleY:kind.startsWith('c')?12:16,tumble:kind.startsWith('c')?1.4:1.2,crown:kind.startsWith('c')?[56,24,0.7]:[58,30,0.5],
     flare:{r:0.1,t:0.8,arc:0.8,sz:0.5,in:0.6},creases,
-    gh:{x0:D.x0,x1:D.x1,GB:D.GB,GT:D.GT,roof:D.roof,roofMat:D.roofMat,top:D.gtop,rearSide:D.rearSide,side:(x,y)=>D.side(x,y,bpTab(D.gtop)(x))},
+    gh:{sn:D.sn||0,x0:D.x0,x1:D.x1,GB:D.GB,GT:D.GT,roof:D.roof,roofMat:D.roofMat,top:D.gtop,rearSide:D.rearSide,side:(x,y)=>D.side(x,y,bpTab(D.gtop)(x))},
     mirror:D.mirror,cuts:D.cuts,handles:D.handles,handleMat:D.handleMat,rocker:D.rocker,rockerY:D.rockerY,
-    trim:({M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood})=>{
+    trim:({M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood,flushLamp,yTop,crown})=>{
       const W=D.W;
+      if(kind==='c6'){trimC6({M,ribbon,disc,box,planW,sideStrip,surfX,onHood,flushLamp,yTop,crown,D,n,wide:c6wide,conv:c6conv});return;}
       const bowtie=(dir,y,sc,mat)=>{ribbon(dir,-1.6*sc,1.6*sc,4,z=>{const a=Math.abs(z)/(1.6*sc);return[y-0.35*sc-(a>0.45?0.12*sc:0),y+0.35*sc+(a<0.45?0.12*sc:0)];},0.34,mat||M.amber);};
       const flags=(dir,y)=>{[1,-1].forEach(s=>ribbon(dir,s*0.1,s*1.5,3,z=>{const a=Math.abs(z);return[y+a*0.35-0.25,y+a*0.35+0.25];},0.34,s>0?M.chrome:M.redL));};
       // swept lamp helper: inner end low/narrow, outer end high
@@ -7772,6 +7896,172 @@ function buildChevyBP(kind,colorHex,name){
       ribbon(-1,-5.6,5.6,6,()=>[18.6,22.6],0.14,M.dark);ribbon(-1,-5.2,5.2,6,()=>[18.9,22.3],0.22,M.plate);
       ribbon(-1,-20,20,26,()=>[5.6,9.6],0.16,M.gloss);
     }});
+}
+/* ---------- Volkswagen Golf Mk8 / Mk8.5 (2020+), from the scaled 2021 Golf R blueprint ----------
+   4290 x 1789 x 1458 mm, 2628 wb. Five-door hatch: long flat bonnet, slim lamps joined by a lit bar
+   across the grille, big black lower intakes, thick body-colour C-pillar, roof spoiler over a steep
+   hatch glass, horizontal wedge tail lamps that wrap round the quarters, diffuser.
+   Trim differences: Golf (chrome grille strip, plain bumper, hidden exhaust), GTI (red grille line,
+   honeycomb intakes with the five-LED "X" fog lamps, one tip each side, red calipers), GTI Clubsport
+   (bigger spoiler, deeper splitter), R (silver blades in the intakes, quad tips, matte-chrome mirrors,
+   blue calipers, R badges). Mk8.5 cars get the lit VW logo. */
+function vwKind(name){const n=(name||'').toLowerCase(),yr=parseInt(name,10)||0;
+  if(/\b(golf|gti)\b/.test(n)&&(yr>=2020||/mk8/.test(n)))return 'golf8';return null;}
+function buildVW(kind,colorHex,name){
+  const n=(name||'').toLowerCase(),R=/golf r\b/.test(n),gti=/\bgti\b/.test(n),cs=/clubsport/.test(n),m85=/mk8\.5/.test(n)||(parseInt(name,10)||0)>=2025;
+  const base=!R&&!gti;
+  const D={NOSE:55.3,TAIL:-53.7,W:22.72,wx:33.38,wr:8.2,AR:10.1,
+    plan:[[55.3,4],[54.6,13.5],[53.2,16.5],[51.8,18.9],[50.5,19.9],[49.1,21.0],[47.7,21.7],[46.3,22.2],[45,22.5],[43.6,22.72],[28.4,22.72],[24,22.5],[18,22.72],[-24,22.72],[-30,22.6],[-39.3,22.6],[-40.6,22.3],[-43.4,21.9],[-44.8,21.5],[-47.5,21.0],[-48.9,20.5],[-50.3,19.8],[-51.7,18.6],[-53,13.3],[-53.7,6]],
+    top:[[55.3,14.0],[54.6,16.5],[54.1,17.6],[53,18.3],[52,19.0],[51,19.7],[49.9,20.4],[47.9,21.4],[45.8,22.1],[43.7,22.4],[41.7,23.1],[39.6,23.8],[37.5,24.2],[35.4,24.5],[33.4,24.8],[31.3,25.1],[27,25.2],[25.1,25.2],[22,24.4],[20.3,24.0],[10,24.6],[0,25.3],[-10,25.9],[-20,26.5],[-32.6,27.2],[-40,27.6],[-46,27.6],[-49.5,26.8],[-50.6,25.9],[-51.6,24.5],[-52.4,21.5],[-52.8,17.5],[-53.7,15.5]],
+    bot:[[55.3,9],[54.5,6.5],[53,5.2],[44,5.2],[30,5.9],[-30,6.0],[-46,6.0],[-50,7.0],[-52.6,8.5],[-53.7,10.5]],
+    gtop:[[25.1,25.5],[24.1,26.9],[22,27.9],[18.9,29.7],[15.8,31.4],[13.7,32.4],[10.6,33.8],[8.5,34.8],[6.5,35.5],[4.4,35.9],[2.3,36.2],[-0.8,36.9],[-3.9,37.3],[-20.5,37.3],[-22.5,36.9],[-28.7,36.6],[-37.1,35.6],[-41.3,35.0],[-44,34.4],[-46,32.5],[-47.8,30],[-49.3,27.4]]};
+  if(base)D.gtop=D.gtop.map(([x,y])=>[x,y+0.4]);               // the plain Golf sits ~35 mm taller (no sport suspension)
+  const side=(x,y,gt)=>{if(y>gt-1.9)return 0;if(x>22.0-(y-24.8)*1.47)return 0;if(x>-6.2)return 1;if(x>-9.6)return 2;
+    if(x>-27)return 1;if(x>-27.6)return 2;if(x>-32.4+(y-27)*0.5)return 1;return 0;};
+  return bpCar(colorHex,name,{body:kind,NOSE:D.NOSE,TAIL:D.TAIL,W:D.W,wx:D.wx,wr:D.wr,AR:D.AR,
+    plan:D.plan,top:D.top,bot:D.bot,tumbleY:17,tumble:1.0,crown:[54,27,0.5],
+    flare:{r:0.1,t:0.6,arc:0.8,sz:0.5,in:0.6},
+    creases:[{x0:-50,x1:47,y:x=>20.8+(25-x)*0.047},{x0:-28,x1:22,y:x=>12.6+(22-x)*0.012}],
+    gh:{sn:12,x0:-49.3,x1:25.1,GB:20.5,GT:15.6,roof:[3.5,-43.5],roofMat:0,top:D.gtop,rearSide:1.6,side:(x,y)=>side(x,y,bpTab(D.gtop)(x))},
+    mirror:[16.2,25.4,[3.4,2.6,3.6]],cuts:[[21.4,6,24],[-6.6,6,26],[-31.5,10,27]],handles:[[-3,22.1],[-26,23.0]],handleMat:'paint',
+    rocker:R?null:[-24,23],rockerY:6.3,
+    trim:({M,ribbon,disc,box,planW,sideStrip,gTop,surfX,onHood,flushLamp,yTop,crown})=>{
+      const clear=new TH.MeshStandardMaterial({color:0xc8ccd2,roughness:0.06,metalness:0.7,emissive:0x2a2c30});
+      const mchrome=new TH.MeshStandardMaterial({color:0xb4b9c0,roughness:0.35,metalness:0.75,emissive:0x1a1c1f});
+      const F=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+      const Rr=(z0,z1,yf,off,mat,nn)=>[1,-1].forEach(s=>ribbon(-1,s*z0,s*z1,nn||10,z=>yf(Math.abs(z)),off,mat));
+      const lin=(a0,a1,p0,p1)=>a=>{const t=Math.min(1,Math.max(0,(a-a0)/(a1-a0)));return[p0[0]+(p1[0]-p0[0])*t,p0[1]+(p1[1]-p0[1])*t];};
+      const vwLogo=(dir,y,r,lit)=>{disc(dir,0,y,r,lit?M.drl:mchrome,0.34,0.84);disc(dir,0,y,r*0.84,M.gloss,0.32);
+        [[-0.5,0.55,-0.1,-0.35],[0.5,0.55,0.1,-0.35],[-0.1,-0.35,0,0.05],[0.1,-0.35,0,0.05]].forEach(([z0,y0,z1,y1])=>{
+          const L=Math.hypot(z1-z0,y1-y0)*r,zc=(z0+z1)/2*r,yc=y+(y0+y1)/2*r,x=surfX(dir,zc,yc);
+          const b=box(0.12,L,0.16*r,lit?M.drl:mchrome,x+dir*0.4,yc,zc);b.rotation.x=Math.atan2(z1-z0,y1-y0);});};
+      // ---- headlamps: slim, inner end tapering toward the grille; LED eyebrow DRL, two projector modules, turn signal outboard ----
+      const hl=lin(11.3,21.6,[15.9,17.9],[15.0,18.9]);
+      F(11.0,21.9,a=>{const r=hl(a);return[r[0]-0.3,r[1]+0.3];},0.12,M.gloss,12);
+      F(11.4,21.5,hl,0.2,clear,12);
+      F(11.8,21.3,a=>{const r=hl(a);return[r[1]-0.55,r[1]-0.2];},0.3,M.drl,12);
+      [1,-1].forEach(s=>{disc(1,s*14.6,16.7,0.8,M.dark,0.32);disc(1,s*14.6,16.7,0.48,M.head,0.36);disc(1,s*17.6,16.5,0.8,M.dark,0.32);disc(1,s*17.6,16.5,0.48,M.head,0.36);});
+      F(19.9,21.3,a=>{const r=hl(a);return[r[0]+0.3,r[0]+1.1];},0.28,M.amber,3);
+      // ---- upper grille between the lamps: black slot, lit bar (GTI / R / Mk8.5), GTI red line, chrome strip on the Golf ----
+      ribbon(1,-11.4,11.4,18,()=>[15.9,17.9],0.14,M.gloss);
+      if(!base)ribbon(1,-11.2,11.2,18,()=>[17.6,17.85],0.26,M.drl);else ribbon(1,-11.2,11.2,18,()=>[17.5,17.8],0.26,M.chrome);
+      if(gti)ribbon(1,-11.2,11.2,18,()=>[16.15,16.35],0.26,M.redL);
+      vwLogo(1,16.9,1.5,m85);
+      // ---- lower bumper: central intake, corner intakes, fog lamps / blades, splitter ----
+      ribbon(1,-13.8,13.8,20,a=>{const z=Math.abs(a);return[6.6+Math.max(0,z-11)*0.5,11.5-Math.max(0,z-11.5)*0.4];},0.14,M.gloss);
+      if(gti){for(let i=0;i<4;i++)for(let k=-6;k<=6;k++){const z=k*1.9+(i%2)*0.95,y=7.4+i*1.0;if(Math.abs(z)<13)disc(1,z,y,0.42,M.satin,0.24);}}
+      else{for(let i=1;i<4;i++){const y=6.6+i*1.2;ribbon(1,-13.2,13.2,16,()=>[y-0.1,y+0.1],0.24,M.satin);}
+        for(let k=-5;k<=5;k++)ribbon(1,k*2.4-0.1,k*2.4+0.1,1,()=>[6.9,11.2],0.24,M.satin);}
+      F(14.2,21.3,a=>{const t=(a-14.2)/7.1;return[6.1+t*0.4,12.3-t*1.2];},0.14,M.gloss,8);
+      if(gti)[1,-1].forEach(s=>{[[0,0],[-0.9,0.9],[0.9,0.9],[-0.9,-0.9],[0.9,-0.9]].forEach(([dz,dy])=>disc(1,s*(17.6+dz),9.2+dy,0.42,M.head,0.3));});
+      else if(R)[1,-1].forEach(s=>{ribbon(1,s*14.0,s*14.6,2,()=>[6.4,12.0],0.3,mchrome);ribbon(1,s*14.6,s*20.6,6,()=>[11.6,12.1],0.3,mchrome);
+        for(let k=1;k<3;k++)ribbon(1,s*(14.6+k*2),s*(14.8+k*2),1,()=>[6.6,11.4],0.24,M.satin);});
+      else[1,-1].forEach(s=>ribbon(1,s*15.0,s*20.4,6,()=>[8.6,9.0],0.24,M.chrome));
+      if(cs)ribbon(1,-20,20,30,()=>[3.6,5.0],1.0,M.gloss);else if(!base){ribbon(1,-19.5,19.5,30,()=>[4.0,4.9],0.3,M.gloss);if(R)ribbon(1,-17,17,24,()=>[4.85,5.15],0.34,mchrome);}
+      // ---- bonnet: two creases from the lamps' inner ends toward the A-pillars ----
+      for(let x=27;x<51;x+=1.0)[1,-1].forEach(s=>onHood(1.1,0.07,0.22,M.paintDk,x,s*(8.6+(x-27)*0.12),0.02));
+      // ---- side ----
+      if(R){sideStrip(21.0,25.2,()=>[20.2,21.0],0.14,M.dark,0.4);
+        [1,-1].forEach(s=>box(3.5,2.7,3.7,mchrome,16.25,25.45,s*(D.W+1.25)));}             // matte-chrome mirror caps
+      sideStrip(-51.4,-43,x=>{const t=Math.min(1,(-43-x)/8.4);return[23.2-t*2.4,24.6+t*0.2];},0.12,M.tail,0.4);   // tail lamps wrap onto the quarters
+      sideStrip(-51.2,-44,x=>{const t=Math.min(1,(-44-x)/7.2);return[23.6-t*1.4,23.9-t*1.4];},0.18,M.led,0.4);
+      if(base||gti)sideStrip(-24,23,()=>[6.4,7.2],0.25,M.gloss,0.6);
+      // ---- rear ----
+      const tl=lin(9.2,15,[22.7,24.3],[21.6,25.1]),tl2=a=>a<15?tl(a):[21.6,25.1+Math.min(0.2,(a-15)*0.04)];
+      Rr(8.9,20.9,a=>{const r=tl2(a);return[r[0]-0.25,r[1]+0.25];},0.12,M.gloss,12);
+      Rr(9.2,20.7,tl2,0.2,M.tail,12);
+      Rr(10.6,20.2,a=>{const r=tl2(a);return[r[1]-0.75,r[1]-0.4];},0.3,M.led,12);
+      Rr(11.6,20.2,a=>{const r=tl2(a);return[r[0]+0.5,r[0]+0.85];},0.3,M.led,10);
+      Rr(9.6,12.2,()=>[22.6,23.4],0.32,M.rev,3);                                         // reverse lamp, inner end
+      Rr(10.9,18.4,()=>[14.1,14.7],0.22,M.tail,6);                                       // bumper reflectors
+      vwLogo(-1,22.8,1.4,false);
+      ribbon(-1,R?-1.0:-1.6,R?1.0:1.6,3,()=>[20.0,20.6],0.24,R?M.blue:gti?M.redL:mchrome);  // R / GTI / Golf badge under the logo
+      ribbon(-1,-19.5,19.5,26,a=>{const z=Math.abs(a);return[4.9,10.7-Math.max(0,z-15)*0.5];},0.14,M.gloss);  // diffuser
+      if(R)for(let k=-3;k<=3;k++)ribbon(-1,k*2.0-0.12,k*2.0+0.12,1,()=>[4.4,7.6],0.5,M.satin);
+      const tip=(z,y,r)=>{disc(-1,z,y,r,M.chrome,0.5);disc(-1,z,y,r*0.76,M.dark,0.56);};
+      if(R)[1,-1].forEach(s=>{tip(s*15,7.8,1.25);tip(s*11.5,7.8,1.25);});
+      else if(gti)[1,-1].forEach(s=>tip(s*13.4,7.6,cs?1.45:1.3));
+      // hatch: wiper, roof spoiler with the third brake light (bigger, with side fins on the R / Clubsport)
+      box(0.3,0.25,5,M.dark,-48.6,28.4,-1.5,0,0.4);
+      const sx=-44.2,sy=gTop(-44)+0.1,sw=2*15.8;
+      box(R||cs?5.6:4.2,R||cs?0.9:0.7,sw,M.paint,sx-(R||cs?2.4:1.8),sy,0,-0.08);
+      if(R||cs)[1,-1].forEach(s=>box(4.6,1.4,0.3,M.gloss,sx-2.4,sy-0.5,s*(sw/2-0.2)));
+      box(0.2,0.3,9,M.led,sx-(R||cs?5.25:3.95),sy-0.35,0);
+    }});
+}
+/* C6 Corvette details, from the 2013 blueprint (front / side / rear / top views):
+   - front: exposed clear teardrop lamps on the fender tops (two big projectors + a small one, amber
+     park/turn at the outer end), wide low grille with horizontal slats, round-cornered fog lamps
+     at the outer corners, black chin spoiler, crossed-flags emblem on the nose, hood creases
+   - side: slanted fender vent behind the front wheel, amber front / red rear side markers,
+     no door handles (C6 uses touch pads), body-colour rockers (carbon on the ZR1)
+   - rear: four round tail lamps, flags between them, recessed plate panel, rectangular reverse lamps
+     low in the fascia, centre quad exhaust in a black surround, black diffuser, CHMSL on the ducktail
+   - trims: Z06 / 427 / ZR1 / Grand Sport get the wide body, the Z06 front fascia (bigger grille,
+     black splitter, hood-leading-edge intake on the LS7 cars), taller rear spoiler; ZR1 adds its
+     raised hood with the clear window over the intercooler, carbon splitter, rockers, roof and spoiler. */
+function trimC6(o){
+  const {M,ribbon,disc,box,planW,sideStrip,surfX,onHood,flushLamp,yTop,crown,D,n,wide,conv}=o;
+  const zr1=/zr1/.test(n),ls7=/z06|\b427\b/.test(n),gs=/grand sport/.test(n);
+  const NO=D.NOSE,TL=D.TAIL;
+  const clear=new TH.MeshStandardMaterial({color:0xc8ccd2,roughness:0.06,metalness:0.7,emissive:0x2a2c30});
+  const flags=(dir,y,sc)=>{sc=sc||1;[1,-1].forEach(s=>ribbon(dir,s*0.15*sc,s*1.7*sc,3,z=>{const a=Math.abs(z);return[y+a*0.32-0.28*sc,y+a*0.32+0.28*sc];},0.34,s>0?M.chrome:M.redL));
+    ribbon(dir,-0.3*sc,0.3*sc,1,()=>[y-0.5*sc,y+0.2*sc],0.36,M.chrome);};
+  // ---- headlamps: clear teardrops on the fender tops, three projectors each, amber park/turn outboard ----
+  const ang=0.45,lx=46.6,ly=17.0,yRay=ly+Math.tan(ang)*(NO-lx);
+  [1,-1].forEach(s=>flushLamp(1,yRay,s*16.3,4.9,3.9,ang,[[1.1,0.88,0.18,M.gloss],[1,0,0.24,clear,36],
+    [0.27,0,0.32,M.dark,20,s*3.0,-0.2],[0.17,0,0.36,M.head,14,s*3.0,-0.2],
+    [0.27,0,0.32,M.dark,20,s*0.2,0.2],[0.17,0,0.36,M.head,14,s*0.2,0.2],
+    [0.18,0,0.32,M.dark,16,-s*2.4,0.5],[0.11,0,0.36,M.head,12,-s*2.4,0.5],
+    [0.2,0,0.3,M.amber,14,s*4.1,-1.6]],s*0.12,0.25));
+  // ---- grille: wide low opening, two slats, vertical dividers ----
+  const gz=wide?12.6:11.4,gy=wide?[6.2,9.8]:[6.9,9.2];
+  ribbon(1,-gz-0.4,gz+0.4,20,z=>{const a=Math.abs(z);return[gy[0]-0.3+Math.max(0,a-gz+2)*0.25,gy[1]+0.3];},0.12,M.paintDk);
+  ribbon(1,-gz,gz,20,z=>{const a=Math.abs(z);return[gy[0]+Math.max(0,a-gz+2)*0.25,gy[1]];},0.16,M.gloss);
+  [1/3,2/3].forEach(t=>{const y=gy[0]+(gy[1]-gy[0])*t;ribbon(1,-gz+0.6,gz-0.6,18,()=>[y-0.12,y+0.12],0.24,M.satin);});
+  for(let k=-2;k<=2;k++){const z=k*gz/3;ribbon(1,z-0.15,z+0.15,1,()=>[gy[0]+0.2,gy[1]-0.2],0.24,M.satin);}
+  flags(1,11.6,0.9);
+  // ---- fog lamps in the outer corners of the fascia ----
+  [1,-1].forEach(s=>{ribbon(1,s*15.2,s*20.2,8,()=>[7.1,9.8],0.14,M.gloss);ribbon(1,s*15.7,s*19.7,8,()=>[7.5,9.4],0.22,clear);
+    disc(1,s*17.7,8.45,0.7,M.head,0.3);
+    ribbon(1,s*20.6,s*21.8,3,()=>[9.2,10.0],0.2,M.amber);});                  // front reflector on the corner
+  // ---- chin spoiler / splitter ----
+  if(zr1)ribbon(1,-21,21,30,()=>[2.4,4.4],1.4,M.carbon);
+  else if(wide)ribbon(1,-21,21,30,()=>[2.5,4.2],0.9,M.gloss);
+  else ribbon(1,-19.5,19.5,30,()=>[2.8,4.3],0.4,M.gloss);
+  // ---- hood: two creases from the lamps converging on the windshield; LS7 cars: intake slot in the leading edge ----
+  const hoodLine=(x0,z0,x1,z1)=>{for(let x=x1;x<x0;x+=1.6){const z=z1+(z0-z1)*(x-x1)/(x0-x1);onHood(1.8,0.1,0.22,M.paintDk,x+0.8,z,0.02);}};
+  [1,-1].forEach(s=>hoodLine(50,s*9.6,22,s*6.4));
+  if(ls7&&!zr1)ribbon(1,-8,8,12,()=>[11.0,11.8],0.2,M.gloss);
+  if(zr1||/\b427\b/.test(n)){onHood(20,0.9,11,M.paint,36,0,0.25);                      // raised "power dome"
+    if(zr1){onHood(9,0.3,6.4,M.glass,35,0,1.05);for(let i=0;i<5;i++)onHood(0.25,0.25,5.6,M.satin,31.6+i*1.7,0,0.95);}}
+  // ---- side: fender vent, markers ----
+  const vy=x=>[x<19?7.2:7.2+(x-19)/2.6*7.8,x>19?17.4:10+(x-16.4)/2.6*7.4];
+  sideStrip(16.4,21.6,vy,0.1,M.gloss,0.26);
+  [0.33,0.66].forEach(t=>sideStrip(16.6,21.4,x=>{const r=vy(x),y=r[0]+(r[1]-r[0])*t;return[y-0.15,y+0.15];},0.2,wide?M.satin:M.paint,0.26));
+  sideStrip(44,49.6,()=>[12.9,14.0],0.12,M.amber,0.4);
+  sideStrip(-48.1,-43,()=>[19.1,19.9],0.12,M.tail,0.4);
+  if(zr1)sideStrip(-24,24,()=>[4.0,6.2],0.25,M.carbon,0.6);
+  else if(wide)sideStrip(-24,24,()=>[4.0,5.4],0.18,M.paint,0.6);
+  // ---- rear ----
+  [[16.9,0],[11.2,0]].forEach(([z])=>[1,-1].forEach(s=>flushLamp(-1,21.3,s*z,2.05,2.05,0.02,
+    [[1.14,0.9,0.18,M.dark],[1,0,0.24,M.tail,32],[0.78,0.62,0.3,M.led],[0.32,0,0.32,M.tail,16]])));
+  flags(-1,22.4,0.9);
+  ribbon(-1,-10,10,14,z=>{const a=Math.abs(z);return[13.6+Math.max(0,a-8)*0.4,19.5-Math.max(0,a-8)*0.4];},0.1,M.paintDk);   // plate recess
+  ribbon(-1,-5.8,5.8,8,()=>[14.4,17.8],0.2,M.plate);
+  [1,-1].forEach(s=>{ribbon(-1,s*9.4,s*16.3,6,()=>[7.7,9.6],0.12,M.gloss);ribbon(-1,s*9.8,s*15.9,6,()=>[8.0,9.3],0.2,M.rev);});
+  ribbon(-1,-8,8,10,()=>[5.6,9.4],0.12,M.gloss);                                    // exhaust surround
+  [3.4,5.9].forEach(z=>[1,-1].forEach(s=>{const r=ls7||zr1?1.2:1.05;disc(-1,s*z,7.5,r,M.chrome,0.5);disc(-1,s*z,7.5,r*0.78,M.dark,0.56);}));
+  ribbon(-1,-15.4,15.4,20,()=>[2.8,5.6],0.14,M.gloss);                              // diffuser
+  for(let k=-2;k<=2;k++){if(k===0)continue;const z=k*5.6+(k>0?-1:1);ribbon(-1,z-0.12,z+0.12,1,()=>[2.9,5.4],0.24,M.satin);}
+  ribbon(-1,-2.8,2.8,4,()=>[24.2,24.7],0.24,M.led);                                 // CHMSL in the ducktail
+  // rear spoiler: integrated ducktail (base), taller lip (Grand Sport / Z06 / 427), clear-coated carbon (ZR1)
+  const sw=2*planW(-54.4)-5;
+  if(zr1)box(3.4,1.5,sw,M.carbon,-54.2,26.0,0,0.22);
+  else if(wide)box(2.8,1.1,sw,M.paint,-54.2,25.8,0,0.24);
+  // ZR1 / Z06 / GS badges: small chrome bars on the fenders behind the vents
+  if(zr1||ls7||gs)sideStrip(12.6,14.6,()=>[13.6,14.4],0.16,zr1?M.blue:M.chrome,0.5);
+  if(conv)box(4.0,0.6,8,M.glass,-43.2,26.9,0,-0.55);                              // small rear window in the cloth top
 }
 /* ---------- BMW 2 / 3 / 4 / 5 / 8 Series, X3, X5, X7 (M and M Performance), from scaled blueprints ----------
    M2 G87 4468 x 1854 x 1410 (2693 wb); M3 G80 4795 x 1917 x 1437 (2857); M4 G82 4794 x 1887 x 1393 (2857);
@@ -8850,6 +9140,7 @@ function buildCarRaw(bodyKey,colorHex,carName){
   {const bk=bmwKind(carName);if(bk)return buildBMW(bk,colorHex,carName);}
   {const jk=jpKind(carName);if(jk)return buildJP(jk,colorHex,carName);}
   {const lk=luxKind(carName);if(lk)return buildLux(lk,colorHex,carName);}
+  {const vk=vwKind(carName);if(vk)return buildVW(vk,colorHex,carName);}
   if(bodyKey==='crownvic')return buildFordBP('crownvic',colorHex,carName);
   if(bodyKey==='challenger')return buildChallengerBP(colorHex,carName);
   if(bodyKey==='viper'||bodyKey==='viperacr')return buildViper(colorHex,bodyKey==='viperacr',carName);
@@ -11573,7 +11864,9 @@ const MP_PRICE={mustang25eco:32500,mustang18eco:26000,mustang25gt:43000,mustang0
  ms_plaid:130000,mx_plaid:120000,lucidDreamP:170000,mustangDarkHorse:60000,mustang16gt:33000,mustangGTD:325000,
  corvetteERay:105000,corvetteZR1:175000,corvetteZR1X:210000,corvetteGS:95000,corvetteGSX:120000,
  lucidSapphire:249000,durangoGT:40000,durangoGTPlus:46000,durangoRT:47000,durangoRTPlus:52000,durangoRTTNG:63000,
- durangoCitadel:52000,durangoCitadelV8:55000,durangoSRT392:74000};
+ durangoCitadel:52000,durangoCitadelV8:55000,durangoSRT392:74000,
+ c6coupe:49600,c6coupeA:50850,c6conv:54600,c6convA:55850,c6gs:55600,c6gsA:56850,c6gsconv:59600,c6z06:75600,c6z07:85600,c6427:75925,c6zr1:111600,
+ gti_mk8m:30000,gti_cs:42000,golf8_15:28000,golfr_mk8m:44000,golfr_20th:47000,gti_mk85:33000,golfr_mk85:46000};
 function mpPrice(k){const p=PRESETS[k];if(!p)return 0;
   return MP_PRICE[k]||Math.round((20000+Math.pow(p.hp,1.35)*18)/500)*500;}
 const mpEV=c=>!!(IND[c.ind]&&IND[c.ind].electric);
@@ -12032,7 +12325,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='dbe50e844e';let dismissed=null;
+(function(){const V='c8658bf18e';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
