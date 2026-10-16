@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="2a8341912c";</script>
+<head><script>window.QM_VER="4b5f1c701f";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -4635,6 +4635,65 @@ function displayImpala(l,c,tk,rf){
   return svgWrap(o.join(''),chromeGrad('imc'+l),'<path d="M20 30 Q220 10 420 30 L432 120 Q420 170 360 172 H80 Q20 170 8 120 Z" fill="#131416" stroke="#2a2b2e" stroke-width="2"/>');
 }
 
+/* Dodge Challenger (2015+), from a photo of the real cluster: two dials with a glowing red outer ring
+   and big white numerals around a large black textured centre disc with a grey rim; short orange
+   needles that start at the disc's edge; a solid red redline zone on the tach; small half-step numbers
+   inside the main ones (500, 1500... rpm; 10, 30... mph). In the middle: the 7-inch screen (compass,
+   page title, outside temperature, big digital speed, odometer) between a coolant-temperature arc on
+   the left and a fuel arc on the right, with P R N D / M down the screen's right edge.
+   Speedo range by model: 160 (SXT / GT / R/T), 180 (Scat Pack / 392), 200 (Hellcat), 220 (Redeye,
+   Demon, Jailbreak, Super Stock). */
+function chall15Spd(nm){return /redeye|demon|jailbreak|super stock/i.test(nm)?220:/hellcat/i.test(nm)?200:/scat|392|srt/i.test(nm)?180:160;}
+function displayChall15(l,c,tk,rf){
+  const o=[],nm=c.name||'',smax=chall15Spd(nm),A0=-130,SP=260,R=76;
+  const tex='c5t'+l,hubG='c5h'+l,gl='c5g'+l,redG='c5r'+l;
+  const sector=(cx,cy,r0,r1,d0,d1)=>{const a=pol(cx,cy,r1,d0),b=pol(cx,cy,r1,d1),c2=pol(cx,cy,r0,d1),d=pol(cx,cy,r0,d0),lg=Math.abs(d1-d0)>180?1:0;
+    return 'M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' A'+r1+' '+r1+' 0 '+lg+' 1 '+b[0].toFixed(1)+' '+b[1].toFixed(1)+' L'+c2[0].toFixed(1)+' '+c2[1].toFixed(1)+' A'+r0+' '+r0+' 0 '+lg+' 0 '+d[0].toFixed(1)+' '+d[1].toFixed(1)+' Z';};
+  const dial=(cx,isT)=>{const cy=92,n=isT?tk:smax/20;
+    o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+(R+3)+'" fill="#0a0a0c"/>',
+      '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="#ff2b1f" stroke-width="2.4" filter="url(#'+gl+')"/>',
+      '<circle cx="'+cx+'" cy="'+cy+'" r="'+(R-4)+'" fill="#121214" stroke="#5a0b08" stroke-width="1"/>');
+    if(isT&&rf>0&&rf<1)o.push('<path d="'+sector(cx,cy,40,R-2,A0+SP*rf,A0+SP)+'" fill="url(#'+redG+')" opacity="0.92"/>');
+    // the big textured centre disc
+    o.push('<circle cx="'+cx+'" cy="'+cy+'" r="38" fill="url(#'+tex+')" stroke="#4a4c50" stroke-width="3"/>',
+      '<circle cx="'+cx+'" cy="'+cy+'" r="38" fill="url(#'+hubG+')"/>');
+    // half-step numbers inside the main ones
+    for(let i=0;i<n;i++){const p=(i+0.5)/n,q=pol(cx,cy,isT?46:45,A0+SP*p);
+      o.push(T(q[0],q[1]+2.2,isT?String(i*1000+500):String(i*20+10),isT?4.6:5,isT&&p>=rf-1e-6&&rf>0?'#ffd6d0':'#a9adb3',{w:500}));}
+    o.push(gDial({cx,cy,R:R-4,a0:A0,span:SP,redFrac:isT?rf:0,scale:uniScale(n,isT?4:1,i=>isT?i:i*20),
+      ticks:{lM:isT?7:6,wM:2.2,lm:isT?3.5:4,wm:1,cm:'#d8dade',cM:'#ffffff',red:'#ffffff'},lab:{r:isT?59:57,sz:isT?16:10.5,w:700,col:'#ffffff'},
+      needle:{id:(isT?'nd-rpm-':'nd-spd-')+l,col:'#ff6a1a',r0:40,r1:R-5,w:3.6,tw:1.4,glow:gl}}));
+    o.push(T(cx,cy+54,isT?'RPM':'MPH',isT?8:7.5,'#ffffff',{w:700}));
+    if(isT)o.push(T(cx,cy+60,'x1000',5,'#ffffff',{w:600}));};
+  dial(84,true);dial(356,false);
+  // centre: coolant arc (left), fuel arc (right), the screen between them
+  const arc=(cx,d0,d1,col,w)=>'<path d="'+arcD(cx,95,54,d0,d1)+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"/>';
+  o.push(arc(222,-128,-52,'#2a2b2e',4.5),arc(222,-66,-52,'#c41a14',4.5),arc(218,52,128,'#2a2b2e',4.5),arc(218,112,128,'#c41a14',4.5));
+  for(let k=0;k<=4;k++){const a=-128+76*k/4,b=52+76*k/4;o.push(tickL(222,95,50,57,a,'#d8dade',1),tickL(218,95,50,57,b,'#d8dade',1));}
+  o.push(minNeedle(222,95,47,58,-100,'#ff6a1a',2,0),minNeedle(218,95,47,58,74,'#ff6a1a',2,0));
+  o.push(T(180,52,'260',6,'#ffffff',{w:600}),T(180,143,'170',6,'#ffffff',{w:600}),T(181,150,'°F',4.6,'#c9ccd1',{w:500}),
+    T(262,52,'F',6.5,'#ffffff',{w:700}),T(262,143,'E',6.5,'#ff3a2a',{w:700}));
+  o.push('<rect x="184" y="38" width="62" height="116" rx="5" fill="#07080b" stroke="#1d1f24"/>',
+    '<rect x="185" y="39" width="60" height="13" rx="4" fill="#0e1424"/>',
+    T(188,48.5,'SW',6,'#ffffff',{w:700,anchor:'start'}),'<path d="M189.6 41.6 L191 39.8 L192.4 41.6 Z" fill="#ff3a2a"/>',
+    T(215,48.5,'Speedometer',5.4,'#ffffff',{w:500}),T(243,48.5,Math.round(ambient())+'°F',5.6,'#ffffff',{w:600,anchor:'end'}),
+    '<line x1="190" y1="55" x2="240" y2="55" stroke="#3a4a7a" stroke-width="0.8"/>',
+    T(215,93,'0',32,'#ffffff',{it:true,w:700,id:'cl-mph-'+l}),T(215,103,'MPH',6.5,'#ffffff',{w:700}),
+    '<rect x="190" y="110" width="50" height="16" fill="#0b1226" opacity="0.9"/>',
+    T(215,121,'<tspan id="cl-g-'+l+'">0.00</tspan> g',6,'#c9d6f5',{w:500}),
+    T(215,145,(5000+(nm.length*977)%40000)+' mi',6,'#ffffff',{w:500}));
+  const auto=c.trans!=='manual';
+  ['P','R','N','D'].forEach((g,i)=>o.push(T(253,70+i*11,g,8.5,auto&&g==='D'?'#ffffff':'#8d9198',{w:700})));
+  o.push(T(250,113,'M',7.5,'#8d9198',{w:700}),T(253,126,auto?'D1':'1',6,'#ffffff',{id:'cl-gear2-'+l,w:700,extra:' data-pre="'+(auto?'D':'')+'"'}));
+  const defs='<pattern id="'+tex+'" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'+
+      '<rect width="3.2" height="3.2" fill="#141517"/><rect width="1.6" height="1.6" fill="#232427"/><rect x="1.6" y="1.6" width="1.6" height="1.6" fill="#1c1d20"/></pattern>'+
+    '<radialGradient id="'+hubG+'" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/><stop offset="0.6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.45"/></radialGradient>'+
+    '<radialGradient id="'+redG+'" cx="50%" cy="50%" r="50%"><stop offset="0.45" stop-color="#7a0a06"/><stop offset="0.8" stop-color="#e3170f"/><stop offset="1" stop-color="#ff4a2a"/></radialGradient>'+
+    glowDef(gl,1.3);
+  return svgWrap(o.join(''),defs,'<path d="M6 60 Q10 18 60 8 H380 Q430 18 434 60 V140 Q430 174 380 176 H60 Q10 174 6 140 Z" fill="#0d0d10" stroke="#3b3d42" stroke-width="2"/>'+
+    '<path d="M150 168 Q220 150 290 168" fill="none" stroke="#5a5d63" stroke-width="1.6"/>');
+}
+
 /* Dodge Challenger (2008-14): four cream-faced dials in chrome rings — fuel, a
    big speedo, a big tach, and coolant — with red needles, red outer scales and a
    green read-out panel under the speedo. */
@@ -4836,7 +4895,7 @@ function buildClusters(){
       venom:/venom/i,focusrs:/focus rs/i,agera:/agera|jesko/i,regera:/regera/i,lucid:/lucid/i,tesla:/tesla/i,taurus:/taurus/i,
       mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i,infiniti:/infiniti/i};
     let nstyle=null;
-    const EXTRA=['charger11','charger15','chall11','accord','accord9','s650','mustangD','mustang6','mustang5','camaro6','camaro5','acura17','acura21','bmwm5','bmwcurved'];
+    const EXTRA=['charger11','charger15','chall11','chall15','accord','accord9','s650','mustangD','mustang6','mustang5','camaro6','camaro5','acura17','acura21','bmwm5','bmwcurved'];
     if(cs){if(NEWC[cs]||EXTRA.indexOf(cs)>=0)nstyle=cs;}
     else{for(const k in NEWC)if(NEWC[k].test(nm)){nstyle=k;break;}
       if(!nstyle&&isAcc)nstyle=(yr&&yr<=2017)?'accord9':'accord';
@@ -4844,6 +4903,7 @@ function buildClusters(){
       if(!nstyle&&/charger/i.test(nm)&&yr>=2011&&yr<=2014)nstyle='charger11';
       if(!nstyle&&/charger/i.test(nm)&&yr>=2015)nstyle='charger15';
       if(!nstyle&&/challenger/i.test(nm)&&yr>=2008&&yr<=2014)nstyle='chall11';
+      if(!nstyle&&/challenger/i.test(nm)&&yr>=2015)nstyle='chall15';
       if(!nstyle&&/camaro/i.test(nm)&&yr)nstyle=yr>=2016?'camaro6':yr>=2010?'camaro5':null;
       if(!nstyle&&/acura/i.test(nm)&&yr)nstyle=yr>=2021?'acura21':'acura17';
       if(!nstyle&&/\bbmw\b/i.test(nm)){if(/\bM5\b/.test(nm))nstyle='bmwm5';else if(yr>=2023||/230i/.test(nm))nstyle='bmwcurved';}}
@@ -4852,6 +4912,7 @@ function buildClusters(){
     const durSpd=/srt|hellcat|392/i.test(nm)?200:140;
     // needle scale must match the numbers printed on each style of speedo
     clusterMeta[l].spdMax=nstyle?({c6:/zr1/i.test(nm)?220:200,infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
+    if(nstyle==='chall15')clusterMeta[l].spdMax=chall15Spd(nm);
     if(nstyle==='charger15')clusterMeta[l].spdMax=/hellcat/i.test(nm)?200:/scat|392/i.test(nm)?180:160;
     const d=document.createElement('div');d.className='cluster'+(darkCluster?' cluster-muscle':'');
     // Build mode buttons from the car's available modes
@@ -4903,7 +4964,7 @@ function buildClusters(){
       const F={r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
         golf:displayGolf,c6:displayC6,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,infiniti:displayInfiniti,g70:displayG70,g80:displayG80,
         mustangD:displayMustangDigital,mustang6:displayMustangS550,mustang5:displayMustangS197,camaro6:(a,b,cc,dd)=>displayCamaro6(a,b,cc,dd,clusterMeta[l].boosted),
-        camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,charger15:displayCharger15,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
+        camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,charger15:displayCharger15,chall15:displayChall15,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
         venom:displayVenom,focusrs:displayFocusRS,agera:displayAgera,regera:displayRegera,lucid:displayLucid,tesla:displayTesla,taurus:displayTaurus,acura17:displayAcura17,acura21:displayAcura21,bmwm5:displayBMWM5,bmwcurved:displayBMWCurved}[nstyle];
       const svgH=F(l,c,tk,rf);
       // the race loop updates gear / feet / slip alongside the digital speed, so
@@ -12694,7 +12755,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='2a8341912c';let dismissed=null;
+(function(){const V='4b5f1c701f';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
