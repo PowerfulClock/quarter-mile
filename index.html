@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="4b5f1c701f";</script>
+<head><script>window.QM_VER="425e6adbe1";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -4645,53 +4645,51 @@ function displayImpala(l,c,tk,rf){
    Demon, Jailbreak, Super Stock). */
 function chall15Spd(nm){return /redeye|demon|jailbreak|super stock/i.test(nm)?220:/hellcat/i.test(nm)?200:/scat|392|srt/i.test(nm)?180:160;}
 function displayChall15(l,c,tk,rf){
-  const o=[],nm=c.name||'',smax=chall15Spd(nm),A0=-130,SP=260,R=76;
-  const tex='c5t'+l,hubG='c5h'+l,gl='c5g'+l,redG='c5r'+l;
+  const o=[],nm=c.name||'',smax=chall15Spd(nm),A0=-130,SP=260,tex='c5t'+l,hubG='c5h'+l,gl='c5g'+l,redG='c5r'+l;
   const sector=(cx,cy,r0,r1,d0,d1)=>{const a=pol(cx,cy,r1,d0),b=pol(cx,cy,r1,d1),c2=pol(cx,cy,r0,d1),d=pol(cx,cy,r0,d0),lg=Math.abs(d1-d0)>180?1:0;
     return 'M'+a[0].toFixed(1)+' '+a[1].toFixed(1)+' A'+r1+' '+r1+' 0 '+lg+' 1 '+b[0].toFixed(1)+' '+b[1].toFixed(1)+' L'+c2[0].toFixed(1)+' '+c2[1].toFixed(1)+' A'+r0+' '+r0+' 0 '+lg+' 0 '+d[0].toFixed(1)+' '+d[1].toFixed(1)+' Z';};
-  const dial=(cx,isT)=>{const cy=92,n=isT?tk:smax/20;
-    o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+(R+3)+'" fill="#0a0a0c"/>',
-      '<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="none" stroke="#ff2b1f" stroke-width="2.4" filter="url(#'+gl+')"/>',
-      '<circle cx="'+cx+'" cy="'+cy+'" r="'+(R-4)+'" fill="#121214" stroke="#5a0b08" stroke-width="1"/>');
-    if(isT&&rf>0&&rf<1)o.push('<path d="'+sector(cx,cy,40,R-2,A0+SP*rf,A0+SP)+'" fill="url(#'+redG+')" opacity="0.92"/>');
-    // the big textured centre disc
+  // from the outside in, as on the real cluster: red ring, big numerals, small half-step numbers, the
+  // tick ring hugging the textured centre disc; the short needle runs from the disc's edge over the
+  // ticks only and stops short of the numerals
+  const dial=(cx,isT)=>{const cy=94,n=isT?tk:smax/20;
+    o.push('<circle cx="'+cx+'" cy="'+cy+'" r="80" fill="#0a0a0c" stroke="#2a2b2e" stroke-width="4"/>',
+      '<circle cx="'+cx+'" cy="'+cy+'" r="76" fill="none" stroke="#ff2b1f" stroke-width="2.4" filter="url(#'+gl+')"/>',
+      '<circle cx="'+cx+'" cy="'+cy+'" r="73" fill="#121214" stroke="#5a0b08" stroke-width="1"/>');
+    if(isT&&rf>0&&rf<1)o.push('<path d="'+sector(cx,cy,40,73,A0+SP*rf,A0+SP)+'" fill="url(#'+redG+')" opacity="0.92"/>');
     o.push('<circle cx="'+cx+'" cy="'+cy+'" r="38" fill="url(#'+tex+')" stroke="#4a4c50" stroke-width="3"/>',
       '<circle cx="'+cx+'" cy="'+cy+'" r="38" fill="url(#'+hubG+')"/>');
-    // half-step numbers inside the main ones
-    for(let i=0;i<n;i++){const p=(i+0.5)/n,q=pol(cx,cy,isT?46:45,A0+SP*p);
-      o.push(T(q[0],q[1]+2.2,isT?String(i*1000+500):String(i*20+10),isT?4.6:5,isT&&p>=rf-1e-6&&rf>0?'#ffd6d0':'#a9adb3',{w:500}));}
-    o.push(gDial({cx,cy,R:R-4,a0:A0,span:SP,redFrac:isT?rf:0,scale:uniScale(n,isT?4:1,i=>isT?i:i*20),
-      ticks:{lM:isT?7:6,wM:2.2,lm:isT?3.5:4,wm:1,cm:'#d8dade',cM:'#ffffff',red:'#ffffff'},lab:{r:isT?59:57,sz:isT?16:10.5,w:700,col:'#ffffff'},
-      needle:{id:(isT?'nd-rpm-':'nd-spd-')+l,col:'#ff6a1a',r0:40,r1:R-5,w:3.6,tw:1.4,glow:gl}}));
-    o.push(T(cx,cy+54,isT?'RPM':'MPH',isT?8:7.5,'#ffffff',{w:700}));
-    if(isT)o.push(T(cx,cy+60,'x1000',5,'#ffffff',{w:600}));};
-  dial(84,true);dial(356,false);
-  // centre: coolant arc (left), fuel arc (right), the screen between them
-  const arc=(cx,d0,d1,col,w)=>'<path d="'+arcD(cx,95,54,d0,d1)+'" fill="none" stroke="'+col+'" stroke-width="'+w+'"/>';
-  o.push(arc(222,-128,-52,'#2a2b2e',4.5),arc(222,-66,-52,'#c41a14',4.5),arc(218,52,128,'#2a2b2e',4.5),arc(218,112,128,'#c41a14',4.5));
-  for(let k=0;k<=4;k++){const a=-128+76*k/4,b=52+76*k/4;o.push(tickL(222,95,50,57,a,'#d8dade',1),tickL(218,95,50,57,b,'#d8dade',1));}
-  o.push(minNeedle(222,95,47,58,-100,'#ff6a1a',2,0),minNeedle(218,95,47,58,74,'#ff6a1a',2,0));
-  o.push(T(180,52,'260',6,'#ffffff',{w:600}),T(180,143,'170',6,'#ffffff',{w:600}),T(181,150,'°F',4.6,'#c9ccd1',{w:500}),
-    T(262,52,'F',6.5,'#ffffff',{w:700}),T(262,143,'E',6.5,'#ff3a2a',{w:700}));
-  o.push('<rect x="184" y="38" width="62" height="116" rx="5" fill="#07080b" stroke="#1d1f24"/>',
-    '<rect x="185" y="39" width="60" height="13" rx="4" fill="#0e1424"/>',
-    T(188,48.5,'SW',6,'#ffffff',{w:700,anchor:'start'}),'<path d="M189.6 41.6 L191 39.8 L192.4 41.6 Z" fill="#ff3a2a"/>',
-    T(215,48.5,'Speedometer',5.4,'#ffffff',{w:500}),T(243,48.5,Math.round(ambient())+'°F',5.6,'#ffffff',{w:600,anchor:'end'}),
-    '<line x1="190" y1="55" x2="240" y2="55" stroke="#3a4a7a" stroke-width="0.8"/>',
-    T(215,93,'0',32,'#ffffff',{it:true,w:700,id:'cl-mph-'+l}),T(215,103,'MPH',6.5,'#ffffff',{w:700}),
-    '<rect x="190" y="110" width="50" height="16" fill="#0b1226" opacity="0.9"/>',
-    T(215,121,'<tspan id="cl-g-'+l+'">0.00</tspan> g',6,'#c9d6f5',{w:500}),
-    T(215,145,(5000+(nm.length*977)%40000)+' mi',6,'#ffffff',{w:500}));
+    for(let i=0;i<n;i++){const p=(i+0.5)/n,q=pol(cx,cy,isT?55:54,A0+SP*p);
+      o.push(T(q[0],q[1]+2,isT?String(i*1000+500):String(i*20+10),isT?4.6:5,isT&&rf>0&&p>=rf-1e-6?'#ffd6d0':'#a9adb3',{w:500}));}
+    o.push(gDial({cx,cy,R:49,a0:A0,span:SP,redFrac:isT?rf:0,scale:uniScale(n,isT?4:1,i=>isT?i:i*20),
+      ticks:{lM:8,wM:2,lm:4,wm:1,cm:'#d8dade',cM:'#ffffff',red:'#ffffff'},lab:{r:isT?65:64.5,sz:isT?16:10.5,w:700,col:'#ffffff'},
+      needle:{id:(isT?'nd-rpm-':'nd-spd-')+l,col:'#ff6a1a',r0:40,r1:50,w:3.4,tw:1.6,glow:gl}}));
+    o.push(T(cx,cy+56,isT?'RPM':'MPH',isT?8:7.5,'#ffffff',{w:700}));
+    if(isT)o.push(T(cx,cy+62,'x1000',5,'#ffffff',{w:600}));};
+  dial(92,true);dial(348,false);
+  // centre screen, as on the Charger: compass / temp / range, big digital speed over a honeycomb,
+  // oil temperature on the left, P R N D M on the right, g and gear, odometer
+  o.push('<rect x="173" y="24" width="94" height="132" rx="6" fill="#08090b" stroke="#2c2d31" stroke-width="2"/>',
+    T(184,37,'SW',7,'#fff',{w:600}),T(220,37,Math.round(ambient())+'°F',7.5,'#fff',{w:500}),
+    T(255,34,'53',7,'#fff',{w:600}),T(255,40,'Range mi',3.6,'#ccc'),
+    '<line x1="180" y1="44" x2="260" y2="44" stroke="#3a3c42" stroke-width="0.8"/>');
+  const hex=(x,y,r)=>{let p='';for(let k=0;k<6;k++){const a=Math.PI/3*k+Math.PI/6;p+=(k?' ':'')+(x+r*Math.cos(a)).toFixed(1)+','+(y+r*Math.sin(a)).toFixed(1);}
+    return '<polygon points="'+p+'" fill="none" stroke="#4a4e57" stroke-width="0.6" opacity="0.7"/>';};
+  for(let i=0;i<5;i++)for(let j=0;j<2;j++)o.push(hex(201+i*9.5+(j?4.75:0),108+j*8.2,4.9));
+  o.push(T(220,90,'0',30,'#fff',{id:'cl-mph-'+l,w:600}),T(220,101,'MPH',6.5,'#fff',{w:600}));
+  o.push('<line x1="182" y1="58" x2="182" y2="122" stroke="#666" stroke-width="0.8"/>');
+  for(let i=0;i<=6;i++)o.push('<line x1="182" y1="'+(58+i*10.6)+'" x2="'+(i%3?184.5:186)+'" y2="'+(58+i*10.6)+'" stroke="#aaa" stroke-width="0.7"/>');
+  o.push(T(191,61,'260',4.2,'#bbb'),T(191,124,'170',4.2,'#bbb'),'<path d="M180 94 l-4 -2.5 v5 z" fill="#ff9a2a"/>',T(182,132,'OIL °F',3.8,'#aaa'));
   const auto=c.trans!=='manual';
-  ['P','R','N','D'].forEach((g,i)=>o.push(T(253,70+i*11,g,8.5,auto&&g==='D'?'#ffffff':'#8d9198',{w:700})));
-  o.push(T(250,113,'M',7.5,'#8d9198',{w:700}),T(253,126,auto?'D1':'1',6,'#ffffff',{id:'cl-gear2-'+l,w:700,extra:' data-pre="'+(auto?'D':'')+'"'}));
+  ['P','R','N','D','M'].forEach((g,i)=>o.push(T(258,64+i*11,g,7,(auto?g==='D':g==='M')?'#fff':'#777',{w:(auto?g==='D':g==='M')?700:500})));
+  o.push('<rect x="252" y="'+(auto?90:101)+'" width="12" height="11" rx="1.5" fill="none" stroke="#fff" stroke-width="0.8"/>');
+  o.push(T(220,128,'<tspan id="cl-g-'+l+'">0.00</tspan> g · <tspan id="cl-gear2-'+l+'" data-pre="'+(auto?'D':'')+'">'+(auto?'D1':'1')+'</tspan>',5.5,'#bbb'),
+    T(220,146,(5000+(nm.length*977)%40000)+' mi',5.5,'#ddd'));
   const defs='<pattern id="'+tex+'" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'+
       '<rect width="3.2" height="3.2" fill="#141517"/><rect width="1.6" height="1.6" fill="#232427"/><rect x="1.6" y="1.6" width="1.6" height="1.6" fill="#1c1d20"/></pattern>'+
     '<radialGradient id="'+hubG+'" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/><stop offset="0.6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.45"/></radialGradient>'+
-    '<radialGradient id="'+redG+'" cx="50%" cy="50%" r="50%"><stop offset="0.45" stop-color="#7a0a06"/><stop offset="0.8" stop-color="#e3170f"/><stop offset="1" stop-color="#ff4a2a"/></radialGradient>'+
+    '<radialGradient id="'+redG+'" cx="50%" cy="50%" r="50%"><stop offset="0.5" stop-color="#7a0a06"/><stop offset="0.8" stop-color="#e3170f"/><stop offset="1" stop-color="#ff4a2a"/></radialGradient>'+
     glowDef(gl,1.3);
-  return svgWrap(o.join(''),defs,'<path d="M6 60 Q10 18 60 8 H380 Q430 18 434 60 V140 Q430 174 380 176 H60 Q10 174 6 140 Z" fill="#0d0d10" stroke="#3b3d42" stroke-width="2"/>'+
-    '<path d="M150 168 Q220 150 290 168" fill="none" stroke="#5a5d63" stroke-width="1.6"/>');
+  return svgWrap(o.join(''),defs,'<path d="M14 22 Q14 8 30 8 H410 Q426 8 426 22 V150 Q426 176 400 176 H40 Q14 176 14 150 Z" fill="#111214" stroke="#26272a" stroke-width="2"/>');
 }
 
 /* Dodge Challenger (2008-14): four cream-faced dials in chrome rings — fuel, a
@@ -12755,7 +12753,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='4b5f1c701f';let dismissed=null;
+(function(){const V='425e6adbe1';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
