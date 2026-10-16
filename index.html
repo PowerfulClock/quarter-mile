@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="425e6adbe1";</script>
+<head><script>window.QM_VER="06b3900d99";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1008,6 +1008,7 @@ function sndPackFor(c){
     if(/camaro/.test(nm)&&v8)return 'vettec7';
     if(/viper/.test(nm))return 'viper';
     if(/mclaren/.test(nm))return 'mclaren';
+    if(/porsche/.test(nm))return 'flat6';                                   // 911 and 718 Cayman: the mod's 4.0 flat-six
     if(/\burus\b/.test(nm))return 'urus';if(/hurac[aá]n/.test(nm))return 'huracan';if(/aventador/.test(nm))return 'aventador';}
   {const nm=(c.name||'').toLowerCase();
     if(/\bbmw\b/.test(nm)){const es=c.engSound||'';
@@ -12753,7 +12754,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='425e6adbe1';let dismissed=null;
+(function(){const V='06b3900d99';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
