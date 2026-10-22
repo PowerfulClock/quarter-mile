@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="ffd1fb4200";</script>
+<head><script>window.QM_VER="04201ca9d1";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1008,7 +1008,7 @@ function sndPackFor(c){
       if(/gt350/.test(nm))return 'mustangam';
       return 'coyote';}}
   {const nm=(c.name||'').toLowerCase(),yr=parseInt(c.name,10)||0,v8=/^v8/.test(c.engSound||'');
-    if(/crown victoria/.test(nm))return /sport|p71|police|interceptor/.test(nm)?'crownvicdual':'crownvic';
+    if(/crown victoria|marauder/.test(nm))return /sport|p71|police|interceptor|marauder/.test(nm)?'crownvicdual':'crownvic';
     if(/corvette/.test(nm))return /\bc6\b/.test(nm)?'vettec6':/\bc8\b/.test(nm)||yr>=2020?'vettec8':'vettec7';
     if(/camaro/.test(nm)&&v8)return 'vettec7';
     if(/viper/.test(nm))return 'viper';
@@ -1888,6 +1888,10 @@ Object.assign(PRESETS,{
   ind:"na",disp:4.6,engSound:"v8x",gears:[2.84,1.55,1.00,0.70],fd:3.27,drive:"rwd",trans:"auto",
   layout:"front",tire:"allseason",weight:4088,dist:55,tireD:27.0,cda:8.5,wb:114.7,cg:20.5,
   launchRpm:2200,stall:2.6,modes:['normal'],mode:'normal'}),
+ marauder04:Object.assign({},P1,{body:'crownvic',name:"2004 Mercury Marauder",mfr:"Mercury",hp:318,hpRpm:5750,tq:330,rated:[302,318],tqRpm:4300,redline:6000,
+  ind:"na",disp:4.6,engSound:"v8x",gears:[2.84,1.55,1.00,0.70],fd:3.55,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:4195,dist:55,tireD:27.6,cda:8.5,wb:114.7,cg:20,
+  launchRpm:2200,stall:2.6,modes:['normal'],mode:'normal'}),
  crownvic_p71:Object.assign({},P1,{body:'crownvic',name:"2005 Crown Victoria P71 Police Interceptor",mfr:"Ford",hp:250,hpRpm:4900,tq:297,tqRpm:4100,redline:5300,
   ind:"na",disp:4.6,engSound:"v8x",gears:[2.84,1.55,1.00,0.70],fd:3.27,drive:"rwd",trans:"auto",
   layout:"front",tire:"allseason",weight:4090,dist:55,tireD:27.0,cda:8.7,wb:114.7,cg:20.5,
@@ -2632,7 +2636,7 @@ function hasCustomModel(body,name){
 function hasCustomCluster(body,name){
   const nm=name||'',yr=parseInt(nm,10)||0;
   if(['challenger','camaro','mustang'].indexOf(body)>=0)return true;
-  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti|ferrari|nissan gt-?r|skyline|supra/i.test(nm))return true;
+  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|marauder|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti|ferrari|nissan gt-?r|skyline|supra/i.test(nm))return true;
   if(/charger/i.test(nm)&&yr>=2024)return true;
   if(/corvette/i.test(nm)&&/\bC[678]\b/.test(nm))return true;
   if(/mustang|shelby/i.test(nm)&&yr>=2005)return true;
@@ -5189,7 +5193,7 @@ function buildClusters(){
     const lambo=cs?cs==='lambo':/lamborghini/i.test(nm);
     const yr=parseInt(nm,10)||0;
     const isAcc=/\baccord\b/i.test(nm);
-    const NEWC={charger26:/\b20(2[4-9]|3\d) dodge charger\b/i,gtr35:/nissan gt-?r\b/i,r34:/skyline/i,grsupra:/\bgr supra\b/i,supra4:/toyota supra\b/i,ferrari:/ferrari/i,r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,c6:/corvette.*\bC6\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria/i,impala:/impala/i,
+    const NEWC={charger26:/\b20(2[4-9]|3\d) dodge charger\b/i,gtr35:/nissan gt-?r\b/i,r34:/skyline/i,grsupra:/\bgr supra\b/i,supra4:/toyota supra\b/i,ferrari:/ferrari/i,r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,c6:/corvette.*\bC6\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria|marauder/i,impala:/impala/i,
       venom:/venom/i,focusrs:/focus rs/i,agera:/agera|jesko/i,regera:/regera/i,lucid:/lucid/i,tesla:/tesla/i,taurus:/taurus/i,
       mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i,infiniti:/infiniti/i};
     let nstyle=null;
@@ -5873,7 +5877,8 @@ function wheelSpec(body,name){
     else if(/\bgt\b/.test(n)){f=r=ty(19,235,55);style='ten';finish='silver';}
     else{f=r=ty(20,245,45);style='five';finish='silver';}
   }else if(body==='crownvic'){
-    if(/p71|police/.test(n)){f=r=ty(17,235,55);style='steel';}
+    if(/marauder/.test(n)){f=ty(18,235,50);r=ty(18,245,55);style='five';finish='silver';}
+    else if(/p71|police/.test(n)){f=r=ty(17,235,55);style='steel';}
     else if(/sport/.test(n)){f=r=ty(17,235,55);style='five';}
     else{f=r=ty(17,225,60);style='seven';}
   }else if(body==='viper'||body==='viperacr'){
@@ -8000,7 +8005,7 @@ function buildAudi(kind,colorHex,name){
    Crown Victoria 5385 x 1987 x 1443 (2913). */
 function fordKind(name){const n=(name||'').toLowerCase();
   if(/focus rs/.test(n))return 'focusrs';if(/fusion/.test(n))return 'fusion';if(/taurus/.test(n))return 'taurus';
-  if(/crown vic/.test(n))return 'crownvic';return null;}
+  if(/crown vic|marauder/.test(n))return 'crownvic';return null;}
 function buildFordBP(kind,colorHex,name){
   const n=(name||'').toLowerCase(),police=/p71|police|interceptor/.test(n);
   const side=(D)=>(x,y)=>{const top=bpTab(D.gtop)(x)-D.sideGap;
@@ -11201,7 +11206,7 @@ function suspProfile(c){
   else if(/durango|explorer|tahoe|suv/.test(n)||body==='durango')k='suv';
   else if(/\bm[2-8]\b|rs ?7|amg|plaid|lucid|zl1|focus rs|golf r|elantra n|type r|supra|m340|m440|m550|m850|g70 3\.3|stinger/.test(n))k='sport';
   else if(/gti|mazda3|mx-5|miata|wrx|focus st|camaro|g70|model 3|s60/.test(n))k='hot';
-  else if(/challenger|charger|mustang|chevelle|camaro|gto|demon|hellcat|scat|srt8|crown victoria p71|police/.test(n))k='muscle';
+  else if(/challenger|charger|mustang|chevelle|camaro|gto|demon|hellcat|scat|srt8|crown victoria p71|police|marauder/.test(n))k='muscle';
   else if(/crown victoria|town car|grand marquis|impala ls|buick/.test(n))k='floaty';
   else if(/g80|genesis|lincoln|mkz|s-class|lexus|model s/.test(n))k='luxury';
   const P=Object.assign({cls:k},T[k]);
@@ -12933,7 +12938,7 @@ const MP_PRICE={ch26rt2:49995,ch26rt4:52995,ch26sp2:59995,ch26sp4:62995,gtr23pre
  mazda3turbo:34000,mx5_2024:29000,focusrs:41000,fusionsport:40000,taurussho:44000,g80_25t:49000,g80_35t:60000,
  g80_33t:56000,g70_20t:35000,g70_33t:45000,g70_25t:40000,s60_t5:37000,s60_t6:45000,s60_t8:67000,viper_acr:120000,
  viper_gts:105000,viper13:97395,viper13gts:121395,viper14ta:122385,agera_rs:2500000,jesko:3000000,regera:2000000,venom_gt:1200000,crownvic_lx:27000,
- crownvic_sport:30000,crownvic_p71:25000,impala_ls06:22000,impala_ss06:28000,impala_ltz14:36000,accord_v6:34000,
+ crownvic_sport:30000,marauder04:34000,crownvic_p71:25000,impala_ls06:22000,impala_ss06:28000,impala_ltz14:36000,accord_v6:34000,
  accord_20t:31000,camaro12ss:33000,camaro12v6:24000,camaro19_20t:26000,camaro21rs:30000,chall11rt:31000,
  chall11srt8:44000,chall11rtm:31990,chall11rtc:32995,chall11srt8m:44775,chall11srt8ie:46770,camaro12ls:23345,camaro12ssm:32535,camaro12zl1:54995,camaro12zl1a:56180,corvetteC7:55900,corvetteC7Z51:60900,corvetteC7GS:65900,corvetteC7ZR1:119995,charger14rt:33000,charger19sxt:29500,charger19sxtawd:32500,charger19gt:31000,charger19gtawd:33500,charger19rt:37000,charger19scat:40000,charger19hellcat:69000,charger19pursuitv6:30000,charger19pursuitv8:34000,charger19pursuitrwd:32500,mustang16v6:25000,mustang16eco:27000,mustang14gt:31000,mustang08gt:26000,
  m340i:58000,m440i:60000,m550i:80000,m850i:102000,x3m40i:61000,x5m50i:86000,rs7_2026:135000,mclarenP1:1150000,
@@ -13401,7 +13406,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='ffd1fb4200';let dismissed=null;
+(function(){const V='04201ca9d1';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
