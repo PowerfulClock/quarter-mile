@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="4fa5593ab5";</script>
+<head><script>window.QM_VER="b8f09ee78b";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1030,6 +1030,32 @@ function sndPackFor(c){
   if((c.ind==='roots'||c.ind==='centri')&&near(6.2))return 'hellcat';
   if(c.ind==='na'){if(near(6.4))return 'hemi64';if(near(5.7))return 'hemi57';if(near(3.6))return 'pentastar';}
   return v8x;}
+/* Recorded shift burbles (from the Burble Library): Audi six-cylinder cars use the BeamNG inline-5 2.0 L stock
+   crackle set; BMW M cars use the BeamNG M2 afterfire set, played the way Back Roads plays it on the M2. */
+const BURBX={p:null,sets:null};
+function burbxKind(c){const n=(c&&c.name||'').toLowerCase(),es=c&&c.engSound||'';
+  if(/\baudi\b/.test(n)&&/^v6/.test(es))return 'i5stock';
+  if(/\bbmw\b/.test(n)&&(/\bm[2-8]\b/.test(n)||/\bx[1-7] ?m\b/.test(n)||/\bxm\b/.test(n)))return 'm2af';
+  return null;}
+function burbxLoad(ctx){if(BURBX.p||!ctx)return BURBX.p;const v=window.QM_VER?'?v='+window.QM_VER:'';
+  BURBX.p=(async()=>{const j=await fetch('sounds/burbx.json'+v).then(r=>r.json());
+    const dec=await ctx.decodeAudioData(await fetch('sounds/burbx.wav'+v).then(r=>r.arrayBuffer()));const ch=dec.getChannelData(0),sets={};
+    for(const k in j.sets){sets[k]={};for(const t in j.sets[k])sets[k][t]=j.sets[k][t].map(([o,n])=>{const b=ctx.createBuffer(1,n,dec.sampleRate);b.copyToChannel(ch.subarray(o,o+n),0);return b;});}
+    BURBX.sets=sets;})().catch(()=>{BURBX.p=null;});return BURBX.p;}
+function burbxPlay(vo,L,t,amp,rate){const b=L[Math.floor(Math.random()*L.length)],ctx=vo.ctx,s=ctx.createBufferSource();s.buffer=b;s.playbackRate.value=rate;
+  const g=ctx.createGain();g.gain.value=Math.min(1.2,amp);s.connect(g);g.connect(vo.panner||audioOut(ctx));s.start(t);return b.duration/rate;}
+/* returns true when it played the recorded set (so the synthesised pops are skipped) */
+function burbxShift(vo,c,up,str,rpm,red){const k=burbxKind(c);if(!k||!vo||vo.dead||vo.electric)return false;
+  const S=BURBX.sets&&BURBX.sets[k];if(!S){burbxLoad(vo.ctx);return false;}
+  const ctx=vo.ctx,t0=ctx.currentTime+0.015,rt=()=>Math.max(0.92,Math.min(1.1,0.92+(rpm||5000)/40000))*(0.96+Math.random()*0.08),amp=1.1*str;
+  if(k==='i5stock'){const n=up?6+Math.floor(Math.random()*5):3+Math.floor(Math.random()*3);let t=t0;
+    for(let i=0;i<n;i++){const d=burbxPlay(vo,S.crackle,t,amp*(1-i/(n+3))*(0.75+Math.random()*0.4),rt());t+=Math.max(0.03+Math.random()*0.06,d*0.9);}
+    return true;}
+  if(up){burbxPlay(vo,S.shift,t0,amp,rt());return true;}
+  // downshift while slowing: a single pop or a shift pop, then a short overrun run
+  let t=t0+0.01;t+=burbxPlay(vo,Math.random()<0.5?S.pop:S.shift,t,amp*0.9,rt())*0.9;
+  const end=t+0.3+0.3*Math.random();while(t<end){t+=burbxPlay(vo,S.run,t,amp*0.7*(0.8+Math.random()*0.2),rt())*(0.8+Math.random()*0.15);}
+  return true;}
 function sndLoad(name){
   if(!name)return null;if(SND.packs[name])return SND.packs[name];
   const rec={ready:false,layers:null};SND.packs[name]=rec;
@@ -1417,6 +1443,7 @@ function startVoicesN(cars,lanes){
     const pan=(n===1)?0:(-0.6+1.2*i/(n-1));   // spread across the stereo field
     const c=cars[l];
     voices[l]=new EngineVoice(ctx,ENGINES[c.engSound]||ENGINES.i4,pan,(IND[c.ind]||IND.na).boosted,c.ind,sndLoad(sndPackFor(c)));
+    if(burbxKind(c))burbxLoad(ctx);
   });
 }
 const P0={gripAdj:1.0,stall:2.0,launch:'lc',launchRpm:2800,shiftMode:'fastest',shiftRpm:0};
@@ -2194,7 +2221,7 @@ Object.assign(PRESETS,{
  huracanPerfSpy:Object.assign({},P1,{modes:['normal','sport','corsa'],mode:'normal',name:"2020 Lamborghini Huracán Performante Spyder",mfr:"Lamborghini",hp:650,hpRpm:8000,tq:442,tqRpm:6500,redline:8500,
   ind:"na",disp:5.2,engSound:"v10",gears:[3.91,2.29,1.59,1.19,0.97,0.82,0.71],fd:3.7,drive:"awd",trans:"dct",
   layout:"mid",tire:"track",weight:3650,dist:42,tireD:26.9,cda:7.9,wb:103.1,cg:17.5,launchRpm:6500,gripAdj:1.12}),
- a7_30t:Object.assign({},P1,{name:"2015 Audi A7 3.0 TFSI quattro",mfr:"Audi",hp:355,hpRpm:5500,tq:345,tqRpm:2900,redline:6800,
+ a7_30t:Object.assign({},P1,{burble:0.4,name:"2015 Audi A7 3.0 TFSI quattro",mfr:"Audi",hp:355,hpRpm:5500,tq:345,tqRpm:2900,redline:6800,
   ind:"centri",disp:3.0,engSound:"v6",gears:[4.714,3.143,2.106,1.667,1.285,1.0,0.839,0.667],fd:3.204,drive:"awd",trans:"auto",
   layout:"front",tire:"allseason",weight:4210,dist:55,tireD:27.0,cda:7.8,wb:114.7,cg:21,launchRpm:2500,modes:['normal','sport'],mode:'normal',rated:[333,325]}),
  a7_tdi:Object.assign({},P1,{name:"2015 Audi A7 3.0 TDI quattro",mfr:"Audi",hp:275,hpRpm:4000,tq:460,tqRpm:1750,redline:4800,
@@ -12697,7 +12724,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
         rpm+=Math.sin(el*3.1)*12;
         if(stage[l]._g!==undefined&&gearIdx<stage[l]._g){   // a downshift just landed
           const vo0=voices[l];
-          if(vo0){vo0.blip();const b=(cars[l].burble||0)*(({normal:0.55,sport:0.85})[cars[l].mode]||1);if(b>0)vo0.burble(0.4*b);}
+          if(vo0){vo0.blip();const b=(cars[l].burble||0)*(({normal:0.55,sport:0.85})[cars[l].mode]||1);if(b>0&&!burbxShift(vo0,cars[l],false,0.5*b,rpm,cars[l].redline))vo0.burble(0.4*b);}
         }
         stage[l]._g=gearIdx;
         if(c.trans==='cvt')rpm=Math.max(1300,Math.min(2200,rpm));
@@ -12805,12 +12832,12 @@ document.getElementById('runBtn').addEventListener('click',()=>{
             const bmode=({normal:0.55,sport:0.85})[r.car.mode]||1;
             const bur=(r.car.burble||0)*bmode;
             if(s.gear>prev){                         // upshift
-              if(bur>0)vo.shiftBurble(bur*(0.6+0.4*Math.min(1,mph/80)));
+              if(bur>0&&!burbxShift(vo,r.car,true,bur*(0.6+0.4*Math.min(1,mph/80)),s.rpm,r.car.redline))vo.shiftBurble(bur*(0.6+0.4*Math.min(1,mph/80)));
               vo.bov();
               if(MD.shock>0.5)vo.chirp(MD.shock);
             }else{                                   // downshift on the brakes
               vo.blip();
-              if(bur>0)vo.burble(0.45*bur);
+              if(bur>0&&!burbxShift(vo,r.car,false,0.5*bur,s.rpm,r.car.redline))vo.burble(0.45*bur);
             }
             lastGear[l]=s.gear;}
           // overrun crackle while braking, for the cars that do it
@@ -13412,7 +13439,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='4fa5593ab5';let dismissed=null;
+(function(){const V='b8f09ee78b';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
