@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="21d57e7a43";</script>
+<head><script>window.QM_VER="5ba4004902";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1034,8 +1034,7 @@ function sndPackFor(c){
    crackle set; BMW M cars use the BeamNG M2 afterfire set, played the way Back Roads plays it on the M2. */
 const BURBX={p:null,sets:null};
 function burbxKind(c){const n=(c&&c.name||'').toLowerCase(),es=c&&c.engSound||'';
-  if(/\baudi\b/.test(n)&&/^v6/.test(es))return 'i5stock';
-  if(/\baudi\b/.test(n)&&/^v8/.test(es))return 'm2af';
+  if(/\baudi\b/.test(n)&&/^v[68]/.test(es))return 'i5stock';
   if(/\bbmw\b/.test(n)&&(/\bm[2-8]\b/.test(n)||/\bx[1-7] ?m\b/.test(n)||/\bxm\b/.test(n)))return 'm2af';
   return null;}
 function burbxLoad(ctx){if(BURBX.p||!ctx)return BURBX.p;const v=window.QM_VER?'?v='+window.QM_VER:'';
@@ -1044,12 +1043,12 @@ function burbxLoad(ctx){if(BURBX.p||!ctx)return BURBX.p;const v=window.QM_VER?'?
     for(const k in j.sets){sets[k]={};for(const t in j.sets[k])sets[k][t]=j.sets[k][t].map(([o,n])=>{const b=ctx.createBuffer(1,n,dec.sampleRate);b.copyToChannel(ch.subarray(o,o+n),0);return b;});}
     BURBX.sets=sets;})().catch(()=>{BURBX.p=null;});return BURBX.p;}
 function burbxPlay(vo,L,t,amp,rate){const b=L[Math.floor(Math.random()*L.length)],ctx=vo.ctx,s=ctx.createBufferSource();s.buffer=b;s.playbackRate.value=rate;
-  const g=ctx.createGain();g.gain.value=Math.min(2.2,amp);s.connect(g);g.connect(vo.panner||audioOut(ctx));s.start(t);return b.duration/rate;}
+  const g=ctx.createGain();g.gain.value=Math.min(4,amp);s.connect(g);g.connect(vo.panner||audioOut(ctx));s.start(t);return b.duration/rate;}
 /* returns true when it played the recorded set (so the synthesised pops are skipped) */
 function burbxShift(vo,c,up,str,rpm,red){const k=burbxKind(c);if(!k||!vo||vo.dead||vo.electric)return false;
   const S=BURBX.sets&&BURBX.sets[k];if(!S){burbxLoad(vo.ctx);return false;}
   const ctx=vo.ctx,t0=ctx.currentTime+0.015,rt=()=>Math.max(0.92,Math.min(1.1,0.92+(rpm||5000)/40000))*(0.96+Math.random()*0.08),amp=2.0*str;
-  if(k==='i5stock'){const n=up?6+Math.floor(Math.random()*5):3+Math.floor(Math.random()*3);let t=t0;
+  if(k==='i5stock'){const amp=3.6*str;const n=up?6+Math.floor(Math.random()*5):3+Math.floor(Math.random()*3);let t=t0;
     for(let i=0;i<n;i++){const d=burbxPlay(vo,S.crackle,t,amp*(1-i/(n+3))*(0.75+Math.random()*0.4),rt());t+=Math.max(0.03+Math.random()*0.06,d*0.9);}
     return true;}
   if(up){burbxPlay(vo,S.shift,t0,amp,rt());return true;}
@@ -13440,7 +13439,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='21d57e7a43';let dismissed=null;
+(function(){const V='5ba4004902';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
