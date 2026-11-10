@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="a65aecccbf";</script>
+<head><script>window.QM_VER="8dac544cf8";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -751,6 +751,7 @@ const IND={
  ev:{label:'Electric motor',hpPerL:0,idleFrac:1.0,redFrac:1.0,tau:0,ce:1.0,boosted:false,electric:true},
  quad:{label:'Quad turbo',hpPerL:70,idleFrac:0.40,redFrac:0.90,tau:0.72,ce:0.88,boosted:true},
  twincharge:{label:'Supercharged + turbocharged',hpPerL:74,idleFrac:0.72,redFrac:0.90,tau:0.22,ce:0.86,boosted:true},
+ f1hybrid:{label:'Turbo hybrid (F1, MGU-H/MGU-K)',hpPerL:170,idleFrac:0.45,redFrac:0.82,tau:0.12,ce:0.88,boosted:true},
  centri:{label:'Supercharger (centrifugal)',hpPerL:75,idleFrac:0.44,redFrac:0.99,tau:0.30,ce:0.86,boosted:true}
 };
 
@@ -2100,6 +2101,13 @@ Object.assign(PRESETS,{
   ind:"twin",disp:4.0,engSound:"v8x",gears:[4.71,3.14,2.11,1.67,1.29,1.00,0.84,0.67],fd:3.20,drive:"awd",trans:"auto",
   layout:"front",tire:"summer",weight:4740,dist:56,tireD:28.5,cda:8.6,wb:115.9,cg:21,
   launchRpm:3200,gripAdj:1.05,modes:['normal','sport','track']}),
+ /* --- race cars: 2018 NASCAR Cup Camaro (Gen-6), 2019 Alfa Romeo C38 F1 --- */
+ nascar18:Object.assign({},P1,{name:"2018 Chevrolet Camaro NASCAR Cup Car",mfr:"Chevrolet",hp:750,hpRpm:9000,tq:520,tqRpm:7000,redline:9500,
+  ind:"na",disp:5.86,engSound:"v8x",gears:[2.8,1.92,1.42,1.0],fd:3.89,drive:"rwd",trans:"manual",
+  layout:"front",tire:"track",weight:3450,dist:52,tireD:28.0,cda:9.6,wb:110,cg:16,launch:'lc',launchRpm:5500,shift:0.22,gripAdj:0.88,burble:0.8,modes:['normal'],mode:'normal'}),
+ f1c38:Object.assign({},P1,{name:"2019 Alfa Romeo C38 Formula 1",mfr:"Alfa Romeo",hp:960,hpRpm:11500,tq:560,tqRpm:10500,redline:15000,
+  ind:"f1hybrid",disp:1.6,engSound:"v6",gears:[3.1,2.45,2.0,1.68,1.45,1.28,1.14,1.03],fd:4.26,drive:"rwd",trans:"dct",
+  layout:"mid",tire:"track",weight:1640,dist:46,tireD:26.4,cda:14.0,wb:141.7,cg:11,launchRpm:10500,gripAdj:0.95,modes:['normal'],mode:'normal'}),
  /* --- Toyota Camry (only trims with their own power figure; no hybrids) --- */
  camry13le:Object.assign({},P1,{name:"2013 Toyota Camry LE",mfr:"Toyota",hp:196,hpRpm:6000,tq:184,rated:[178,170],tqRpm:4100,redline:6200,
   ind:"na",disp:2.5,engSound:"i4",gears:[3.3,1.9,1.42,1.0,0.713,0.609],fd:3.824,drive:"fwd",trans:"auto",
@@ -2685,12 +2693,12 @@ function modelFamily(name,mfr){
 function hasCustomModel(body,name){
   if(body==='mustang'&&(isS550(name)||isS197(name)||isS650(name)))return true;
   if(['durango','charger','camaro','crownvic','challenger','viper','viperacr'].indexOf(body)>=0)return true;
-  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name)||vwKind(name)||bp3Kind(name)||bp4Kind(name)||bp5Kind(name));
+  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name)||vwKind(name)||bp3Kind(name)||bp4Kind(name)||bp5Kind(name)||bp6Kind(name));
 }
 function hasCustomCluster(body,name){
   const nm=name||'',yr=parseInt(nm,10)||0;
   if(['challenger','camaro','mustang'].indexOf(body)>=0)return true;
-  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|marauder|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti|ferrari|nissan gt-?r|skyline|supra|toyota camry/i.test(nm))return true;
+  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|marauder|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti|ferrari|nissan gt-?r|skyline|supra|toyota camry|nascar|formula 1/i.test(nm))return true;
   if(/charger/i.test(nm)&&yr>=2024)return true;
   if(/corvette/i.test(nm)&&/\bC[678]\b/.test(nm))return true;
   if(/mustang|shelby/i.test(nm)&&yr>=2005)return true;
@@ -4345,6 +4353,52 @@ function displayCamry21(l,c,tk,rf){
   o.push(T(280,132,'ODO',5,'#c9ced6',{anchor:'end'}),T(280,143,'57366mi',7,'#fff',{anchor:'end'}),T(220,154,'<tspan id="cl-g-'+l+'">0.00</tspan> g',5.5,'#9aa0aa'));
   return svgWrap(o.join(''),glowDef('c21g'+l,1.2)+chromeGrad('c21r'+l),'<rect x="2" y="8" width="436" height="168" rx="22" fill="#141518"/>');
 }
+/* ---------- race car clusters ---------- */
+// NASCAR: black panel, white-lit numerals with a soft glow, tach left, big speedo centre, fuel and oil/water right, switch row below
+function displayNascar(l,c,tk,rf){
+  const o=[],wh='#f4f6f8',gl='nsg'+l,smax=clusterMeta[l].spdMax||220;
+  o.push('<rect x="2" y="6" width="436" height="122" rx="10" fill="#050506" stroke="#222" stroke-width="2"/>');
+  o.push(gDial({cx:70,cy:72,R:48,a0:-120,span:210,redFrac:rf,scale:uniScale(tk,1,i=>i),red:{r:46,col:'#e0303a',w:3},
+    ticks:{lM:6,wM:2,lm:3,wm:1,cM:wh,cm:'#bfc4cc',red:'#ff4a4a'},lab:{r:35,sz:10,w:600,col:wh},
+    needle:{id:'nd-rpm-'+l,col:'#ffffff',r0:-6,r1:44,w:2.6,tw:1.2,glow:gl,hub:{r:6,fill:'#111',stroke:'#444'}}}));
+  o.push(T(70,104,'x1000 RPM',5,wh));
+  o.push(gDial({cx:210,cy:70,R:58,a0:-120,span:240,scale:uniScale(smax/20,1,i=>i*20),
+    ticks:{lM:7,wM:2,lm:3.5,wm:1,cM:wh,cm:'#bfc4cc'},lab:{r:45,sz:10,w:600,col:wh},
+    needle:{id:'nd-spd-'+l,col:'#ffffff',r0:-8,r1:54,w:3,tw:1.4,glow:gl,hub:{r:9,fill:'#111',stroke:'#444'}}}));
+  o.push(T(210,52,'MPH',7,wh),T(210,104,'<tspan id="cl-mph-'+l+'">0</tspan>',10,wh,{fam:'Roboto Mono, monospace'}));
+  o.push(ring(330,62,34,-100,-10,wh,1.6)+T(300,54,'E',7,wh)+T(326,34,'1/2',6,wh)+T(360,46,'F',7,wh)+staticNeedle(330,62,4,32,-30,'#ff3a2a',2.4));
+  o.push(ring(330,118,30,-110,-20,wh,1.4)+T(306,112,'20',6,wh)+T(330,94,'40',6,wh)+T(352,106,'60',6,wh)+T(330,110,'OIL',5,'#bfc4cc')+staticNeedle(330,118,4,28,-60,'#ff3a2a',2.2));
+  o.push(ring(400,82,28,-100,-20,wh,1.2)+T(400,74,'H2O',4.5,'#bfc4cc')+staticNeedle(400,82,3,26,-50,'#ff3a2a',2));
+  // switch panel
+  o.push('<rect x="2" y="132" width="436" height="44" rx="8" fill="#0d0e10" stroke="#222"/>');
+  [['IGN',36],['START',84],['FAN',132],['BLOWER',180]].forEach(([t,x])=>o.push('<rect x="'+(x-8)+'" y="141" width="16" height="22" rx="3" fill="#202226" stroke="#3a3c40"/><rect x="'+(x-3)+'" y="143" width="6" height="10" rx="2" fill="#c8ccd2"/>'+T(x,172,t,5.5,wh)));
+  o.push('<circle cx="250" cy="154" r="13" fill="#141518" stroke="#3a3c40" stroke-width="2"/>'+ring(250,154,17,-120,-10,'#3a7cff',3)+ring(250,154,17,10,120,'#ff3a2a',3));
+  o.push('<rect x="290" y="140" width="76" height="28" rx="3" fill="#0a0f0a" stroke="#2a3a2a"/>',T(304,159,'D1',13,'#7dff9a',{id:'cl-gear2-'+l,fam:'Roboto Mono, monospace',extra:' data-pre=""'}),
+    T(344,159,'<tspan id="cl-g-'+l+'">0.00</tspan>g',7,'#7dff9a',{fam:'Roboto Mono, monospace'}));
+  o.push('<circle cx="404" cy="154" r="11" fill="#c01818" stroke="#5a0a0a" stroke-width="2"/>'+T(404,172,'KILL',5.5,wh));
+  return svgWrap(o.join(''),glowDef(gl,1.4),'');
+}
+// Formula 1: steering-wheel display — shift LEDs across the top, big gear in the middle, speed, revs and lap delta
+function displayF1(l,c,tk,rf){
+  const o=[],rl=+c.redline||15000;
+  o.push('<path d="M40 40 Q40 18 70 18 H370 Q400 18 400 40 V120 Q400 150 372 160 L340 172 H100 L68 160 Q40 150 40 120 Z" fill="#141518" stroke="#2a2c30" stroke-width="2"/>');
+  o.push('<path d="M8 50 Q8 30 30 30 H44 V150 H30 Q8 150 8 128 Z M432 50 Q432 30 410 30 H396 V150 H410 Q432 150 432 128 Z" fill="#202226" stroke="#33353a"/>');
+  const leds=[];for(let i=0;i<15;i++){const x=106+i*16,col=i<5?'#2bd94a':i<10?'#ff2a2a':'#3a6cff';
+    leds.push('<circle cx="'+x+'" cy="30" r="5.4" fill="'+col+'" filter="url(#f1g'+l+')"/>');}
+  o.push('<g>'+Array.from({length:15},(_,i)=>'<circle cx="'+(106+i*16)+'" cy="30" r="5.4" fill="#26282c"/>').join('')+'</g>');
+  o.push('<g id="nd-rpm-'+l+'" data-segs="1" data-pw="0,0|'+(rl*0.6/(tk*1000)).toFixed(3)+',0|'+(rl*0.98/(tk*1000)).toFixed(3)+',1|1,1">'+leds.join('')+'</g>');
+  o.push('<rect x="132" y="44" width="176" height="104" rx="6" fill="#06080a" stroke="#2c2f35"/>');
+  o.push(T(220,118,'N',58,'#fff',{w:700,id:'cl-gear2-'+l,fam:'Roboto Mono, monospace',extra:' data-pre=""'}));
+  o.push(T(146,62,'<tspan id="cl-mph-'+l+'">0</tspan>',15,'#fff',{anchor:'start',fam:'Roboto Mono, monospace'}),T(146,72,'MPH',6,'#9aa0aa',{anchor:'start'}));
+  o.push(T(296,62,'<tspan id="nd-rpm-'+l+'-2" data-num="1" data-lo="0" data-hi="'+(tk*1000)+'">0</tspan>',11,'#ffd23a',{anchor:'end',fam:'Roboto Mono, monospace'}),T(296,72,'RPM',6,'#9aa0aa',{anchor:'end'}));
+  o.push(T(146,140,'Δ -0.124',8,'#2bd94a',{anchor:'start',fam:'Roboto Mono, monospace'}),T(296,140,'<tspan id="cl-g-'+l+'">0.00</tspan> g',8,'#fff',{anchor:'end',fam:'Roboto Mono, monospace'}));
+  o.push('<rect x="196" y="130" width="48" height="13" rx="2" fill="#0d3a14"/>',T(220,140,'DRS',8,'#2bd94a',{w:700}));
+  // buttons and rotaries
+  [[76,58,'#e8e8e8','N'],[76,90,'#2b6cff','PL'],[76,122,'#ffd23a','BB'],[364,58,'#ff2a2a','R'],[364,90,'#2bd94a','OK'],[364,122,'#ff8a1a','PIT']].forEach(([x,y,col,t])=>
+    o.push('<circle cx="'+x+'" cy="'+y+'" r="11" fill="'+col+'" stroke="#000" stroke-width="2"/>'+T(x,y+3,t,7,'#111',{w:700})));
+  [[108,160],[332,160]].forEach(([x,y])=>o.push('<circle cx="'+x+'" cy="'+y+'" r="10" fill="#2a2c30" stroke="#55585e" stroke-width="2"/><path d="M'+x+' '+(y-8)+' V'+(y-2)+'" stroke="#ffd23a" stroke-width="2"/>'));
+  return svgWrap(o.join(''),glowDef('f1g'+l,1.6),'');
+}
 function displayC6(l,c,tk,rf){
   const o=[],ch='url(#c6c'+l+')',zr1=/zr1/i.test(c.name||''),smax=zr1?220:200;
   const face=(x,y,r)=>'<circle cx="'+x+'" cy="'+y+'" r="'+(r+4)+'" fill="#0b0c0e" stroke="'+ch+'" stroke-width="3"/>';
@@ -5298,7 +5352,7 @@ function buildClusters(){
     const lambo=cs?cs==='lambo':/lamborghini/i.test(nm);
     const yr=parseInt(nm,10)||0;
     const isAcc=/\baccord\b/i.test(nm);
-    const NEWC={camry13:/\b201[2-4] toyota camry\b/i,camry21:/\b20(1[89]|2[0-4]) toyota camry\b/i,charger26:/\b20(2[4-9]|3\d) dodge charger\b/i,gtr35:/nissan gt-?r\b/i,r34:/skyline/i,grsupra:/\bgr supra\b/i,supra4:/toyota supra\b/i,ferrari:/ferrari/i,r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,c6:/corvette.*\bC6\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria|marauder/i,impala:/impala/i,
+    const NEWC={nascar:/nascar/i,f1:/\bc38\b|formula 1/i,camry13:/\b201[2-4] toyota camry\b/i,camry21:/\b20(1[89]|2[0-4]) toyota camry\b/i,charger26:/\b20(2[4-9]|3\d) dodge charger\b/i,gtr35:/nissan gt-?r\b/i,r34:/skyline/i,grsupra:/\bgr supra\b/i,supra4:/toyota supra\b/i,ferrari:/ferrari/i,r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,c6:/corvette.*\bC6\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria|marauder/i,impala:/impala/i,
       venom:/venom/i,focusrs:/focus rs/i,agera:/agera|jesko/i,regera:/regera/i,lucid:/lucid/i,tesla:/tesla/i,taurus:/taurus/i,
       mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i,infiniti:/infiniti/i};
     let nstyle=null;
@@ -5318,7 +5372,7 @@ function buildClusters(){
     // the Durango speedo reads to 140 mph; SRT models print 200
     const durSpd=/srt|hellcat|392/i.test(nm)?200:140;
     // needle scale must match the numbers printed on each style of speedo
-    clusterMeta[l].spdMax=nstyle?({camry13:140,camry21:160,charger26:180,gtr35:220,r34:111.85,grsupra:180,supra4:198.8,ferrari:220,c6:/zr1/i.test(nm)?220:200,infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
+    clusterMeta[l].spdMax=nstyle?({nascar:220,f1:240,camry13:140,camry21:160,charger26:180,gtr35:220,r34:111.85,grsupra:180,supra4:198.8,ferrari:220,c6:/zr1/i.test(nm)?220:200,infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
     if(nstyle==='chall15')clusterMeta[l].spdMax=chall15Spd(nm);
     if(nstyle==='charger15')clusterMeta[l].spdMax=/hellcat/i.test(nm)?200:/scat|392/i.test(nm)?180:160;
     const d=document.createElement('div');d.className='cluster'+(darkCluster?' cluster-muscle':'');
@@ -5368,7 +5422,7 @@ function buildClusters(){
       '</div>';
     if(nstyle){
       const tk=tachMax/1000,rf=rl/tachMax;
-      const F={camry13:displayCamry13,camry21:displayCamry21,charger26:displayCharger26,gtr35:displayGTR35,r34:displayR34,grsupra:displayGRSupra,supra4:displaySupraMk4,ferrari:displayFerrari,r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
+      const F={nascar:displayNascar,f1:displayF1,camry13:displayCamry13,camry21:displayCamry21,charger26:displayCharger26,gtr35:displayGTR35,r34:displayR34,grsupra:displayGRSupra,supra4:displaySupraMk4,ferrari:displayFerrari,r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
         golf:displayGolf,c6:displayC6,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,infiniti:displayInfiniti,g70:displayG70,g80:displayG80,
         mustangD:displayMustangDigital,mustang6:displayMustangS550,mustang5:displayMustangS197,camaro6:(a,b,cc,dd)=>displayCamaro6(a,b,cc,dd,clusterMeta[l].boosted),
         camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,charger15:displayCharger15,chall15:displayChall15,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
@@ -5496,7 +5550,7 @@ function applyGauge(el,f){
   const d=el.dataset;
   if(d.a0!=null){const q=pwMap(d.pw,f);el.setAttribute('transform','rotate('+(+d.a0+(+d.span)*q).toFixed(1)+' '+d.cx+' '+d.cy+')');return true;}
   if(d.arc!=null){el.setAttribute('stroke-dasharray',(pwMap(d.pw,f)*1000).toFixed(1)+' 1000');return true;}
-  if(d.segs!=null){const kids=el.children,n=Math.round(f*kids.length);
+  if(d.segs!=null){const kids=el.children,n=Math.round(pwMap(d.pw,f)*kids.length);
     if(el._n!==n){el._n=n;for(let i=0;i<kids.length;i++)kids[i].setAttribute('opacity',i<n?'1':'0');}return true;}
   if(d.hbar!=null){el.setAttribute('width',(f*(+d.w)).toFixed(1));return true;}
   if(d.num!=null){let g=f;if(d.bell!=null){const b=+d.bell;g=Math.max(0,1-Math.pow((f-b)/Math.max(0.2,f<b?b:1-b),2));}
@@ -6025,6 +6079,7 @@ function wheelSpec(body,name){
   }else if(body==='taurus'){if(/police|interceptor/.test(n)){f=r=ty(18,245,55);style='steel';}else{f=r=ty(20,245,45);style='split5';finish='silver';}
   }else if(body==='mkz17'){if(/3\.0t/.test(n)){f=r=ty(19,245,40);style='multi';finish='silver';}else if(/hybrid/.test(n)){f=r=ty(17,225,55);style='ten';finish='silver';}else{f=r=ty(18,245,45);style='multi';finish='silver';}cal='silver';
   }else if(body==='tlx17'){if(/3\.5/.test(n)){f=r=ty(19,245,40);style='split5';finish='gunmetal';cal='silver';}else{f=r=ty(18,225,50);style='ten';finish='silver';cal='silver';}
+  }else if(body==='nascar18'){f=r=ty(15,325,40);style='steel';finish='silver';cal='black';
   }else if(body==='camry21'){if(/v6|trd/.test(n)){f=r=ty(19,235,40);style='multi';finish='black';cal='black';}else if(/\bse\b/.test(n)){f=r=ty(18,235,45);style='split5';finish='gunmetal';cal='black';}else{f=r=ty(17,215,55);style='ten';finish='silver';cal='silver';}
   }else if(body==='camry13'){if(/v6/.test(n)){f=r=ty(18,225,45);style='split5';finish='gunmetal';cal='silver';}else{f=r=ty(17,215,55);style='ten';finish='silver';cal='silver';}
   }else if(body==='charger26'){f=r=ty(20,305,35);style=/scat/.test(n)?'split5':'five';finish=/scat/.test(n)?'black':'gunmetal';cal=/scat/.test(n)?'red':'black';
@@ -7522,7 +7577,7 @@ function bpCar(colorHex,name,C){
     (C.cuts||[]).forEach(([x,y0,y1])=>box(0.3,y1-y0,0.35,M.dark,x,(y0+y1)/2,s*(planW(x)-0.8)));
     (C.handles||[]).forEach(([x,y])=>box(2.6,0.6,0.5,C.handleMat==='chrome'?M.chrome:C.handleMat==='paint'?M.paint:M.dark,x,y,s*(planW(x)-0.5)));
     if(C.rocker)box(C.rocker[1]-C.rocker[0],1.4,0.6,M.dark,(C.rocker[0]+C.rocker[1])/2,(C.rockerY||6.2),s*(Math.min(planW(C.rocker[0]),planW(C.rocker[1]))-2.0));
-    const mr=C.mirror;addMirror(shell,mr[0],mr[1],s,G.GB-0.6,W+1.2,M.paint,M.dark,mr[2]||[4,2.6,3.2]);
+    const mr=C.mirror;if(!C.mirrorSides||C.mirrorSides.includes(s))addMirror(shell,mr[0],mr[1],s,G.GB-0.6,W+1.2,M.paint,M.dark,mr[2]||[4,2.6,3.2]);
   });
   [wx,-wx].forEach(ax=>{const lin=new TH.Mesh(new TH.CylinderGeometry(AR*0.97,AR*0.97,W*2-6,20,1,true),
     new TH.MeshStandardMaterial({color:0x0b0d0f,roughness:1,side:TH.BackSide}));lin.rotation.x=Math.PI/2;lin.position.set(ax,wr,0);shell.add(lin);});
@@ -10417,7 +10472,153 @@ const BP5_TRIM={
     if(/v6/.test(n))[1,-1].forEach(s=>tip(s*15,6.6,1.15));else tip(-15,6.4,0.95,M.satin);
   }};
 
+/* ---------- 2018 Chevrolet Camaro NASCAR Cup car (Gen-6) and 2019 Alfa Romeo C38 Formula 1 car ---------- */
+function bp6Kind(name){const n=(name||'').toLowerCase();
+  if(/nascar/.test(n))return 'nascar18';
+  if(/\bc38\b|formula 1|\bf1\b/.test(n))return 'f1c38';
+  return null;}
+function buildBP6(kind,colorHex,name){return kind==='f1c38'?buildF1(colorHex,name):buildNascar(colorHex,name);}
+function buildNascar(colorHex,name){
+  const n=(name||'').toLowerCase();
+  const D={NOSE:62.2,TAIL:-68.4,W:24.77,wx:35.5,wr:9.0,AR:10.0,tumbleY:16,tumble:1.6,crown:[58,30,0.4],
+    plan:[[62.2,4],[61,12],[59,17.5],[56,21],[52,23.2],[46,24.4],[40,24.77],[-50,24.77],[-56,24.4],[-61,23.6],[-65,22.4],[-67.5,20],[-68.4,8]],
+    top:[[62.2,10],[61.5,13],[60,16],[58,17.4],[50,18.9],[40,20.4],[30,21.8],[24.9,22.4],[15,21.6],[0,22.2],[-15,23.0],[-30,24.0],[-46,25.0],[-55,24.4],[-64.7,23.6],[-67.5,22],[-68.2,19],[-68.4,14]],
+    bot:[[62.2,4],[61.5,1.6],[58,1.3],[48,1.6],[40,2.6],[30,2.6],[-30,2.6],[-45,3.0],[-55,3.4],[-66,4.5],[-68.4,6]],
+    gtop:[[24.9,22.6],[20,25.2],[15,28.0],[10,30.8],[5,32.3],[1.3,33.0],[-10,33.2],[-21.1,32.1],[-28,30.4],[-35,28.6],[-41,26.9],[-46,25.4]],
+    GB:20.5,GT:15.5,roof:[-1,-21],rearSide:2.6};
+  const side=(x,y,gt)=>{if(y>gt-1.4)return 0;if(x>24.9-(y-22.6)*1.75)return 0;if(x>12.5&&y<25)return 0;if(x>-15.5)return 1;if(x>-21)return 0;if(x>-35+(y-23)*1.2)return 1;return 0;};
+  return bpCar(colorHex,name,{body:'nascar18',NOSE:D.NOSE,TAIL:D.TAIL,W:D.W,wx:D.wx,wr:D.wr,AR:D.AR,
+    plan:D.plan,top:D.top,bot:D.bot,tumbleY:D.tumbleY,tumble:D.tumble,crown:D.crown,
+    flare:{r:0.1,t:0.6,arc:0.8,sz:0.5,in:0.6},creases:[{x0:-62,x1:56,y:x=>17.0}],
+    gh:{sn:12,x0:D.gtop[D.gtop.length-1][0],x1:D.gtop[0][0],GB:D.GB,GT:D.GT,roof:D.roof,roofMat:0,top:D.gtop,rearSide:D.rearSide,side:(x,y)=>side(x,y,bpTab(D.gtop)(x))},
+    mirror:[11,25.4,[3.6,2.2,3.0]],mirrorSides:[-1],cuts:[],handles:[],rocker:[-30,30],rockerY:3.4,wheelOut:[D.W-0.4,D.W-0.2],
+    trim:(c)=>nascarTrim(Object.assign({},c,{D,n}))});
+}
+function nascarTrim(c){const {M,ribbon,disc,box,sideStrip,onHood,planW,yTop,gTop,shell}=c;const {F,R,quad,mesh,tip,wing}=bp4Kit(c);
+  const mat=(col,e)=>new TH.MeshStandardMaterial({color:col,roughness:0.35,metalness:0.2,emissive:e||0x000000});
+  const blue=mat(0x1d4fb8),red=mat(0xd7262e),navy=mat(0x0e2a6e),silverD=mat(0xb9bec6),decalBlk=mat(0x15171b),decalW=mat(0xe9edf2,0x202428);
+  // ---- livery: blue lower body with red and white speed stripes, numbers on the doors and roof ----
+  sideStrip(-68,62,()=>[2.6,8.6],0.06,blue,0.5);
+  sideStrip(-68,62,x=>{const y=8.6+(62-x)*0.012;return[y,y+0.7];},0.07,red,0.5);
+  for(let k=0;k<4;k++)sideStrip(20-k*18,44-k*18,x=>{const y=10.5+k*1.5+(44-k*18-x)*0.12;return[y,y+0.5];},0.08,k%2?red:blue,0.4);
+  sideStrip(40,62,x=>[11+(62-x)*0.12,12+(62-x)*0.12],0.08,red,0.4);
+  // door numbers: built from short stroke segments so they read correctly from both sides
+  const glyph={'4':[[[0.7,1],[0,0.38]],[[0,0.38],[1,0.38]],[[0.8,1],[0.62,0]]],
+               '7':[[[0.05,1],[1,1]],[[1,1],[0.35,0]]]};
+  const strokes=(txt,s,mt,xc,yb,h,w,off,thick)=>{const L=txt.length,cw=w*1.2,x0=xc+s*(-((L-1)*cw)/2);   // s>0: text runs toward the tail
+    [...txt].forEach((ch,i)=>{const xo=x0+s*(i*cw);(glyph[ch]||[]).forEach(([[a,b],[c2,d]])=>{const N=14;
+      for(let k=0;k<=N;k++){const t=k/N,u=a+(c2-a)*t,v=b+(d-b)*t,x=xo+s*((u-0.5)*w+(v-0.5)*h*0.22);mt(x,yb+v*h,thick);}});});};
+  [1,-1].forEach(sd=>{const zr=x=>sd*(planW(x)+0.05);
+    const dot=(m,o)=>(x,y,t)=>box(t,t,0.12,m,x,y,zr(x)+sd*o);
+    // white number panel, then blue outline strokes, then red digits; reading front-to-back on each side
+    strokes('47',sd>0?1:-1,dot(navy,0.05),-2,8.5,11,6.5,0,1.9);strokes('47',sd>0?1:-1,dot(red,0.12),-2,8.5,11,6.5,0,1.2);});
+  // roof number, read from the driver's side
+  [[-6,0,8]].forEach(([xc])=>{const glyphPts=[];const mt=(x,y,t)=>glyphPts.push([x,y,t]);
+    strokes('47',1,mt,0,-5,10,6,0,1.4);glyphPts.forEach(([zz,xx,t])=>{const x=xc+xx,z=zz;box(t,0.12,t,red,x,bpTab(c.D.gtop)(x)+0.05,z);});});
+  // ---- front: sticker headlights, black upper slot, big lower grille, side intakes, splitter ----
+  quad(1,12.9,21.2,[14.0,16.6],[14.6,17.9],0.12,decalBlk,10);
+  [1,-1].forEach(s=>{[14.6,16.6,18.6].forEach((z,i)=>{disc(1,s*z,15.6+i*0.4,0.7,decalW,0.22);});ribbon(1,s*13.4,s*20.4,6,()=>[17.0,17.4],0.24,decalW);});
+  ribbon(1,-7.5,7.5,10,()=>[14.6,16.8],0.14,M.gloss);
+  mesh(1,0,12.9,2.6,12.9,0.14,9,5,M.gloss);
+  F(14.4,21.2,a=>[4.4,10.4-(a-14.4)*0.2],0.14,M.gloss,6);
+  ribbon(1,-23.6,23.6,30,()=>[0.8,2.2],1.4,M.carbon);
+  // hood: cowl, raised centre section, hood pins, NACA-style vent
+  onHood(2.2,0.3,30,M.gloss,24.4,0,0.05);
+  [[52,-12],[52,12],[30,-14],[30,14]].forEach(([x,z])=>onHood(0.8,0.35,0.8,M.chrome,x,z,0.1));
+  for(let k=0;k<5;k++)onHood(4,0.1,0.3,M.paintDk,40,-3+k*1.5,0.04);
+  // ---- sides: side skirts, fuel filler (left), right-side exhaust exits ahead of the rear wheel, window net (driver side) ----
+  sideStrip(-27,27,()=>[1.6,3.4],0.3,M.carbon,0.6);
+  box(2.6,2.6,0.25,M.chrome,-48,22.0,-(planW(-48)+0.1));
+  [-21.5,-24].forEach(x=>{const t=new TH.Mesh(new TH.CylinderGeometry(0.9,0.9,1.6,14,1,true),M.chrome);t.rotation.x=Math.PI/2;t.position.set(x,3.4,planW(x)+0.3);shell.add(t);
+    const d=new TH.Mesh(new TH.CircleGeometry(0.75,14),M.dark);d.position.set(x,3.4,planW(x)+1.05);shell.add(d);});
+  for(let i=0;i<8;i++)box(0.15,9.5,0.15,decalBlk,10-i*3.4,26.5,-(c.D.GB+0.6));
+  for(let j=0;j<4;j++)box(25,0.15,0.15,decalBlk,-1.5,22.6+j*2.6,-(c.D.GB+0.6));
+  // roof: rails and roof flaps; rear window fins
+  [1,-1].forEach(s=>{box(28,0.4,0.4,M.dark,-8,bpTab(c.D.gtop)(-8)+0.1,s*(c.D.GT-1));box(9,1.6,0.3,M.dark,-40,bpTab(c.D.gtop)(-40)+0.6,s*(c.D.GT-1.5));});
+  [-14,-18].forEach(x=>box(3.4,0.12,8,M.paintDk,x,bpTab(c.D.gtop)(x)+0.05,0));
+  // ---- rear: sticker tail lights, tall rear spoiler blade, valance and diffuser ----
+  R(8,21.6,a=>[16.2+(a-8)*0.05,19.0],0.12,M.tail,10);R(8.5,21.2,()=>[17.3,17.7],0.2,decalW,8);
+  R(2,6.6,()=>[16.4,18.4],0.12,decalBlk,4);
+  box(1.2,4.8,41,M.gloss,-66.6,yTop(-66.6)+2.4,0,0);[1,-1].forEach(s=>box(3.6,4.4,0.3,M.dark,-65.6,yTop(-65.6)+2.2,s*20.6));
+  ribbon(-1,-21,21,28,()=>[1.2,7.7],0.14,M.gloss);for(let k=-4;k<=4;k++)ribbon(-1,k*4-0.15,k*4+0.15,1,()=>[1.0,7.0],0.6,M.satin);
+  ribbon(-1,-8,8,10,()=>[11.5,13.6],0.2,decalBlk);
+}
+/* ---------- open-wheel Formula 1 car, built from lofted sections ---------- */
+function buildF1(colorHex,name){
+  const grp=new TH.Group(),shell=new TH.Group();
+  const paint=new TH.MeshStandardMaterial({color:new TH.Color(colorHex),roughness:0.28,metalness:0.45,side:TH.DoubleSide});
+  const grey=new TH.MeshStandardMaterial({color:0x8e9196,roughness:0.35,metalness:0.4,side:TH.DoubleSide});
+  const white=new TH.MeshStandardMaterial({color:0xe8e8ea,roughness:0.35,metalness:0.2,side:TH.DoubleSide});
+  const carbon=new TH.MeshStandardMaterial({color:0x17181b,roughness:0.42,metalness:0.35,side:TH.DoubleSide});
+  const dark=new TH.MeshStandardMaterial({color:0x0b0c0e,roughness:0.8,metalness:0.1,side:TH.DoubleSide});
+  const tailM=new TH.MeshStandardMaterial({color:0x8a1612,emissive:0xff2418,emissiveIntensity:0.6,roughness:0.2});
+  const headM=new TH.MeshStandardMaterial({color:0xf4f4f4,emissive:0x111111,roughness:0.3});
+  const visor=new TH.MeshStandardMaterial({color:0x101418,roughness:0.08,metalness:0.6});
+  const B=(w,h,d,m,x,y,z,rz,ry,rx)=>{const o=new TH.Mesh(new TH.BoxGeometry(w,h,d),m);o.position.set(x,y,z);if(rz)o.rotation.z=rz;if(ry)o.rotation.y=ry;if(rx)o.rotation.x=rx;shell.add(o);return o;};
+  const rod=(a,b,r,m)=>{const A=new TH.Vector3(...a),Bv=new TH.Vector3(...b),L=A.distanceTo(Bv);const o=new TH.Mesh(new TH.CylinderGeometry(r,r,L,8),m||carbon);
+    o.position.copy(A).add(Bv).multiplyScalar(0.5);o.quaternion.setFromUnitVectors(new TH.Vector3(0,1,0),Bv.clone().sub(A).normalize());shell.add(o);return o;};
+  // loft: sections [x, yCentre, halfHeight, halfWidth], superellipse cross-section; matFn picks paint by height (red top, grey sides)
+  const loft=(S,mat,ex,seg)=>{seg=seg||28;ex=ex||3;const v=[],idx=[];S.forEach(([x,yc,hh,hw])=>{for(let k=0;k<=seg;k++){const q=k/seg*Math.PI*2,c=Math.cos(q),s=Math.sin(q);
+      const sz=Math.sign(c)*Math.pow(Math.abs(c),2/ex)*hw,sy=Math.sign(s)*Math.pow(Math.abs(s),2/ex)*hh;v.push(x,yc+sy,sz);}});
+    for(let i=0;i<S.length-1;i++)for(let k=0;k<seg;k++){const a=i*(seg+1)+k,b=a+seg+1;idx.push(a,b,a+1,b,b+1,a+1);}
+    const g=new TH.BufferGeometry();g.setAttribute('position',new TH.Float32BufferAttribute(v,3));g.setIndex(idx);g.computeVertexNormals();
+    const m=new TH.Mesh(g,mat);shell.add(m);
+    [0,S.length-1].forEach(i=>{const [x,yc,hh,hw]=S[i];if(hh<0.2)return;const cap=new TH.Mesh(new TH.CircleGeometry(1,seg),mat);cap.scale.set(hw,hh,1);cap.rotation.y=Math.PI/2;cap.position.set(x,yc,0);shell.add(cap);});
+    return m;};
+  const wx=45.7;
+  // nose and monocoque: grey lower, team colour upper (split by two lofts)
+  loft([[71,6.6,0.6,1.6],[66,7.8,1.4,2.4],[58,9.2,2.2,3.0],[50,10.6,2.8,3.6],[42,11.6,3.4,4.6],[32,12.4,3.8,6.4],[22,12.8,4.0,7.6],[14,13.0,4.0,8.2],[8,12.6,3.8,8.4]],grey,2.6);
+  loft([[60,10.6,0.9,2.2],[50,12.4,1.2,3.0],[40,13.6,1.4,4.0],[30,14.8,1.4,5.6],[20,15.8,1.3,6.6],[12,16.4,1.0,7.0]],paint,2.2);
+  // sidepods (coke-bottle), engine cover rising into the airbox and roll hoop
+  [1,-1].forEach(s=>{const g=loft([[16,8.4,4.2,3.6],[8,8.2,4.4,4.2],[-6,7.6,4.0,3.6],[-20,6.6,3.2,2.4],[-32,5.6,2.4,1.4]],paint,3.2);g.position.z=s*10.2;
+    const inlet=new TH.Mesh(new TH.PlaneGeometry(6.4,6.8),dark);inlet.rotation.y=Math.PI/2;inlet.position.set(16.1,8.6,s*10.2);shell.add(inlet);
+    const low=loft([[16,5.0,1.6,3.8],[-10,4.8,1.6,4.0],[-30,4.2,1.4,2.0]],grey,3);low.position.z=s*10.2;});
+  loft([[8,13.4,3.2,7.6],[0,15.6,5.6,6.6],[-6,15.4,5.4,5.6],[-16,13.0,4.6,4.4],[-28,10.4,3.6,3.0],[-40,8.4,2.6,1.8],[-48,7.6,1.8,1.2]],paint,2.6);
+  loft([[2,21.6,2.2,2.6],[-2,22.2,2.0,2.4],[-8,20.4,1.4,1.4]],paint,2.4);
+  const intake=new TH.Mesh(new TH.CircleGeometry(1,20),dark);intake.scale.set(1.9,1.6,1);intake.rotation.y=Math.PI/2;intake.position.set(2.05,21.4,0);shell.add(intake);
+  B(1.2,1.6,0.6,carbon,-1.5,24.4,0);B(2.6,0.6,0.4,carbon,-1.5,25.2,0);                       // camera pod / roll-hoop cap
+  B(18,4.2,0.25,paint,-26,15.0,0,-0.14);                                                         // shark-fin engine cover spine
+  // cockpit: opening, helmet, halo
+  B(10,0.6,7.8,dark,13,16.8,0);const helmet=new TH.Mesh(new TH.SphereGeometry(2.4,16,12),white);helmet.position.set(9.6,18.0,0);shell.add(helmet);
+  const vz=new TH.Mesh(new TH.SphereGeometry(2.45,16,12,-0.6,1.2,1.0,0.7),visor);vz.position.copy(helmet.position);vz.rotation.y=Math.PI/2+Math.PI;shell.add(vz);
+  const halo=new TH.Mesh(new TH.TorusGeometry(5.2,0.55,8,24,Math.PI),carbon);halo.rotation.x=-Math.PI/2;halo.rotation.z=-Math.PI/2;halo.scale.set(1.25,1,1);halo.position.set(6.6,20.4,0);shell.add(halo);
+  rod([15.2,16.6,0],[13.0,20.4,0],0.5,carbon);
+  // mirrors on stalks beside the cockpit
+  [1,-1].forEach(s=>{rod([14,15.0,s*7.4],[13,17.6,s*11.2],0.25,carbon);B(1.6,1.6,3.2,paint,13,17.8,s*12.0);const g=new TH.Mesh(new TH.PlaneGeometry(2.8,1.3),new TH.MeshStandardMaterial({color:0x9fb4c8,metalness:0.6,roughness:0.08}));g.rotation.y=-Math.PI/2;g.position.set(12.15,17.8,s*12.0);shell.add(g);});
+  // floor, barge boards, diffuser
+  B(80,0.5,40,carbon,-6,2.1,0);B(30,0.5,24,carbon,-52,2.6,0);
+  [1,-1].forEach(s=>{for(let k=0;k<4;k++)B(8-k,4.2-k*0.6,0.18,carbon,30-k*2.2,4.4,s*(13.6+k*1.1),0,0.25*s);
+    B(12,4.4,0.25,carbon,-50,5.0,s*10.6,0.22);});
+  for(let k=-3;k<=3;k++)B(12,3.8,0.18,carbon,-50,4.8,k*3,0.22);
+  // front wing: three elements, endplates, flap colour; nose pillars
+  const fw=(x,y,dy,c)=>B(4.2,0.35,48,c,x,y,0,0.18);
+  fw(74,3.0,0,carbon);fw(70.6,4.1,0,paint);fw(67.4,5.1,0,white);fw(64.6,6.0,0,carbon);
+  [1,-1].forEach(s=>{B(12,6.4,0.3,carbon,70,5.4,s*24.4);B(5,2.6,0.25,carbon,66,4.4,s*21.6,0,0.2*s);rod([66,8.4,s*1.4],[67,4.2,s*3.4],0.3,carbon);});
+  // rear wing: main plane + DRS flap, endplates, beam wing, pylon, rain light
+  B(5.2,0.5,24.2,carbon,-53.6,21.6,0,-0.16);B(3.4,0.45,24.2,paint,-50.8,23.6,0,-0.55);
+  [1,-1].forEach(s=>{B(10,13.2,0.35,carbon,-52.6,17.0,s*12.3);B(10,1.4,0.4,paint,-52.6,23.4,s*12.35);for(let k=0;k<4;k++)B(1.4,0.15,0.4,dark,-56+k*1.6,20.6,s*12.4);});
+  B(3.4,0.4,18,carbon,-50.6,11.6,0,-0.2);rod([-46,8.6,0],[-52,21.0,0],0.45,carbon);
+  B(0.6,1.2,2.2,tailM,-55.4,9.0,0);
+  [1,-1].forEach(s=>B(0.2,0.6,0.8,tailM,-57.2,15.4,s*12.4));                                 // endplate LEDs
+  // suspension wishbones, push/pull rods, uprights and brake ducts
+  const susp=(ax,zw,yc,inX)=>[1,-1].forEach(s=>{[[0.9,6.4],[-0.9,6.4]].forEach(([dx])=>{rod([ax+dx*3,yc+1.4,s*4.6],[ax,yc+1.8,s*(zw-3.8)],0.22);rod([ax+dx*3,yc-1.2,s*4.8],[ax,yc-1.2,s*(zw-3.8)],0.22);});
+    rod([ax,yc-1.0,s*(zw-4)],[inX,yc+4.2,s*4.2],0.2);B(3.4,6.4,1.2,carbon,ax,yc,s*(zw-4.4));});
+  susp(wx,21.5,8.5,wx-3);susp(-wx,20.3,8.5,-wx+3);
+  // nose number, side panels in white; sidepod and engine-cover livery split
+  [1,-1].forEach(s=>{B(26,0.2,0.2,white,-12,12.6,s*6.0,-0.04);});
+  grp.add(shell);
+  const spec={f:{rim:13,dia:26.4,w:12.0},r:{rim:13,dia:26.4,w:15.9},style:'multi',finish:'black',cal:'black'};
+  const {wheels,rearR}=placeWheels(grp,spec,wx,[25.4,25.4]);
+  // tyre sidewall markings
+  grp.scale.setScalar(U);
+  const headlight=new TH.SpotLight(0xf2f6ff,0,55,0.5,0.5,1.4);headlight.position.set(76*U,0.5,0);const ht=new TH.Object3D();ht.position.set(160*U,-0.2,0);grp.add(headlight);grp.add(ht);headlight.target=ht;headlight.visible=false;
+  const taillight=new TH.PointLight(0xff2a1a,0.4,14,2);taillight.position.set(-56*U,0.4,0);grp.add(taillight);
+  const S=SHAPES.sedan;
+  return {grp,shell,wheels,S:Object.assign({},S,{wx,wr:rearR,nose:77,tail:-58}),brake:tailM,head:headM,depth:51,headlight,taillight};
+}
+
 function buildCarRaw(bodyKey,colorHex,carName){
+  {const k6=bp6Kind(carName);if(k6)return buildBP6(k6,colorHex,carName);}
   {const k4=bp4Kind(carName);if(k4)return buildBP4(k4,colorHex,carName);}
   {const k5=bp5Kind(carName);if(k5)return buildBP5(k5,colorHex,carName);}
   if(bodyKey==='mustang'&&isS550(carName))return buildMustangS550(colorHex,carName);
@@ -13141,7 +13342,7 @@ function showSlip(rA,rB){
    host's presence carries the room settings, each player's carries their car.
    The physics are deterministic, so a race needs no streaming at all — every
    screen loads the same cars and conditions and computes the identical race. */
-const MP_PRICE={camry13le:24000,camry13v6:30000,camry21le:26000,camry21le_awd:27500,camry21se:27500,camry21se_awd:29000,camry21xsev6:36000,ch26rt2:49995,ch26rt4:52995,ch26sp2:59995,ch26sp4:62995,gtr23prem:115000,gtr23tspec:140000,gtr23nismo:212000,r34gtr:180000,r34vspec:220000,r34vspec2:240000,r34mspec:230000,r34vnur:400000,r34mnur:380000,r34ztune:1000000,grs20_30:50000,grs20_le:56000,grs21_20:43000,grs21_30:51000,grs21_a91:56000,grs23_mt:54000,grs24_45:66000,supra4rz:90000,supra4rzs:75000,supra4szr:45000,supra4sz:35000,supra4us:110000,supra4usna:40000,f8trib:276000,f8spider:300000,f812sf:335000,f812gts:400000,f812comp:600000,f458:230000,f458spider:257000,f458spec:300000,huracanEvoRwd:208000,huracanEvoSpy:287000,huracanEvoRwdSpy:229000,huracanPerf:275000,huracanPerfSpy:308000,a7_30t:66000,a7_tdi:69000,s7_15:81000,rs7_15:105000,rs7p_16:129000,mustang25eco:32500,mustang18eco:26000,mustang25gt:43000,mustang09v6:21000,bmw230i:41000,bmwM2:63000,
+const MP_PRICE={nascar18:400000,f1c38:15000000,camry13le:24000,camry13v6:30000,camry21le:26000,camry21le_awd:27500,camry21se:27500,camry21se_awd:29000,camry21xsev6:36000,ch26rt2:49995,ch26rt4:52995,ch26sp2:59995,ch26sp4:62995,gtr23prem:115000,gtr23tspec:140000,gtr23nismo:212000,r34gtr:180000,r34vspec:220000,r34vspec2:240000,r34mspec:230000,r34vnur:400000,r34mnur:380000,r34ztune:1000000,grs20_30:50000,grs20_le:56000,grs21_20:43000,grs21_30:51000,grs21_a91:56000,grs23_mt:54000,grs24_45:66000,supra4rz:90000,supra4rzs:75000,supra4szr:45000,supra4sz:35000,supra4us:110000,supra4usna:40000,f8trib:276000,f8spider:300000,f812sf:335000,f812gts:400000,f812comp:600000,f458:230000,f458spider:257000,f458spec:300000,huracanEvoRwd:208000,huracanEvoSpy:287000,huracanEvoRwdSpy:229000,huracanPerf:275000,huracanPerfSpy:308000,a7_30t:66000,a7_tdi:69000,s7_15:81000,rs7_15:105000,rs7p_16:129000,mustang25eco:32500,mustang18eco:26000,mustang25gt:43000,mustang09v6:21000,bmw230i:41000,bmwM2:63000,
  challSXT11:25000,challRT23:39000,scatpack23:47000,hellcat23:67000,demon170:100000,z06:107000,porsche911:114000,
  camaro16v6:26700,elantraN:33000,sq5:54000,durangoHC:96000,mclaren720s:285000,mclaren765LT:358000,porscheGT3:162000,
  camaroSS19:37000,camaroZL1:62000,corvetteC7Z06:80000,corvetteC8:59000,shelbyGT350:60000,shelbyGT500:73000,
@@ -13620,7 +13821,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='a65aecccbf';let dismissed=null;
+(function(){const V='8dac544cf8';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
