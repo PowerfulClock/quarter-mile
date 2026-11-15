@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="8dac544cf8";</script>
+<head><script>window.QM_VER="b4923da882";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1798,16 +1798,16 @@ Object.assign(PRESETS,{
  /* --- Lincoln MKZ (incl. an eCVT hybrid) --- */
  mkz_20t:Object.assign({},P1,{name:"2017 Lincoln MKZ 2.0T FWD",mfr:"Lincoln",hp:245,hpRpm:5500,tq:275,tqRpm:3000,redline:6300,
   ind:"single",disp:2.0,engSound:"i4",gears:[4.48,2.87,1.84,1.41,1.00,0.74],fd:3.51,drive:"fwd",trans:"auto",
-  layout:"front",tire:"allseason",weight:3665,dist:61,tireD:26.4,cda:7.4,wb:112.2,cg:21.5,
+  layout:"front",tire:"allseason",weight:3719,dist:61,tireD:26.4,cda:7.4,wb:112.2,cg:21.5,
   launchRpm:2500,modes:['normal','sport'],mode:'normal'}),
  mkz_30t:Object.assign({},P1,{name:"2017 Lincoln MKZ 3.0T AWD",mfr:"Lincoln",hp:400,hpRpm:5750,tq:400,tqRpm:2750,redline:6300,
   ind:"twin",disp:3.0,engSound:"v6",gears:[4.48,2.87,1.84,1.41,1.00,0.74],fd:3.16,drive:"awd",trans:"auto",
-  layout:"front",tire:"summer",weight:4046,dist:58,tireD:26.9,cda:8.6,wb:112.2,cg:21.5,
+  layout:"front",tire:"summer",weight:4191,dist:58,tireD:26.9,cda:8.6,wb:112.2,cg:21.5,
   launchRpm:2600,modes:['normal','sport'],mode:'normal'}),
  mkz_hyb:Object.assign({},P1,{name:"2017 Lincoln MKZ Hybrid (eCVT)",mfr:"Lincoln",hp:141,hpRpm:6000,tq:129,tqRpm:4000,redline:6000,
   ind:"na",disp:2.0,engSound:"i4",hybHp:72,hybTq:177,
   gears:[2.60,0.45],fd:3.60,drive:"fwd",trans:"ecvt",sysHp:188,
-  layout:"front",tire:"allseason",weight:3810,dist:60,tireD:26.0,cda:7.2,wb:112.2,cg:21.5,
+  layout:"front",tire:"allseason",weight:3828,dist:60,tireD:26.0,cda:7.2,wb:112.2,cg:21.5,
   launch:'none',modes:['normal'],mode:'normal'}),
  /* --- Volvo S60 (incl. a twincharged T6 and a T8 plug-in hybrid) --- */
  s60_t5:Object.assign({},P1,{name:"2019 Volvo S60 T5",mfr:"Volvo",hp:250,hpRpm:5500,tq:258,tqRpm:1500,redline:6200,
@@ -13821,7 +13821,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='8dac544cf8';let dismissed=null;
+(function(){const V='b4923da882';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
