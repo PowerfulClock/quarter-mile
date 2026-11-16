@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="b4923da882";</script>
+<head><script>window.QM_VER="e1f6531031";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -483,6 +483,12 @@ footer p{margin-bottom:10px}
     <input type="number" id="temp" value="75" min="-20" max="120" step="1" style="width:100px"></div>
   <div class="fld"><label for="tempSlide">&nbsp;</label>
     <input type="range" id="tempSlide" value="75" min="-20" max="120" step="1" style="width:180px;padding:0"></div>
+  <div class="fld"><label for="altFt">ALTITUDE (ft)</label>
+    <input type="number" id="altFt" value="0" min="-500" max="12000" step="100" style="width:100px"></div>
+  <div class="fld"><label for="humid">HUMIDITY (%)</label>
+    <input type="number" id="humid" value="0" min="0" max="100" step="5" style="width:90px"></div>
+  <div class="fld"><label for="wind">HEADWIND (mph, − = tailwind)</label>
+    <input type="number" id="wind" value="0" min="-40" max="40" step="1" style="width:100px"></div>
   <div class="airnote" id="airNote"></div>
 </div>
 
@@ -849,7 +855,34 @@ function lerpPts(pts,x){
   return pts[pts.length-1][1];
 }
 function tireMu(k,T){const t=TIRES[k]||TIRES.summer;return t.mu*lerpPts(t.pts,T);}
-function airDensity(T){return 1.225*288.15/((T-32)*5/9+273.15);}
+/* Air density from temperature, altitude and humidity (moist-air ideal gas):
+   pressure falls with altitude per the standard atmosphere, p = 101325*(1-2.25577e-5*h)^5.25588;
+   water vapour (Tetens saturation pressure x relative humidity) is lighter than dry air, so humid air is
+   slightly thinner: rho = pd/(Rd*T) + pv/(Rv*T). */
+function envNum(id,d){const el=document.getElementById(id);const v=el?parseFloat(el.value):NaN;return isNaN(v)?d:v;}
+function envAlt(){return envNum('altFt',0);}
+function envHum(){return Math.max(0,Math.min(100,envNum('humid',0)));}
+function envWind(){return envNum('wind',0);}
+function airDensity(T,altFt,rh){const Tk=(T-32)*5/9+273.15,Tc=Tk-273.15;
+  const h=(altFt==null?envAlt():altFt)*0.3048,p=101325*Math.pow(Math.max(0.2,1-2.25577e-5*h),5.25588);
+  const pv=((rh==null?envHum():rh)/100)*610.78*Math.pow(10,7.5*Tc/(Tc+237.3));
+  return (p-pv)/(287.058*Tk)+pv/(461.495*Tk);}
+/* Aerodynamic defaults when a car has no measured figures. ClA in ft2: + is downforce, - is lift.
+   Ordinary road cars make a little lift; track specials and race cars make real downforce.
+   bal = share of the aero load on the front axle. */
+function aeroDefault(c){const n=(c.name||'').toLowerCase(),hp=c.hp||200;
+  if(c.cla!=null&&!isNaN(c.cla))return {cla:c.cla,bal:(c.aeroBal!=null&&!isNaN(c.aeroBal))?c.aeroBal:45};
+  let cla=-1.3,bal=40;
+  if(/nascar/.test(n)){cla=22.6;bal=45;}
+  else if(/formula 1|\bc38\b/.test(n)){cla=38.8;bal=42;}
+  else if(/\bgt[234]\b|gt[23] rs|performante|\bsto\b|\bsvj\b|speciale|competizione|pista|\bz06\b|\bzr1\b|\bacr\b|\bgt500\b|\bnismo\b|z-tune|senna|765lt|600lt|track edition|\bcs\b/.test(n)){cla=6.5;bal=42;}
+  else if((c.layout==='mid'||c.layout==='rear')&&hp>=450){cla=1.6;bal=42;}
+  else if(hp>=400){cla=-0.3;bal=42;}
+  return {cla,bal};}
+/* Rolling resistance rises with speed and falls with inflation pressure:
+   Crr = 0.005 + (1/p)(0.01 + 0.0095(v/100 km/h)^2), p in bar. */
+const TIRE_BAR={drag:1.2,track:2.0,summer:2.4,allweather:2.4,allseason:2.4,touring:2.4,winter:2.2};
+function crrAt(tire,v){const p=TIRE_BAR[tire]||2.4,k=v*3.6/100;return 0.005+(0.01+0.0095*k*k)/p;}
 function ambient(){const v=parseFloat(document.getElementById('temp').value);return isNaN(v)?75:v;}
 function raceDist(){return parseFloat(document.getElementById('dist').value)||1320;}
 function startMph(){return parseFloat(document.getElementById('startMph').value)||0;}
@@ -2626,6 +2659,8 @@ function buildForm(lane,color,idx){
   '<div><label for="cg'+L+'">CG height (in)</label><input type="number" id="cg'+L+'" min="8" max="40" step="0.5"></div>'+
   '<div><label for="wb'+L+'">Wheelbase (in)</label><input type="number" id="wb'+L+'" min="70" max="150" step="0.5"></div>'+
   '<div><label for="cda'+L+'">Drag area CdA (ft²)</label><input type="number" id="cda'+L+'" min="2" max="20" step="0.1"></div>'+
+  '<div><label for="cla'+L+'">Downforce area ClA (ft², − = lift)</label><input type="number" id="cla'+L+'" min="-6" max="60" step="0.1"></div>'+
+  '<div><label for="aeroBal'+L+'">Aero balance (% front)</label><input type="number" id="aeroBal'+L+'" min="20" max="70" step="1"></div>'+
   '<div><label for="eff'+L+'">Driveline efficiency</label><input type="number" id="eff'+L+'" min="0.6" max="1" step="0.01"></div>'+
   '<div><label for="shift'+L+'">Shift time (sec)</label><input type="number" id="shift'+L+'" min="0" max="1.5" step="0.01"></div>'+
   '<div><label for="stall'+L+'">Converter stall multiplier</label><input type="number" id="stall'+L+'" min="1" max="3" step="0.05"></div>'+
@@ -2647,7 +2682,7 @@ document.getElementById('carForms').innerHTML=
 /* The car's hardware can only be changed in the Real Customization map. On the race tracks the
    driver still picks the drive mode, shift strategy, launch technique (method and launch rpm) and tyres. */
 const SPEC_FIELDS=['hp','hpRpm','tq','tqRpm','redline','disp','ind','engSound','layout','drive','trans','fd','weight','tireD',
-  'dist','cg','wb','cda','eff','shift','stall','stallRpm','hpPerL','hybHp','hybTq','redFrac','gripAdj'];
+  'dist','cg','wb','cda','cla','aeroBal','eff','shift','stall','stallRpm','hpPerL','hybHp','hybTq','redFrac','gripAdj'];
 /* Specs are free to edit in single player and in an online Sandbox room; Build & Race and Class racing
    rooms keep them locked so every car goes through the dealership / Real Customization. */
 function specsFree(){try{return !(MP.on&&mpCfg()&&mpMode()!=='sandbox');}catch(e){return true;}}
@@ -2803,7 +2838,7 @@ function readCarRaw(lane){
   return{name:document.getElementById('name'+lane+'f').value||('Lane '+lane),
     hp:n('hp'),hpRpm:n('hpRpm'),tq:n('tq'),tqRpm:n('tqRpm'),redline:n('redline'),
     disp:n('disp')||2.0,ind:s('ind'),shift:n('shift'),fd:n('fd'),
-    weight:n('weight'),tireD:n('tireD'),dist:n('dist'),cda:n('cda'),eff:n('eff'),
+    weight:n('weight'),tireD:n('tireD'),dist:n('dist'),cda:n('cda'),cla:n('cla'),aeroBal:n('aeroBal'),eff:n('eff'),
     wb:n('wb')||110,cg:n('cg')||20,gripAdj:n('gripAdj')||1,stall:n('stall')||2,
     hpPerL:n('hpPerL')||0,redFrac:n('redFrac')||0,stallRpm:n('stallRpm')||0,
     hybHp:n('hybHp')||0,hybTq:n('hybTq')||0,
@@ -2815,7 +2850,7 @@ function readCarRaw(lane){
     burble:(EXTRAOF[lane]||{}).burble||0,
     ...buildExtras(lane,n('hp'),n('tq')),
     venue:currentVenue(),burnout:!!BURNOUTOF[lane]&&s('drive')==='rwd'&&!((IND[s('ind')]||IND.na).electric),
-    temp:ambient(),gears,empty:laneEmpty(lane)};
+    temp:ambient(),altFt:envAlt(),humid:envHum(),wind:envWind(),gears,empty:laneEmpty(lane)};
 }
 function validate(c){
   const e=[],req={hp:'peak horsepower',hpRpm:'horsepower rpm',tq:'peak torque',tqRpm:'torque rpm',
@@ -3052,7 +3087,15 @@ function simulate(c){
   const m=c.weight/LB_PER_KG,r=(c.tireD*0.0254)/2;
   const wb=c.wb*0.0254,h=c.cg*0.0254;
   const ff=c.dist/100,rf=1-ff;
-  const rho=airDensity(c.temp),cda=c.cda*0.092903,pf=Math.sqrt(rho/1.225);
+  /* Power falls with the mass of air the engine can swallow. Temperature keeps its calibrated effect; altitude and
+     humidity cut a naturally aspirated engine roughly in proportion to density (about 3% per 1,000 ft), while a turbo
+     or supercharged engine's boost control recovers most of it and an electric motor does not care. */
+  const rho=airDensity(c.temp,c.altFt,c.humid),rhoT=airDensity(c.temp,0,0),cda=c.cda*0.092903;
+  const indI=IND[c.ind]||IND.na,altK=indI.electric?0:(indI.boosted?0.35:1.0);
+  const pf=Math.sqrt(rhoT/1.225)*Math.pow(rho/rhoT,altK);
+  const AD=aeroDefault(c),cla=AD.cla*0.092903,abal=AD.bal/100,windV=(c.wind!=null?c.wind:envWind())/MPH_PER_MS;
+  const drsCar=/formula 1|\bc38\b/i.test(c.name||'');
+  let aeroDrag=0,aeroDown=0,aeroRoll=0,trapAero=null;
   const mu=tireMu(c.tire,c.temp)*c.gripAdj;
   // tread temperature: starts where the pre-race left it, heats with wheelspin,
   // cools back toward the driven-warm baseline, faster at speed
@@ -3235,10 +3278,14 @@ function simulate(c){
         slamE-=ex*Math.max(0.5,v)*DT;F+=ex;}
     }
     const tr=(h/wb)*m*aPrev;
+    /* aerodynamics: dynamic pressure on the airspeed (road speed plus headwind); DRS opens on the F1 car past ~50 mph */
+    const vAir=v+windV,qd=0.5*rho*vAir*Math.abs(vAir),drsOn=drsCar&&v>22;
+    aeroDrag=qd*cda*(drsOn?0.85:1);aeroDown=qd*cla*(drsOn?0.80:1);
+    const dLoad=aeroDown>0?aeroDown*0.9:aeroDown;
     let N;
-    if(c.drive==='rwd')N=Math.max(0,m*G*rf+tr);
-    else if(c.drive==='fwd')N=Math.max(0,m*G*ff-tr);
-    else N=m*G;
+    if(c.drive==='rwd')N=Math.max(0,m*G*rf+tr+dLoad*(1-abal));
+    else if(c.drive==='fwd')N=Math.max(0,m*G*ff-tr+dLoad*abal);
+    else N=Math.max(0,m*G+dLoad);
 
     /* ---- longitudinal slip model ----
        The driven wheels carry their own angular velocity. Grip is a function of
@@ -3322,12 +3369,13 @@ function simulate(c){
     const limited=sr>SP*1.6;
     tyreT+=fricKW*DT*0.30-(tyreT-tBase)*DT*(1+v/15)/TYRE_COOL_TAU;
     if(limited)tl+=DT;
-    let a=(Ftire-0.5*rho*cda*v*v-0.013*m*G)/m;
+    aeroRoll=crrAt(c.tire,v)*Math.max(0,m*G+aeroDown);
+    let a=(Ftire-aeroDrag-aeroRoll)/m;
     const braking=coasting&&t>etDone+0.7;
     if(braking){
       // firm but not panic braking, eased in over half a second: ~0.55 g
       const ramp=Math.min(1,(t-etDone-0.7)/0.5);
-      a=Math.min(a,-(0.55*G*ramp+0.5*rho*cda*v*v/m));
+      a=Math.min(a,-(0.55*G*ramp+(aeroDrag+aeroRoll)/m));
     }
     const dOmega=(Tin-Ftire*r)/Math.max(0.5,Irot);
     omega=Math.max(0,omega+dOmega*DT);
@@ -3343,6 +3391,7 @@ function simulate(c){
       // a downshift blips a little past the new revs, then settles (rev-matching)
       if(coasting&&tgt>shiftFrom)disp+=(tgt-shiftFrom)*0.35*Math.sin(Math.PI*k);
     }
+    if(trapAero===null&&x*FT_PER_M>=(c.raceFt||1320))trapAero={drag:aeroDrag,down:aeroDown,roll:aeroRoll,v};
     if(tRoll===null&&x>=0.3048)tRoll=t;      // 1 ft: the industry rollout mark
     if(sixty===null&&v*MPH_PER_MS>=60)sixty=t;
     if(hopT>0)hopT-=DT;
@@ -3353,7 +3402,7 @@ function simulate(c){
   const trapV=trace.length?trace.find(s=>s.x*FT_PER_M>=(c.raceFt||1320))||trace[trace.length-1]:{v};
   return{et:etFinal,trap:(trapV.v||v)*MPH_PER_MS,sixty,sixtyRoll:(sixty!==null&&tRoll!==null)?sixty-tRoll:null,
     trace,car:c,tlTime:tl,mu:mu*prepAt(c,0)*tyreGripFactor(c.tire,(c.tireTemp0!=null?c.tireTemp0:tBase),c.temp),
-    tyre0:(c.tireTemp0!=null?c.tireTemp0:tBase),boostPsi:bi.psi,
+    tyre0:(c.tireTemp0!=null?c.tireTemp0:tBase),boostPsi:bi.psi,rho,aero:trapAero||{drag:aeroDrag,down:aeroDown,roll:aeroRoll,v},aeroCla:AD.cla,
     idealEt:5.825*Math.pow(c.weight/c.hp,1/3)};
 }
 function crossoverPoints(c){
@@ -5659,7 +5708,7 @@ function refreshAll(){
   const rho=airDensity(ambient());
   document.getElementById('airNote').innerHTML='Air density '+rho.toFixed(3)+' kg/m³ ('+
     ((rho/1.225-1)*100>=0?'+':'')+((rho/1.225-1)*100).toFixed(1)+'% vs standard)<br>Power ×'+
-    Math.sqrt(rho/1.225).toFixed(3);
+    Math.sqrt(rho/1.225).toFixed(3)+(envWind()?' · '+(envWind()>0?'headwind ':'tailwind ')+Math.abs(envWind())+' mph':'');
   activeLanes().forEach(refresh);
 }
 function setLane(lane,d){
@@ -5668,6 +5717,7 @@ function setLane(lane,d){
   document.getElementById('name'+lane+'f').value=d.name;
   ['hp','hpRpm','tq','tqRpm','redline','disp','fd','weight','tireD','gripAdj','dist','cda','wb','cg','launchRpm']
     .forEach(k=>{const el=document.getElementById(k+lane);if(el)el.value=d[k];});
+  {const ad=aeroDefault(d);const a1=document.getElementById('cla'+lane),a2=document.getElementById('aeroBal'+lane);if(a1)a1.value=ad.cla;if(a2)a2.value=ad.bal;}
   BODYOF[lane]=d.body||'sedan';
   MODESOF[lane]=d.modes||['normal'];
   CLUSTEROF[lane]=d.cluster||'auto';
@@ -11707,6 +11757,7 @@ function stepSusp(l,c,dt){
 });
 const tempIn=document.getElementById('temp'),tempSl=document.getElementById('tempSlide');
 tempIn.addEventListener('input',()=>{tempSl.value=tempIn.value;refreshAll();});
+['altFt','humid','wind'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('input',refreshAll);});
 tempSl.addEventListener('input',()=>{tempIn.value=tempSl.value;refreshAll();});
 document.getElementById('dist').addEventListener('change',()=>{reset();activeLanes().forEach(precomputeShift);});
 /* Venue rules. The strip is two lanes, so it is only offered with 2 racers.
@@ -13277,6 +13328,10 @@ function slipHtml(r){
   h+='<div class="slip-row"><span>Elapsed time</span><span>'+r.et.toFixed(3)+' s</span></div>'+
    '<div class="slip-row"><span>Trap speed</span><span>'+r.trap.toFixed(1)+' mph</span></div>'+
    '<div class="slip-row"><span>Wheel hp / torque (dyno)</span><span>'+(()=>{const w=dynoWheel(c)||{hp:c.hp*c.eff,tq:c.tq*c.eff};return Math.round(w.hp)+' / '+Math.round(w.tq);})()+'</span></div>'+
+   (r.aero?'<div class="slip-row"><span>Aero drag at the stripe</span><span>'+Math.round(r.aero.drag/4.44822)+' lb · '+Math.round(r.aero.drag*r.aero.v/745.7)+' hp</span></div>'+
+     '<div class="slip-row"><span>'+(r.aero.down>=0?'Downforce':'Lift')+' at the stripe</span><span>'+Math.round(Math.abs(r.aero.down)/4.44822)+' lb</span></div>'+
+     '<div class="slip-row"><span>Rolling resistance at the stripe</span><span>'+Math.round(r.aero.roll/4.44822)+' lb</span></div>'+
+     '<div class="slip-row"><span>Air density</span><span>'+r.rho.toFixed(3)+' kg/m³</span></div>':'')+
    (I.boosted?'<div class="slip-row"><span>Peak boost</span><span>'+r.boostPsi.toFixed(1)+' psi</span></div>':'')+
    (c.startMph?'':'<div class="slip-row"><span>Launch</span><span>'+lbl+'</span></div>')+
    '<div class="slip-row"><span>Tyres at launch'+(c.burnout&&!c.startMph?' (after burnout)':'')+'</span><span>'+Math.round(r.tyre0)+'°F</span></div>'+
@@ -13425,7 +13480,7 @@ function mpLegal(c,cls){
   return C.t(c).concat(g);}
 
 /* ---- compact car encoding (fits several cars in one 4 KB presence) ---- */
-const MP_KEYS=['name','hp','hpRpm','tq','tqRpm','redline','disp','ind','shift','fd','weight','tireD','dist','cda','eff','wb','cg',
+const MP_KEYS=['name','hp','hpRpm','tq','tqRpm','redline','disp','ind','shift','fd','weight','tireD','dist','cda','cla','aeroBal','eff','wb','cg',
  'gripAdj','stall','hpPerL','redFrac','stallRpm','hybHp','hybTq','launch','launchRpm','shiftMode','shiftRpm','mode','drive',
  'trans','layout','tire','engSound','body','modes','cluster','sysHp','sysTq','vmax','burble','burnout','gears','curve','naCurve','psiCurve','tau','bPsi','bNaFrac','gearBoost','gearTq','ie'];
 function mpEnc(c){if(c&&c.empty)return['-'];return MP_KEYS.map(k=>{let v=c[k];if(typeof v==='number'&&!isFinite(v))v=null;
@@ -13447,7 +13502,7 @@ function mpSetLane(L,arr){if(Array.isArray(arr)&&arr[0]==='-'){if(!laneEmpty(L))
 function mpHash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return (h>>>0).toString(36);}
 function mpInShop(){const v=document.getElementById('venue').value;return v==='dyno'||v==='rc';}
 function mpTrkRead(){return{d:document.getElementById('dist').value,s:document.getElementById('startMph').value,
-  v:mpInShop()?(window.__lastRaceVenue||'road'):document.getElementById('venue').value,t:document.getElementById('tod').value,a:document.getElementById('temp').value};}
+  v:mpInShop()?(window.__lastRaceVenue||'road'):document.getElementById('venue').value,t:document.getElementById('tod').value,a:document.getElementById('temp').value,al:envAlt(),hu:envHum(),wi:envWind()};}
 
 const MP={on:false,room:null,rm:null,me:null,code:'',nick:'',host:false,cfg:null,lastCfg:null,
   lastAuth:{},myCars:{},my:null,trk:null,b:null,rdy:false,racing:false,raceId:0,pendingRace:null,
@@ -13499,7 +13554,7 @@ function mpPush(){if(!MP.rm)return;clearTimeout(mpPushT);mpPushT=setTimeout(()=>
 
 /* ---- applying state to the page ---- */
 function mpApplyTrk(o){const set=(id,v)=>{const el=document.getElementById(id);if(el&&v!=null&&el.value!==String(v)){el.value=v;el.dispatchEvent(new Event('change',{bubbles:true}));}};
-  if(mpInShop())window.__lastRaceVenue=o.v;else set('venue',o.v);set('dist',o.d);set('startMph',o.s);set('tod',o.t);
+  if(mpInShop())window.__lastRaceVenue=o.v;else set('venue',o.v);set('dist',o.d);set('startMph',o.s);set('tod',o.t);set('altFt',o.al);set('humid',o.hu);set('wind',o.wi);
   const te=document.getElementById('temp');if(te&&o.a!=null&&te.value!==String(o.a)){te.value=o.a;te.dispatchEvent(new Event('input',{bubbles:true}));te.dispatchEvent(new Event('change',{bubbles:true}));
     const sl=document.getElementById('tempSlide');if(sl)sl.value=o.a;}}
 function mpSetRacers(n){const rc=document.getElementById('racerCount');
@@ -13511,7 +13566,7 @@ function mpLock(){
   const rb=document.getElementById('runBtn');rb.disabled=inRoom&&!(mpInShop()&&!MP.racing);
   rb.title=inRoom?'In an online room the host starts every race, so everyone sees the same race at the same time.':'';
   document.getElementById('resetBtn').disabled=inRoom&&MP.racing;
-  ['dist','startMph','tod','temp','tempSlide'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=inRoom&&!mpTrkEditable();});
+  ['dist','startMph','tod','temp','tempSlide','altFt','humid','wind'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=inRoom&&!mpTrkEditable();});
   const ven=document.getElementById('venue');if(inRoom&&!mpTrkEditable())ven.disabled=true;else if(typeof syncVenue==='function'&&ven.disabled&&(window.activeRacers||2)<3)ven.disabled=false;
   const build=inRoom&&c.m==='build';
   ['presetPick','loadPreset','presetSearch'].forEach(id=>{document.getElementById(id).disabled=build||(inRoom&&MP.racing);});
@@ -13821,7 +13876,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='b4923da882';let dismissed=null;
+(function(){const V='e1f6531031';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
