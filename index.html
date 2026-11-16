@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="59e5d24220";</script>
+<head><script>window.QM_VER="732bea0e8f";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -2021,7 +2021,7 @@ Object.assign(PRESETS,{
  camaro21rs:Object.assign({},P1,{body:'camaro',name:"2021 Chevrolet Camaro RS V6",mfr:"Chevrolet",hp:335,hpRpm:6800,tq:284,tqRpm:5300,redline:7000,
   ind:"na",disp:3.6,engSound:"v6",body:"camaro",gears:[4.696,2.985,2.146,1.769,1.520,1.275,1.000,0.854,0.689,0.636],fd:3.27,drive:"rwd",trans:"auto",
   layout:"front",tire:"summer",weight:3435,dist:52,tireD:26.8,cda:7.4,wb:110.7,cg:19.5,
-  launchRpm:2800,modes:['normal','sport']}),
+  launchRpm:2800,modes:['normal','sport','track']}),
  /* --- Dodge (2011 Challenger + 2014 Charger) --- */
  chall11rt:Object.assign({},P1,{name:"2011 Dodge Challenger R/T",mfr:"Dodge",hp:372,hpRpm:5200,tq:400,tqRpm:4400,redline:5800,
   ind:"na",disp:5.7,engSound:"v8h",body:"challenger",gears:[3.59,2.19,1.41,1.00,0.83],fd:3.06,drive:"rwd",trans:"auto",
@@ -13877,7 +13877,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='59e5d24220';let dismissed=null;
+(function(){const V='732bea0e8f';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
