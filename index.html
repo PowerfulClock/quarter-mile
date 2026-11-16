@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="e1f6531031";</script>
+<head><script>window.QM_VER="c8c2c653b0";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1128,7 +1128,7 @@ class SampleEngine{
     src.start(ctx.currentTime,Math.random()*s.buf.duration);v={src,g};Ly.act.set(s,v);return v;}
   layer(k,rpm,level){
     const Ly=this.L[k];if(!Ly)return;const ctx=this.ctx,t=ctx.currentTime,list=Ly.list;
-    Ly.g.gain.setTargetAtTime(level,t,0.035);
+    Ly.g.gain.setTargetAtTime(level,t,Ly.tcShift||0.035);
     const want=new Map();
     if(Ly.grain){
       // one-cycle grains: hold the current grain while it's within 3% of the rpm
@@ -1149,6 +1149,7 @@ class SampleEngine{
   }
   update(rpm,load,shifting){
     const r=Math.max(500,rpm),hasOff=!!this.L.off;
+    for(const k in this.L)this.L[k].tcShift=(shifting||this.wasShift)?0.07:0.035;this.wasShift=shifting;
     const on=shifting?0.22:(hasOff?0.30+0.70*load:0.55+0.45*load);
     if(this.lp)this.lp.frequency.setTargetAtTime((2200+load*8000)*this.tone,this.ctx.currentTime,0.05);
     this.layer('on',r,on);
@@ -1345,9 +1346,10 @@ class EngineVoice{
     // a recorded engine replaces the synthesized combustion tone
     const syn=this.smp?0:1;
     if(this.smp)this.smp.update(rpm,load,shifting);
-    this.oscG.gain.setTargetAtTime(0.55*lvl*syn,t,0.03);
-    this.osc2G.gain.setTargetAtTime(0.30*lvl*syn,t,0.03);
-    this.subG.gain.setTargetAtTime(cfg.half*0.6*lvl*syn*(this.hasValve?(0.5+0.5*vOpen):1),t,0.03);
+    const tcS=(shifting||this.wasShift)?0.07:0.03;this.wasShift=shifting;
+    this.oscG.gain.setTargetAtTime(0.55*lvl*syn,t,tcS);
+    this.osc2G.gain.setTargetAtTime(0.30*lvl*syn,t,tcS);
+    this.subG.gain.setTargetAtTime(cfg.half*0.6*lvl*syn*(this.hasValve?(0.5+0.5*vOpen):1),t,tcS);
     this.nf.frequency.setTargetAtTime(600+f*6,t,0.05);
     this.nG.gain.setTargetAtTime(0.035*lvl*syn*(0.4+load*0.8)*(1+cfg.rough),t,0.05);
     if(this.boosted&&!this.blown){
@@ -1442,9 +1444,9 @@ class EngineVoice{
     const s=ctx.createBufferSource();s.buffer=this.nb;
     const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=3200;f.Q.value=1.6;
     const g=ctx.createGain();g.gain.setValueAtTime(0.0001,t);
-    g.gain.exponentialRampToValueAtTime(0.10,t+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+0.26);
-    f.frequency.setValueAtTime(3600,t);f.frequency.exponentialRampToValueAtTime(1500,t+0.25);
+    g.gain.exponentialRampToValueAtTime(0.06,t+0.07);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.34);
+    f.Q.value=0.9;f.frequency.setValueAtTime(2600,t);f.frequency.exponentialRampToValueAtTime(1100,t+0.32);
     s.connect(f);f.connect(g);g.connect(this.panner||audioOut(ctx));
     s.start(t);s.stop(t+0.3);
   }
@@ -13267,7 +13269,6 @@ document.getElementById('runBtn').addEventListener('click',()=>{
             if(s.gear>prev){                         // upshift
               if(bur>0&&!burbxShift(vo,r.car,true,bur*(0.6+0.4*Math.min(1,mph/80)),s.rpm,r.car.redline))vo.shiftBurble(bur*(0.6+0.4*Math.min(1,mph/80)));
               vo.bov();
-              if(MD.shock>0.5)vo.chirp(MD.shock);
             }else{                                   // downshift on the brakes
               vo.blip();
               if(bur>0&&!burbxShift(vo,r.car,false,0.5*bur,s.rpm,r.car.redline))vo.burble(0.45*bur);
@@ -13876,7 +13877,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='e1f6531031';let dismissed=null;
+(function(){const V='c8c2c653b0';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
