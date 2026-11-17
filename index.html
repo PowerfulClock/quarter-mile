@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>window.QM_VER="c2039ab124";</script>
+<head><script>window.QM_VER="8f60ca879b";</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quarter Mile — drag race simulator</title>
@@ -1484,12 +1484,12 @@ function startVoicesN(cars,lanes){
 }
 const P0={gripAdj:1.0,stall:2.0,launch:'lc',launchRpm:2800,shiftMode:'fastest',shiftRpm:0};
 const PRESETS={
- mustang25eco:Object.assign({},P0,{engSound:"i4",modes:['normal','sport','track','drag'],mode:'normal',body:'mustang',name:"2025 Mustang EcoBoost",hp:338,hpRpm:5500,tq:372,rated:[315,350],tqRpm:3000,redline:6300,
+ mustang25eco:Object.assign({},P0,{engSound:"i4",modes:['normal','sport','track','drag'],mode:'normal',body:'mustang',name:"2025 Mustang EcoBoost",hp:315,hpRpm:5500,tq:350,tqRpm:3000,redline:6300,
   ind:"single",disp:2.3,gears:[4.70,2.99,2.15,1.80,1.52,1.28,1.00,0.85,0.69,0.64],fd:3.15,drive:"rwd",trans:"auto",
-  layout:"front",tire:"summer",weight:3812,dist:53,tireD:27.0,cda:7.9,wb:107,cg:20.5}),
- mustang18eco:Object.assign({},P0,{engSound:"i4",modes:['normal','sport','track','drag'],mode:'normal',body:'mustang',name:"2018 Mustang EcoBoost",hp:278,hpRpm:5500,tq:322,rated:[310,350],tqRpm:3000,redline:6300,
-  ind:"single",disp:2.3,gears:[4.70,2.99,2.15,1.80,1.52,1.28,1.00,0.85,0.69,0.64],fd:3.31,drive:"rwd",trans:"auto",
-  layout:"front",tire:"summer",weight:3750,dist:53,tireD:27.5,cda:7.9,wb:107,cg:20.5}),
+  layout:"front",tire:"summer",weight:3740,dist:53,tireD:27.5,cda:7.9,wb:107,cg:20.5}),
+ mustang18eco:Object.assign({},P0,{engSound:"i4",modes:['normal','sport','track','drag'],mode:'normal',body:'mustang',name:"2018 Mustang EcoBoost",hp:310,hpRpm:5500,tq:350,tqRpm:3000,redline:6300,
+  ind:"single",disp:2.3,gears:[4.70,2.99,2.15,1.80,1.52,1.28,1.00,0.85,0.69,0.64],fd:3.15,drive:"rwd",trans:"auto",
+  layout:"front",tire:"summer",weight:3720,dist:53,tireD:27.5,cda:7.9,wb:107,cg:20.5}),
  mustang25gt:Object.assign({},P0,{engSound:"v8x",modes:['normal','sport','track','drag'],mode:'normal',body:'mustang',name:"2025 Mustang GT",hp:486,hpRpm:7250,tq:418,tqRpm:4900,redline:7500,
   ind:"na",disp:5.0,gears:[3.24,2.10,1.42,1.00,0.81,0.62],fd:3.55,drive:"rwd",trans:"manual",
   layout:"front",tire:"summer",weight:3827,dist:53,tireD:27.8,cda:8.0,wb:107,cg:20.5,launchRpm:3500}),
@@ -13877,7 +13877,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='c2039ab124';let dismissed=null;
+(function(){const V='8f60ca879b';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
