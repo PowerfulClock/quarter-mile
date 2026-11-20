@@ -11483,9 +11483,11 @@ function drawStage(st){
     const sp=stepSusp(l,c,0.016);
     // three.js is y-up: a positive Z rotation lifts the nose. Canvas was y-down,
     // so the sign is the opposite of the old 2D renderer.
-    const theta=(sp.r-sp.f)/(2*o.S.wx);
+    const rh=sp.r+(sp.hop||0);
+    const theta=(rh-sp.f)/(2*o.S.wx);
     o.shell.rotation.z=theta;
-    o.shell.position.y=((sp.f+sp.r)/2)*U*-1;
+    o.shell.rotation.x=sp.ro||0;                 // torque-reaction roll: positive lifts the left (driver's) side
+    o.shell.position.y=((sp.f+rh)/2)*U*-1;
     const wr=o.S.wr*U;
     // driven wheels spin at wheel speed (so they visibly outrun the car under
     // wheelspin); the undriven pair just rolls with the road
@@ -11664,9 +11666,13 @@ function suspProfile(c){
     luxury: {ff:1.15,fr:1.25,z:0.32,as:0.3, ad:0.28,al:0.22,tr:4.2},
     floaty: {ff:1.02,fr:1.12,z:0.2, as:0.08,ad:0.12,al:0.1, tr:5.0},
     suv:    {ff:1.2, fr:1.35,z:0.3, as:0.28,ad:0.25,al:0.2, tr:4.6},
-    perfsuv:{ff:1.55,fr:1.7, z:0.36,as:0.35,ad:0.3, al:0.25,tr:3.6}};
+    perfsuv:{ff:1.55,fr:1.7, z:0.36,as:0.35,ad:0.3, al:0.25,tr:3.6},
+    stock:  {ff:2.5, fr:2.8, z:0.45,as:0.6, ad:0.45,al:0.3, tr:1.6},   // NASCAR: stiff springs, bump stops, truck-arm rear
+    formula:{ff:4.6, fr:5.0, z:0.55,as:0.6, ad:0.6, al:0.5, tr:0.7}};  // F1: downforce cars run 3-5+ Hz on pushrods
   let k='sedan';
-  if(/koenigsegg|jesko|agera|regera|mclaren p1|bugatti|veyron|chiron|venom|aventador|svj|zr1|gt3 rs|senna/.test(n))k='hyper';
+  if(/nascar|cup car/.test(n))k='stock';
+  else if(/formula 1|\bf1\b|c38/.test(n))k='formula';
+  else if(/koenigsegg|jesko|agera|regera|mclaren p1|bugatti|veyron|chiron|venom|aventador|svj|zr1|gt3 rs|senna/.test(n))k='hyper';
   else if(/mclaren|720s|765|huracan|\br8\b|c8|z06|corvette|911|gt3|turbo s|viper|gt500|gt350|ford gt|nsx|gt-r|cayman/.test(n))k='supercar';
   else if(/x[357] m\b|x3 m40|x5 m50|x7|urus|trackhawk|durango (srt|hellcat)|sq5|model x|model y|cayenne/.test(n))k=/durango|model y|sq5/.test(n)?'suv':'perfsuv';
   else if(/durango|explorer|tahoe|suv/.test(n)||body==='durango')k='suv';
@@ -11676,7 +11682,20 @@ function suspProfile(c){
   else if(/crown victoria|town car|grand marquis|impala ls|buick/.test(n))k='floaty';
   else if(/g80|genesis|lincoln|mkz|s-class|lexus|model s/.test(n))k='luxury';
   const P=Object.assign({cls:k},T[k]);
-  if(/model [sx]|lucid|x5|x7|g80/.test(n))P.z+=0.04;                         // air / adaptive dampers
+  const A=suspArch(c);P.arch=A;
+  /* era: springs and dampers have stiffened decade by decade. A 1960s-70s car rides around 1.0-1.2 Hz on soft,
+     lightly damped shocks with lots of travel; 1980s-90s cars sit between that and today's 1.3-1.6 Hz norm. */
+  if(A.yr&&A.yr<1975){P.ff*=0.82;P.fr*=0.82;P.z*=0.72;P.tr+=1.2;}
+  else if(A.yr&&A.yr<2000){P.ff*=0.92;P.fr*=0.92;P.z*=0.88;P.tr+=0.5;}
+  /* rear axle type sets the anti-squat: a live axle's links (or leaf springs) push the body up under drive
+     torque, so it barely squats or even rises ("separation"); an IRS with its diff bolted to the subframe squats more */
+  if(A.rear==='link')P.as=Math.max(P.as,1.02);
+  else if(A.rear==='leaf')P.as=Math.max(P.as,0.72);
+  else if(A.rear==='truckarm')P.as=Math.max(P.as,1.1);
+  // dampers: magnetic and adaptive units hold the body flatter; air springs ride softer and self-level
+  if(A.damp==='mag'){P.z*=1.25;}
+  else if(A.damp==='adaptive'){P.z*=mode==='normal'?1.05:1.15;}
+  else if(A.damp==='air'){P.ff*=0.92;P.fr*=0.92;P.z+=0.05;}
   if(/crown victoria p71|police/.test(n)){P.ff*=1.12;P.fr*=1.15;P.z+=0.04;}   // police package springs
   if(mode==='sport'){P.ff*=1.08;P.fr*=1.08;P.z*=1.12;}
   if(mode==='track'){P.ff*=1.15;P.fr*=1.15;P.z*=1.22;}
@@ -11688,12 +11707,48 @@ function suspProfile(c){
   P.tireSquat=/slick/.test(tire)?0.5:/radial|drag/.test(tire)?0.32:/track/.test(tire)?0.06:0.12;
   P.h=Math.max(12,Math.min(32,(c.cg||20)))*0.0254;P.L=Math.max(85,Math.min(140,c.wb||110))*0.0254;
   P.df=Math.max(0.3,Math.min(0.65,(c.dist||55)/100));
-  P.kick=/dct|pdk|dual/.test((c.trans||'').toLowerCase())?0.5:/auto/.test((c.trans||'').toLowerCase())?0.8:1.2;
+  P.kick=/dct|pdk|dual/.test((c.trans||'').toLowerCase())?0.5:/auto/.test((c.trans||'').toLowerCase())?0.8:/amt/.test(c.trans||'')?1.5:/cvt/.test(c.trans||'')?0:1.2;
+  /* torque-reaction roll: with a longitudinal engine the driveshaft's torque twists the body. On a live axle that
+     reaction goes straight into the body (left front lifts, right rear unloads); with IRS the diff is bolted to the
+     body, so most of it cancels; transverse engines and electric motors twist about the other axis and do not roll it */
+  P.rollK={link:1.0,leaf:1.15,truckarm:0.9,irs:0.22,beam:0}[A.rear]??0.22;
+  if(A.transverse||(IND[c.ind]&&IND[c.ind].electric))P.rollK=0;
+  if(P.drive==='awd')P.rollK*=0.55;
+  P.m=Math.max(600,(c.weight||3500)*0.4536);P.rw=Math.max(0.25,(c.tireD||27)*0.0254/2);P.fd=c.fd||3.5;
+  // roll stiffness from the wheel rates plus typical anti-roll bars (about half the total on a road car)
+  {const kf=P.m*P.df/2*Math.pow(2*Math.PI*P.ff,2),kr=P.m*(1-P.df)/2*Math.pow(2*Math.PI*P.fr,2),t=1.58;
+   P.Kroll=(kf+kr)*t*t/2*1.4;}
+  // wheel hop when the driven tyres break loose: leaf springs wrap up worst, IRS hops on bushing deflection
+  P.hopAmp={leaf:0.55,irs:0.28,link:0.14,truckarm:0.1,beam:0.12}[A.rear]??0.2;
+  P.hopHz={leaf:8.5,irs:11,link:9,truckarm:9,beam:12}[A.rear]??10;
+  if(/drag|radial/.test(tire))P.hopAmp*=0.6;
+  if(k==='formula')P.hopAmp=0.03;
   return P;
+}
+/* Suspension layout by make, model and year. rear: link (live axle on coil links / torque arm), leaf (live axle on
+   leaf springs), truckarm (NASCAR), irs (independent), beam (torsion beam). damp: passive, adaptive, mag, air. */
+function suspArch(c){
+  const n=(c.name||'').toLowerCase(),yr=parseInt(c.name,10)||0,drv=c.drive||'rwd';
+  let rear='irs',damp='passive',transverse=false;
+  if(/nascar/.test(n))rear='truckarm';
+  else if(/mustang/.test(n)&&yr&&yr<2015&&!/mach-e/.test(n))rear=yr<1974?'leaf':'link';
+  else if(/camaro/.test(n)&&yr&&yr<2010)rear=yr<1982?'leaf':'link';
+  else if(/crown victoria|marauder|town car|grand marquis|impala ss/.test(n)&&(yr<2012))rear=/impala/.test(n)&&yr>2000?'irs':'link';
+  else if(/chevelle|gto|monte carlo|cutlass|442|el camino/.test(n)&&yr&&yr<1990)rear='link';
+  else if(/(charger|challenger|road runner|cuda|barracuda|super bee|coronet|nova|firebird|trans am)/.test(n)&&yr&&yr<1982)rear='leaf';
+  else if(/f-150|silverado|sierra|\bram\b|tundra|tacoma|ranger|raptor|trx|wrangler|bronco/.test(n))rear=/wrangler|bronco/.test(n)?'link':'leaf';
+  else if(drv==='fwd'&&/golf(?! r)|jetta|civic(?! type)|corolla|elantra(?! n)|sentra|focus(?! rs)|cruze/.test(n))rear='beam';
+  // transverse engines (FWD and FWD-based AWD) twist about the car's width, not its length
+  if(drv==='fwd'||/golf|gti|focus rs|focus st|type r|elantra n|camry|accord|mazda3|tlx|mkz|impala ltz|impala ls|s60|xc|model [3sxy]|lucid|mach-e/.test(n))transverse=true;
+  if(/zl1|1le|z51|\bz06\b|zr1|grand sport|c8|corvette|gt350|gt500|dark horse|mustang gt.*(pp2|performance pack)|\br8\b|ferrari|huracan|huracán|ct[45]-v|escalade/.test(n)&&!(/corvette/.test(n)&&yr&&yr<2005))damp='mag';
+  else if(/\bm[2-8]\b|x[3-7] m\b|amg|porsche|911|cayman|cayenne|srt|hellcat|demon|redeye|scat|rs ?[3-7]\b|\bs[4-8]\b|sq5|golf r|gr supra|g70|g80|stinger|lotus|mclaren|aventador|urus|xse|n line|elantra n|type r|focus rs|viper/.test(n))damp='adaptive';
+  if(/gt-r/.test(n)&&yr>=2007)damp='adaptive';
+  if(/model [sx]|lucid air|town car|urus|cayenne|escalade|s-class|range rover/.test(n))damp=damp==='mag'?'mag':'air';
+  return {yr,rear,damp,transverse};
 }
 const SUSP_DEF=suspProfile({name:'',body:'sedan'});
 function resetSusp(){['A','B','C','D'].forEach(l=>{
-  SUSP[l].f=SUSP[l].r=SUSP[l].vf=SUSP[l].vr=0;SUSP[l].ups=-9;SUSP[l].gh=0;SUSP[l].pend=0;});}
+  SUSP[l].f=SUSP[l].r=SUSP[l].vf=SUSP[l].vr=0;SUSP[l].ups=-9;SUSP[l].gh=0;SUSP[l].pend=0;SUSP[l].ro=SUSP[l].vro=0;SUSP[l].hopE=0;SUSP[l].hop=0;});}
 function stepSusp(l,c,dt){
   const s=SUSP[l]||(SUSP[l]={f:0,r:0,vf:0,vr:0,ups:-9});
   const P=SUSPP[l]||SUSP_DEF;
@@ -11724,6 +11779,14 @@ function stepSusp(l,c,dt){
     const kk=(c.harsh!=null?2.4*c.harsh:(0.6+1.8*(c.hold||0))*P.kick);
     if(P.dragLift){s.pend=kk;s.pendT=0;}
     else{s.vr-=kk*wr*0.08*IN_TO_U*10;s.vf+=kk*wf*0.05*IN_TO_U*10;}}
+  /* torque-reaction roll: driveshaft torque = wheel torque / final drive; the body twists against its roll stiffness */
+  {const tq=Math.max(0,a)*P.m*P.rw/P.fd*(c.shifting?0.6:1),tgtRoll=Math.min(0.045,tq*P.rollK/P.Kroll);
+   const wro=2*Math.PI*P.ff*1.1;s.vro=(s.vro||0)+(wro*wro*(tgtRoll-(s.ro||0))-2*P.z*wro*(s.vro||0))*dt;s.ro=(s.ro||0)+s.vro*dt;}
+  /* wheel hop: when the driven tyres break loose hard at low speed the axle winds up and lets go over and over */
+  {const ss=c.slipSpd||0,hopping=ss>0.8&&ss<6&&(c.g||0)>0.15&&(c.mph||0)<45&&P.drive!=='fwd';   // hop on grip-slip-grip, not in a steady smoky spin
+   s.hopE=Math.max(0,Math.min(1,(s.hopE||0)+(hopping?dt*6:-dt*5)));
+   s.hopPh=((s.hopPh||0)+dt*2*Math.PI*P.hopHz)%(2*Math.PI);
+   s.hop=s.hopE*P.hopAmp*IN_TO_U*Math.sin(s.hopPh);}
   // integrate in small sub-steps so stiff cars stay stable; front rebound uses its own damping (drag shocks)
   const N=6,h=dt/N;
   for(let i=0;i<N;i++){
@@ -13230,7 +13293,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
         if(!wheelDist[l])wheelDist[l]=0;
         wheelDist[l]+=(s.omega||0)*((r.car.tireD*0.0254)/2)*(1/60);
         stageState[l]={ft,g:gF,tl:s.tl,mph,color:LC[l],drive:r.car.drive,ups:s.ups,
-          hold:s.hold||0,harsh:s.harsh,body:r.car.body,slip:s.slip||0,slipSpd:s.slipSpd||0,fric:s.fric||0,omega:s.omega||0,
+          hold:s.hold||0,harsh:s.harsh,shifting:!!s.shifting,body:r.car.body,slip:s.slip||0,slipSpd:s.slipSpd||0,fric:s.fric||0,omega:s.omega||0,
           omegaDist:wheelDist[l],finished:(t>=r.et)};
         if(onStrip&&!posted[l]&&t>=r.et){
           posted[l]=true;stripBoard(l,r.et,r.trap,false);
