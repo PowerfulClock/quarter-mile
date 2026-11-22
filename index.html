@@ -2165,6 +2165,22 @@ Object.assign(PRESETS,{
  camry21xsev6:Object.assign({},P1,{name:"2021 Toyota Camry XSE V6",mfr:"Toyota",hp:318,hpRpm:6600,tq:282,rated:[301,267],tqRpm:4700,redline:6800,
   ind:"na",disp:3.5,engSound:"v6",gears:[5.25,3.03,1.95,1.46,1.22,1.0,0.81,0.67],fd:2.8,drive:"fwd",trans:"auto",
   layout:"front",tire:"summer",weight:3572,dist:62,tireD:26.4,cda:7.1,wb:111.2,cg:21,launch:'none',modes:['normal','sport'],mode:'normal'}),
+ /* --- Ford Explorer 2020 (sixth generation): only trims with their own power figure or drivetrain; no hybrid.
+    Ford: 2.3 EcoBoost 300 hp / 310 lb-ft (axle 3.36 RWD, 3.51 4WD), ST 3.0 EcoBoost 400 / 415 (3.58),
+    Platinum 3.0 EcoBoost 365 / 380 (3.16); 10R60 10-speed. Owner timeslips (stock ST, Maryland Int'l Raceway):
+    14.22-14.60 s at 97.3-99.1 mph. */
+ explorer20xlt:Object.assign({},P1,{name:"2020 Ford Explorer XLT",mfr:"Ford",hp:288,hpRpm:5500,tq:298,rated:[300,310],tqRpm:3000,redline:6300,
+  ind:"single",disp:2.3,engSound:"i4",gears:[4.714,2.997,2.149,1.769,1.521,1.275,1.0,0.853,0.689,0.636],fd:3.36,drive:"rwd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4400,dist:54,tireD:31.0,cda:10.9,wb:119.1,cg:27,launch:'bb',launchRpm:2000,modes:['normal','sport'],mode:'normal'}),
+ explorer20xlt4wd:Object.assign({},P1,{name:"2020 Ford Explorer XLT 4WD",mfr:"Ford",hp:288,hpRpm:5500,tq:298,rated:[300,310],tqRpm:3000,redline:6300,
+  ind:"single",disp:2.3,engSound:"i4",gears:[4.714,2.997,2.149,1.769,1.521,1.275,1.0,0.853,0.689,0.636],fd:3.51,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4560,dist:54,tireD:31.0,cda:10.9,wb:119.1,cg:27,launch:'bb',launchRpm:2000,modes:['normal','sport'],mode:'normal'}),
+ explorer20st:Object.assign({},P1,{name:"2020 Ford Explorer ST",mfr:"Ford",hp:384,hpRpm:5500,tq:398,rated:[400,415],tqRpm:3500,redline:6250,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.714,2.997,2.149,1.769,1.521,1.275,1.0,0.853,0.689,0.636],fd:3.58,drive:"awd",trans:"auto",
+  layout:"front",tire:"summer",weight:4701,dist:55,tireD:30.7,cda:10.9,wb:119.1,cg:26.5,launch:'bb',launchRpm:2200,modes:['normal','sport','track'],mode:'normal'}),
+ explorer20plat:Object.assign({},P1,{name:"2020 Ford Explorer Platinum",mfr:"Ford",hp:350,hpRpm:5500,tq:365,rated:[365,380],tqRpm:3500,redline:6250,
+  ind:"twin",disp:3.0,engSound:"v6",gears:[4.714,2.997,2.149,1.769,1.521,1.275,1.0,0.853,0.689,0.636],fd:3.16,drive:"awd",trans:"auto",
+  layout:"front",tire:"allseason",weight:4727,dist:55,tireD:31.0,cda:10.9,wb:119.1,cg:27,launch:'bb',launchRpm:2000,modes:['normal','sport'],mode:'normal'}),
  /* --- batch 4: 2026 Charger Sixpack, GT-R R35 / R34, Supras, Ferraris, Huracán 2020 range, Audi A7 (C7) --- */
  ch26rt2:Object.assign({},P1,{name:"2026 Dodge Charger Sixpack R/T 2-Door",mfr:"Dodge",hp:450,hpRpm:5200,tq:490,tqRpm:3500,redline:6100,
   ind:"twin",disp:3.0,engSound:"i6",gears:[5.00,3.20,2.14,1.72,1.31,1.00,0.82,0.64],fd:3.09,drive:"awd",trans:"auto",
@@ -2730,12 +2746,12 @@ function modelFamily(name,mfr){
 function hasCustomModel(body,name){
   if(body==='mustang'&&(isS550(name)||isS197(name)||isS650(name)))return true;
   if(['durango','charger','camaro','crownvic','challenger','viper','viperacr'].indexOf(body)>=0)return true;
-  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name)||vwKind(name)||bp3Kind(name)||bp4Kind(name)||bp5Kind(name)||bp6Kind(name));
+  return !!(evKind(name)||audiKind(name)||fordKind(name)||chevyKind(name)||bmwKind(name)||jpKind(name)||luxKind(name)||vwKind(name)||bp3Kind(name)||bp4Kind(name)||bp5Kind(name)||bp6Kind(name)||explorerKind(name));
 }
 function hasCustomCluster(body,name){
   const nm=name||'',yr=parseInt(nm,10)||0;
   if(['challenger','camaro','mustang'].indexOf(body)>=0)return true;
-  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|marauder|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti|ferrari|nissan gt-?r|skyline|supra|toyota camry|nascar|formula 1/i.test(nm))return true;
+  if(/porsche|\baudi\b|\bbmw\b|durango|lamborghini|\baccord\b|mclaren|elantra n\b|\b(golf|gti)\b|lincoln|\bfusion\b|viper|crown victoria|marauder|impala|venom|focus rs|agera|jesko|regera|lucid|tesla|taurus|mazda ?3\b|miata|mx-5|volvo|genesis g[78]0|infiniti|ferrari|nissan gt-?r|skyline|supra|toyota camry|ford explorer|nascar|formula 1/i.test(nm))return true;
   if(/charger/i.test(nm)&&yr>=2024)return true;
   if(/corvette/i.test(nm)&&/\bC[678]\b/.test(nm))return true;
   if(/mustang|shelby/i.test(nm)&&yr>=2005)return true;
@@ -4353,6 +4369,46 @@ function displayFerrari(l,c,tk,rf){
   o.push('<rect x="298" y="128" width="40" height="6" fill="none" stroke="#cfd3d8" stroke-width="0.6"/><rect x="298" y="128" width="6" height="6" fill="'+red+'"/>',T(394,136,'2039 km',6,'#fff'));
   return svgWrap(o.join(''),'<radialGradient id="frb'+l+'"><stop offset="0.8" stop-color="#0c0c0e"/><stop offset="0.9" stop-color="#3a3c40"/><stop offset="1" stop-color="#121215"/></radialGradient>','');
 }
+/* ---------- Ford Explorer (2020-24) cluster ----------
+   Two chrome-ringed analog dials (tach 0-8 with a red band, speedo 0-140) with ice-blue needles, an 8-inch screen
+   between them (trip page, big digital speed, odometer / range), a bar under it: temp C-H, P R N D M, fuel E-F. */
+function displayExplorer6(l,c,tk,rf){
+  const o=[],wh='#f4f6fa',dim='#8d96a6',nd='#6fd2ff',amb='#ff8a1c';
+  const face=(cx,cy,R)=>o.push('<circle cx="'+cx+'" cy="'+cy+'" r="'+(R+5)+'" fill="url(#ex6r'+l+')"/><circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="#06070a"/>'+
+    '<circle cx="'+cx+'" cy="'+cy+'" r="'+(R*0.22)+'" fill="#0e1014"/>');
+  face(80,90,68);face(360,90,68);
+  o.push(gDial({cx:80,cy:90,R:64,a0:-125,span:245,redFrac:rf,scale:uniScale(Math.max(8,tk),2,i=>i),red:{r:60,col:'#e2262e',w:7},
+    ticks:{lM:8,wM:2.2,lm:4,wm:1.2,cM:wh,cm:wh,red:wh},lab:{r:46,sz:15,w:500,col:wh},
+    needle:{id:'nd-rpm-'+l,col:nd,r0:-6,r1:60,w:3.4,tw:1.2,glow:'ex6g'+l,hub:{r:9,fill:'#15181d',stroke:'#2c313a'}}}));
+  o.push(T(48,128,'RPM',6,wh,{anchor:'start'}),T(48,135,'x1000',5,wh,{anchor:'start'}));
+  o.push(gDial({cx:360,cy:90,R:64,a0:-125,span:245,scale:uniScale(7,2,i=>i*20),
+    ticks:{lM:8,wM:2.2,lm:4,wm:1.2,cM:wh,cm:wh},lab:{r:46,sz:14,w:500,col:wh},
+    needle:{id:'nd-spd-'+l,col:nd,r0:-6,r1:60,w:3.4,tw:1.2,glow:'ex6g'+l,hub:{r:9,fill:'#15181d',stroke:'#2c313a'}}}));
+  o.push(T(352,128,'MPH',5.5,wh));
+  // warning lamps scattered in the dials (as in the photo): TPMS, check engine, ABS, BRAKE, airbag
+  o.push(T(104,114,'ABS',5.5,amb,{w:700}),T(372,62,'BRAKE',5.5,'#ff3b2a',{w:700}));
+  // centre screen
+  o.push('<defs><linearGradient id="ex6s'+l+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05070c"/><stop offset="0.62" stop-color="#0a1a3c"/><stop offset="0.82" stop-color="#1638a8"/><stop offset="1" stop-color="#0a1430"/></linearGradient></defs>');
+  o.push('<rect x="154" y="26" width="132" height="116" rx="4" fill="url(#ex6s'+l+')" stroke="#1d2230"/>');
+  o.push(T(166,37,'Trip 1',7,wh,{anchor:'start'}),T(250,37,'E',7,wh),T(282,37,Math.round(ambient())+'°',7,wh,{anchor:'end'}));
+  o.push('<line x1="160" y1="41" x2="280" y2="41" stroke="#3a4a6a" stroke-width="0.6"/>');
+  o.push('<path d="M176 59 L178.5 48 M184 59 L181.5 48 M180 58 L180 56 M180 53 L180 51" stroke="'+wh+'" stroke-width="1.1" fill="none"/>'+
+    '<rect x="216.5" y="48" width="6" height="10" rx="1" fill="none" stroke="'+wh+'" stroke-width="1.1"/><rect x="217.8" y="49.5" width="3.4" height="2.6" fill="'+wh+'"/>'+
+    '<circle cx="258" cy="54" r="4.2" fill="none" stroke="'+wh+'" stroke-width="1.1"/><path d="M258 54 L258 51.4 M256.6 48.6 L259.4 48.6" stroke="'+wh+'" stroke-width="1.1"/>');
+  o.push(T(180,66,'4144.2',6,wh),T(180,72,'Miles',4.5,dim),T(220,66,'16.5',6,wh),T(220,72,'MPG',4.5,dim),T(258,66,'386:26',6,wh),T(258,72,'time',4.5,dim));
+  o.push('<line x1="166" y1="80" x2="196" y2="80" stroke="#4a5a7a" stroke-width="0.6"/><line x1="244" y1="80" x2="274" y2="80" stroke="#4a5a7a" stroke-width="0.6"/>');
+  o.push(T(220,104,'<tspan id="cl-mph-'+l+'">0</tspan>',24,wh,{w:300}),T(220,113,'MPH',6,wh));
+  o.push(T(166,132,'72055.0 mi',6,wh,{anchor:'start',fam:'Roboto Mono, monospace'}),T(276,132,'171 mi to E',6,wh,{anchor:'end'}));
+  o.push(T(220,140,'<tspan id="cl-g-'+l+'">0.00</tspan> g',4.8,dim));
+  // lower bar: temperature, gear selector, fuel
+  o.push('<rect x="22" y="150" width="396" height="20" rx="5" fill="#0b0c0f"/>');
+  o.push(T(40,164,'C',7,wh),'<rect x="48" y="158" width="66" height="1.6" fill="'+wh+'"/>'+[0,1,2].map(k=>'<rect x="'+(50+k*6)+'" y="154" width="4" height="2" fill="'+dim+'"/>').join('')+
+    '<rect x="102" y="158" width="10" height="1.6" fill="#ff3030"/>'+T(120,164,'H',6,wh));
+  o.push(T(188,166,'P',10,dim,{w:600}),T(203,166,'R',10,wh,{w:600}),T(218,166,'N',10,wh,{w:600}),
+    T(236,166,'D',10,amb,{w:700,id:'cl-gear2-'+l,extra:' data-pre="D"'}),T(256,166,'M',10,wh,{w:600}));
+  o.push(T(326,164,'E',6,wh),'<rect x="334" y="158" width="66" height="1.6" fill="'+wh+'"/>'+[0,1,2,3,4].map(k=>'<rect x="'+(350+k*10)+'" y="154" width="7" height="2" fill="'+wh+'"/>').join('')+T(406,164,'F',6,wh));
+  return svgWrap(o.join(''),glowDef('ex6g'+l,1.5)+chromeGrad('ex6r'+l),'<rect x="2" y="6" width="436" height="170" rx="26" fill="#0d0e11"/>');
+}
 /* ---------- Toyota Camry clusters ---------- */
 // 2012-14: three chrome-ringed analog dials lit white with blue inner rings; tach + LCD left, big speedo centre, fuel/MPG + LCD right
 function displayCamry13(l,c,tk,rf){
@@ -5403,7 +5459,7 @@ function buildClusters(){
     const lambo=cs?cs==='lambo':/lamborghini/i.test(nm);
     const yr=parseInt(nm,10)||0;
     const isAcc=/\baccord\b/i.test(nm);
-    const NEWC={nascar:/nascar/i,f1:/\bc38\b|formula 1/i,camry13:/\b201[2-4] toyota camry\b/i,camry21:/\b20(1[89]|2[0-4]) toyota camry\b/i,charger26:/\b20(2[4-9]|3\d) dodge charger\b/i,gtr35:/nissan gt-?r\b/i,r34:/skyline/i,grsupra:/\bgr supra\b/i,supra4:/toyota supra\b/i,ferrari:/ferrari/i,r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,c6:/corvette.*\bC6\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria|marauder/i,impala:/impala/i,
+    const NEWC={explorer6:/\b20(19|2[0-4]) ford explorer\b/i,nascar:/nascar/i,f1:/\bc38\b|formula 1/i,camry13:/\b201[2-4] toyota camry\b/i,camry21:/\b20(1[89]|2[0-4]) toyota camry\b/i,charger26:/\b20(2[4-9]|3\d) dodge charger\b/i,gtr35:/nissan gt-?r\b/i,r34:/skyline/i,grsupra:/\bgr supra\b/i,supra4:/toyota supra\b/i,ferrari:/ferrari/i,r8:/\baudi\b.*\bR8\b/i,mclaren:/mclaren/i,elantran:/elantra n\b/i,golf:/\b(golf|gti)\b/i,c6:/corvette.*\bC6\b/i,lincoln:/lincoln|\bfusion\b/i,viper:/viper/i,crownvic:/crown victoria|marauder/i,impala:/impala/i,
       venom:/venom/i,focusrs:/focus rs/i,agera:/agera|jesko/i,regera:/regera/i,lucid:/lucid/i,tesla:/tesla/i,taurus:/taurus/i,
       mazda3:/mazda ?3\b/i,miata:/miata|mx-5/i,volvo:/volvo/i,g70:/genesis g70/i,g80:/genesis g80/i,infiniti:/infiniti/i};
     let nstyle=null;
@@ -5423,7 +5479,7 @@ function buildClusters(){
     // the Durango speedo reads to 140 mph; SRT models print 200
     const durSpd=/srt|hellcat|392/i.test(nm)?200:140;
     // needle scale must match the numbers printed on each style of speedo
-    clusterMeta[l].spdMax=nstyle?({nascar:220,f1:240,camry13:140,camry21:160,charger26:180,gtr35:220,r34:111.85,grsupra:180,supra4:198.8,ferrari:220,c6:/zr1/i.test(nm)?220:200,infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
+    clusterMeta[l].spdMax=nstyle?({explorer6:140,nascar:220,f1:240,camry13:140,camry21:160,charger26:180,gtr35:220,r34:111.85,grsupra:180,supra4:198.8,ferrari:220,c6:/zr1/i.test(nm)?220:200,infiniti:180,g70:180,bmwm5:200,camaro6:200,camaro5:180,mustang5:140,viper:220,charger11:140,crownvic:140,impala:140,venom:270,focusrs:180,agera:260,regera:260,tesla:140,taurus:140}[nstyle]||160):porsche?225:durango?durSpd:vetteC7?200:bmw?200:(muscle||chevy||pony||audi)?160:220;
     if(nstyle==='chall15')clusterMeta[l].spdMax=chall15Spd(nm);
     if(nstyle==='charger15')clusterMeta[l].spdMax=/hellcat/i.test(nm)?200:/scat|392/i.test(nm)?180:160;
     const d=document.createElement('div');d.className='cluster'+(darkCluster?' cluster-muscle':'');
@@ -5473,7 +5529,7 @@ function buildClusters(){
       '</div>';
     if(nstyle){
       const tk=tachMax/1000,rf=rl/tachMax;
-      const F={nascar:displayNascar,f1:displayF1,camry13:displayCamry13,camry21:displayCamry21,charger26:displayCharger26,gtr35:displayGTR35,r34:displayR34,grsupra:displayGRSupra,supra4:displaySupraMk4,ferrari:displayFerrari,r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
+      const F={explorer6:displayExplorer6,nascar:displayNascar,f1:displayF1,camry13:displayCamry13,camry21:displayCamry21,charger26:displayCharger26,gtr35:displayGTR35,r34:displayR34,grsupra:displayGRSupra,supra4:displaySupraMk4,ferrari:displayFerrari,r8:displayR8,mclaren:displayMcLaren,accord:displayAccord10,accord9:displayAccord9,elantran:displayElantraN,s650:displayS650,
         golf:displayGolf,c6:displayC6,lincoln:displayLincoln,mazda3:displayMazda3,miata:displayMiata,volvo:displayVolvo,infiniti:displayInfiniti,g70:displayG70,g80:displayG80,
         mustangD:displayMustangDigital,mustang6:displayMustangS550,mustang5:displayMustangS197,camaro6:(a,b,cc,dd)=>displayCamaro6(a,b,cc,dd,clusterMeta[l].boosted),
         camaro5:displayCamaro5,viper:displayViper,charger11:displayCharger11,charger15:displayCharger15,chall15:displayChall15,crownvic:displayCrownVic,impala:displayImpala,chall11:displayChall11,
@@ -5856,6 +5912,7 @@ const SHAPES={
 viper:{wx:31.9,wr:8.6,archR:10.2,nose:57,tail:-60,rocker:-4.5,belt:-22},
 viperacr:{wx:31.9,wr:8.6,archR:10.2,nose:57,tail:-60,rocker:-4.5,belt:-22},
 durango:{wx:38.65,wr:9.8,archR:11.4,nose:62.6,tail:-67,rocker:-6.4,belt:-30},
+explorer:{wx:38.4,wr:10.0,archR:11.6,nose:59.8,tail:-68.5,rocker:-8.6,belt:-31.5},
 crownvic:{wx:37.75,wr:8.8,archR:10.4,nose:65,tail:-76,rocker:-5,belt:-27},
 sedan:{wx:34,wr:8.37,archR:10.35,rocker:-7,belt:-27,doors:3,ws:[20,-27.5,-4,-38],bl:[-41,-27,-27,-37],
  outline(c){c.moveTo(-61,-12);c.lineTo(-61,-20);c.quadraticCurveTo(-60,-24,-55,-25);
@@ -6194,6 +6251,10 @@ function wheelSpec(body,name){
     else if(/aventador s\b/.test(n)){f=ty(20,255,30);r=ty(21,355,25);style='ten';finish='gunmetal';cal='black';}
     else{f=ty(19,255,35);r=ty(20,335,30);style='split5';finish='silver';cal='black';}
   }else if(body==='mc720'||body==='p1'){f=ty(19,245,35);r=ty(20,305,30);style='ten';finish=body==='p1'?'silver':'gunmetal';cal='black';
+  }else if(body==='explorer'){
+    if(/\bst\b/.test(n)){f=r=ty(21,275,45);style='split5';finish='black';cal='red';}
+    else if(/platinum/.test(n)){f=r=ty(20,255,55);style='split6';finish='chrome';cal='silver';}
+    else{f=r=ty(18,255,65);style='ten';finish='silver';cal='silver';}
   }else if(body==='durango'){
     const srt=/srt|hellcat|tow n go/.test(n);
     f=r=srt?ty(20,295,45):ty(20,265,50);
@@ -6228,7 +6289,7 @@ function buildWheelX(R,rimR,W,style,finish,cal){
     const disc=new TH.Mesh(new TH.CylinderGeometry(rimR*0.74,rimR*0.74,R*0.05,28),finDk);disc.rotation.x=Math.PI/2;disc.position.z=s*fz*0.45;grp.add(disc);
     const cl=new TH.Mesh(new TH.BoxGeometry(rimR*0.24,rimR*0.62,R*0.14),new TH.MeshStandardMaterial({color:calCol,roughness:0.4,metalness:0.3}));
     cl.position.set(-rimR*0.58,rimR*0.2,s*fz*0.45);grp.add(cl);});
-  const spokes={five:[5,0.26,0],split5:[5,0.1,0.13],ten:[10,0.12,0],seven:[7,0.18,0],multi:[14,0.07,0]}[style]||[5,0.26,0];
+  const spokes={five:[5,0.26,0],split5:[5,0.1,0.13],split6:[6,0.09,0.12],ten:[10,0.12,0],seven:[7,0.18,0],multi:[14,0.07,0]}[style]||[5,0.26,0];
   [1,-1].forEach(s=>{const z=s*fz*0.84;
     for(let i=0;i<spokes[0];i++){const a0=i/spokes[0]*Math.PI*2;
       (spokes[2]?[-spokes[2],spokes[2]]:[0]).forEach(d=>{const a=a0+d;
@@ -7527,9 +7588,9 @@ function bpCar(colorHex,name,C){
     (x,y,z)=>{const top=gTop(x),az=Math.abs(z),GT=gtF(x);
       if(y<yTop(x)+(G.sill!=null?G.sill:0.5))return 0;
       const wr=G.wrap&&x>G.roof[0];
-      if(y>top-0.9&&az<GT-0.3){if(wr)return 1;if(x<G.roof[0]&&x>G.roof[1])return G.roofMat||0;return az>GT-(x<G.roof[1]?(G.rearSide||3.0):1.8)?0:1;}
+      if(y>top-0.9&&az<GT-0.3){if(wr)return 1;if(x<G.roof[0]&&x>G.roof[1])return G.roofMat||0;return az>GT-(x<G.roof[1]?(G.rearSide||3.0):1.8)?(x<G.roof[1]?(G.rearSideMat||0):(G.aMat||0)):1;}
       if(y>top-1.2&&!wr)return 0;
-      return G.side(x,y);},[M.paint,M.glass,M.dark]));
+      return G.side(x,y,z);},[M.paint,M.glass,M.dark]));
   // ---- surface helpers for trim ----
   // the body's bottom / top / crown / plan width sampled every 0.05 once, so finding the surface is a cheap
   // array walk instead of four table interpolations per step (this used to take up to 30 s on some cars)
@@ -7629,7 +7690,7 @@ function bpCar(colorHex,name,C){
     (C.cuts||[]).forEach(([x,y0,y1])=>box(0.3,y1-y0,0.35,M.dark,x,(y0+y1)/2,s*(planW(x)-0.8)));
     (C.handles||[]).forEach(([x,y])=>box(2.6,0.6,0.5,C.handleMat==='chrome'?M.chrome:C.handleMat==='paint'?M.paint:M.dark,x,y,s*(planW(x)-0.5)));
     if(C.rocker)box(C.rocker[1]-C.rocker[0],1.4,0.6,M.dark,(C.rocker[0]+C.rocker[1])/2,(C.rockerY||6.2),s*(Math.min(planW(C.rocker[0]),planW(C.rocker[1]))-2.0));
-    const mr=C.mirror;if(!C.mirrorSides||C.mirrorSides.includes(s))addMirror(shell,mr[0],mr[1],s,G.GB-0.6,W+1.2,M.paint,M.dark,mr[2]||[4,2.6,3.2]);
+    const mr=C.mirror;if(!C.mirrorSides||C.mirrorSides.includes(s))addMirror(shell,mr[0],mr[1],s,G.GB-0.6,W+1.2,C.mirrorMat==='dark'?M.gloss:M.paint,M.dark,mr[2]||[4,2.6,3.2]);
   });
   [wx,-wx].forEach(ax=>{const lin=new TH.Mesh(new TH.CylinderGeometry(AR*0.97,AR*0.97,W*2-6,20,1,true),
     new TH.MeshStandardMaterial({color:0x0b0d0f,roughness:1,side:TH.BackSide}));lin.rotation.x=Math.PI/2;lin.position.set(ax,wr,0);shell.add(lin);});
@@ -7704,6 +7765,123 @@ function buildDurangoBP(colorHex,name){
       // roof rails and spoiler
       [1,-1].forEach(s=>{box(46,0.7,1.0,M.dark,-28,gTop(-28)+0.6,s*17.2);});
       box(3.4,0.8,38,M.paint,-56.4,gTop(-56.4)+0.5,0,0.1);
+    }});
+}
+/* ---------- Ford Explorer (2020-24, sixth generation), from a scaled 2020 Explorer Platinum blueprint ----------
+   5050 mm long, 3025 mm wheelbase, 2004 mm wide, 1780 mm tall over the rails. 1 unit = 39.37 mm.
+   Trims: XLT 2.3 EcoBoost (RWD / 4WD), ST 3.0 EcoBoost (400 hp), Platinum 3.0 EcoBoost (365 hp). */
+function explorerKind(name){const n=(name||'').toLowerCase(),yr=parseInt(name,10)||0;
+  return (/ford explorer/.test(n)&&yr>=2020&&yr<=2024)?'explorer6':null;}
+function buildExplorerBP(colorHex,name){
+  const n=(name||'').toLowerCase(),st=/\bst\b/.test(n),plat=/platinum/.test(n),xlt=!st&&!plat;
+  const bright=plat?'chrome':st?'gloss':'satin';   // exterior accent finish: Platinum satin-chrome, ST gloss black, XLT silver
+  const dloTop=x=>x>-36?41.7:41.7-(-36-x)*0.11;
+  const slant=y=>-26.1-(41.7-y)*0.62;                       // rear edge of the rear-door glass
+  return bpCar(colorHex,name,{body:'explorer',NOSE:59.8,TAIL:-68.5,W:25.4,wx:38.4,wr:10.0,AR:11.6,
+    plan:[[59.8,7],[59.2,11],[58.3,14.4],[56.8,18.5],[55.4,21.0],[53.9,22.5],[52.4,23.6],[49.5,24.3],[45.1,25.0],[39.3,25.4],[-47,25.4],[-52.8,24.7],[-55.7,24.3],[-58.7,23.6],[-61.6,22.5],[-64.5,21.0],[-65.9,18.8],[-67.4,12.2],[-68.5,6]],
+    top:[[59.8,18],[59.5,21.5],[59.0,24.5],[58.3,27.0],[57.2,27.9],[54,28.6],[50,29.2],[45,29.9],[40,30.4],[35,30.9],[30,31.2],[27.6,31.3],[20,31.4],[10,31.5],[0,31.7],[-10,31.9],[-20,32.2],[-30,32.6],[-36,33.0],[-45,33.3],[-55,33.6],[-60,33.6],[-63.5,33.5],[-64.8,33.0],[-65.6,31.6],[-66.5,29.0],[-67.4,24.5],[-67.9,20.5],[-68.3,16.5],[-68.5,13.0]],
+    bot:[[59.8,14],[59.5,10],[58.8,7.6],[54,7.2],[50,7.6],[45,8.2],[30,8.6],[-30,8.6],[-47,9.2],[-52,9.6],[-58,9.9],[-63,10.2],[-66.5,11.0],[-68.5,12.6]],
+    crown:[56,28,1.0],tumbleY:25,tumble:0.7,
+    flare:{r:1.2,t:1.3,arc:0.9,sz:0.45,in:0.35,dark:true},                   // black wheel-arch mouldings
+    creases:[{x0:-54,x1:43,y:x=>28.4+(-x)*0.012},{x0:-35,x1:23,y:x=>16.4+(23-x)*0.006}],
+    gh:{x0:-64.6,x1:27.6,GB:22.0,GT:18.4,rr:1.6,roof:[6,-57.5],rearSide:3.2,rearSideMat:2,
+      top:[[27.6,31.6],[25,33.3],[22,35.0],[19,36.7],[16,38.4],[13,40.0],[10,41.3],[7.5,42.3],[5,43.2],[2,43.8],[-2,44.2],[-10,44.4],[-30,44.5],[-45,44.4],[-52,44.1],[-56,43.6],[-58.6,42.8],[-60.3,41.4],[-61.8,39.2],[-63.2,36.8],[-64.6,34.4]],
+      side:(x,y)=>{
+        if(x>12.5-(y-31.2)*0.56)return 2;                    // black A-pillar and mirror sail
+        const top=dloTop(x);
+        if(x>-37){
+          if(y>top)return 0;                                  // body-colour roof side
+          if(y>top-0.45)return 2;                             // black window frame
+          if(x<-5.7&&x>-9.9)return 2;                         // black B-pillar
+          if(x<=-9.9&&x>slant(y)){if(x<-25.3&&x>-25.9)return 2;return 1;}   // rear door glass + divider
+          if(x<=slant(y))return 0;                            // body-colour C-pillar
+          return 1;}                                          // front door glass
+        // quarter glass in a black surround, then the black D-pillar ("floating roof")
+        const qr=-53.1+(y-34.6)*(2.7/5.4);
+        if(y>33.9&&y<top-0.6&&x<-37.6&&x>qr)return 1;
+        if(y>top+0.2)return 0;
+        return 2;}},
+    mirror:[14.5,33.0,[4.6,3.0,3.8]],mirrorMat:st?'dark':'paint',
+    cuts:[[23.0,9,31.3],[-6.4,9,31.7],[-35.9,10,32.9]],
+    handles:[[-0.2,28.9],[-30.4,30.6]],handleMat:plat?'chrome':'paint',
+    wheelOut:[24.8,24.8],
+    trim:(c)=>{const {M,ribbon,disc,box,sideStrip,onHood,planW,gTop,yTop}=c;const {clear,F,R,quad,mesh,tip}=bp4Kit(c);
+      const silver=new TH.MeshStandardMaterial({color:0xb4b9c0,roughness:0.32,metalness:0.75,emissive:0x1a1c20});
+      const acc=bright==='chrome'?M.chrome:bright==='gloss'?M.gloss:silver;
+      // dark wheelhouse liners so the arches never show daylight through the body
+      [38.4,-38.4].forEach(ax=>[1,-1].forEach(s=>{const d=new TH.Mesh(new TH.CircleGeometry(11.4,28),M.dark);d.position.set(ax,10.0,s*(25.4-7.2));d.rotation.y=s>0?0:Math.PI;c.shell.add(d);}));
+      const oval=new TH.MeshStandardMaterial({color:0x1a3f9a,roughness:0.25,metalness:0.4,emissive:0x0a1a44,emissiveIntensity:0.6});
+      const badge=(dir,z,y,r,sx)=>{const a=disc(dir,z,y,r*1.15,M.chrome,dir>0?0.32:0.3);a.scale.x=sx;const b=disc(dir,z,y,r,oval,dir>0?0.4:0.38);b.scale.x=sx;};
+      /* ---- front ---- */
+      // headlamps: wide slab with an LED light-bar across the top that sweeps back along the fender,
+      // two rectangular LED projector modules inside, amber turn signal in the outer corner
+      quad(1,11.2,23.7,[23.3,27.3],[24.1,28.1],0.12,M.gloss,14);
+      quad(1,11.5,23.4,[23.6,27.0],[24.4,27.8],0.2,clear,14);
+      F(11.8,23.2,a=>{const t=(a-11.8)/11.4;return[26.3+t*0.8,26.9+t*0.8];},0.3,M.drl,12);
+      [[12.6,15.6],[16.2,19.2]].forEach(([a,b])=>{F(a-0.2,b+0.2,()=>[24.1,26.0],0.26,M.gloss,4);F(a,b,()=>[24.3,25.8],0.32,M.head,4);});
+      F(20.0,22.8,a=>{const t=(a-20)/2.8;return[24.6+t*0.3,25.8+t*0.4];},0.3,M.amber,4);
+      sideStrip(42.6,55.4,x=>{const t=(55.4-x)/12.8;return[24.0+t*2.4,28.0-t*0.5];},0.12,M.gloss,0.4);    // lamp wrapping round the fender
+      sideStrip(43.2,55.0,x=>{const t=(55-x)/11.8;return[26.9+t*0.2,27.5-t*0.1];},0.2,M.drl,0.4);
+      sideStrip(52.0,54.8,()=>[24.4,25.4],0.2,M.amber,0.4);                                              // side marker / turn
+      // grille: big hexagon of black-framed mesh, Ford oval in the middle
+      const gy=a=>{const lo=a<11.9?19.6:19.6+(a-11.9)/3.5*4.4,hi=a<10.9?27.0:a<11.4?27.0-(a-10.9)/0.5*3.8:23.2-(a-11.4)/4.0*0.8;return[lo,Math.max(lo+0.1,hi)];};   // grille tucks under the lamp ends
+      ribbon(1,-15.6,15.6,30,z=>{const r=gy(Math.min(15.4,Math.abs(z)));return[r[0]-0.35,r[1]+0.35];},0.12,acc);   // surround
+      ribbon(1,-15.4,15.4,30,z=>gy(Math.abs(z)),0.18,M.gloss);
+      for(let r=0;r<6;r++){const y=20.4+r*1.12;for(let k=-7;k<=7;k++){const z=k*1.95+(r%2?0.98:0);
+        const g=gy(Math.abs(z));if(y<g[0]+0.4||y>g[1]-0.4)continue;disc(1,z,y,0.5,plat?M.chrome:st?M.gloss:silver,0.26,0.62);}}
+      badge(1,0,24.1,1.15,2.5);
+      // fog lamps: black pockets with a horizontal LED bar; slot between them
+      ribbon(1,-9.8,9.8,12,()=>[16.9,18.3],0.14,M.gloss);
+      F(12.9,21.3,a=>{const t=(a-12.9)/8.4;return[15.4+t*0.4,19.0+t*0.3];},0.12,M.gloss,8);
+      F(14.2,20.4,a=>{const t=(a-14.2)/6.2;return[17.1+t*0.2,18.1+t*0.2];},0.24,M.head,6);
+      F(14.2,20.4,()=>[16.0,16.3],0.22,acc,4);
+      // lower bumper: black intake with a grid, silver skid plate (Platinum), black cladding the full width
+      F(0,24.6,a=>[6.8,a>14.6?11.2:10.4],0.08,M.dark,14);
+      mesh(1,0,14.3,10.0,14.3,0.12,7,3,M.gloss);
+      if(!xlt)F(0,13.3,()=>[6.4,9.2],0.22,plat?silver:M.gloss,8);
+      if(plat)[2.2,6.6,10.8].forEach(z=>[1,-1].forEach(s=>ribbon(1,s*z-1.4,s*z+1.4,2,()=>[7.2,8.4],0.3,M.dark)));
+      // hood: two raised character lines running back from the grille corners
+      for(let x=33;x<56;x+=1.0)[1,-1].forEach(s=>onHood(1.0,0.1,0.28,M.paintDk,x,s*(6.2+(x-33)*0.12),0.03));
+      onHood(20,0.05,0.4,M.paintLt,44,0,0.04);
+      /* ---- sides ---- */
+      sideStrip(48,59.4,()=>[7.4,10.4],0.08,M.dark,0.4);                                 // front bumper corner
+      sideStrip(-27,26.5,()=>[8.6,12.9],0.08,M.dark,0.5);                                // rocker cladding
+      if(!xlt)sideStrip(-24,24,()=>[11.5,12.0],0.16,acc,0.5);                            // bright rocker insert
+      sideStrip(-68.4,-50.5,x=>[9.4,13.6+Math.max(0,-62-x)*0.5],0.08,M.dark,0.4);       // rear bumper corner
+      sideStrip(-66.2,-63.8,()=>[15.4,16.1],0.16,M.tail,0.4);                            // rear side reflector
+      // tail lamp wraps forward onto the quarter panel as a wedge
+      sideStrip(-64.4,-54.6,x=>{const b=x>-58.9?31.0-(-54.6-x)/4.3*5.4:25.6;return[b,31.3];},0.12,M.gloss,0.3);
+      sideStrip(-64.2,-55.2,x=>{const b=x>-58.9?31.0-(-55.2-x)/3.7*5.2:25.9;return[b+0.15,31.1];},0.2,M.tail,0.3);
+      sideStrip(-64.0,-56.0,()=>[30.3,30.7],0.26,M.led,0.3);
+      // fuel door (driver's side)
+      box(4.3,2.8,0.12,M.paintMid,-44.8,28.6,-(planW(-44.8)+0.02));
+      // mirror turn-signal repeaters
+      [1,-1].forEach(s=>box(3.0,0.3,1.9,M.amber,14.6,31.6,s*27.6));
+      /* ---- rear ---- */
+      // tail lamps: red C-shape with a white reverse lamp up the inner edge
+      R(17.9,23.4,()=>[24.3,32.2],0.12,M.gloss,6);
+      R(18.1,23.2,()=>[24.5,32.0],0.2,M.tail,6);
+      R(18.4,20.6,()=>[25.3,30.0],0.28,M.rev,3);
+      R(20.9,22.8,()=>[30.7,31.4],0.3,M.led,3);R(22.3,22.9,()=>[25.2,31.2],0.3,M.led,2);
+      // liftgate: satin/chrome bar across with EXPLORER lettering, Ford oval above, trim badge
+      R(0,10.8,()=>[30.1,32.0],0.2,acc,10);
+      for(let k=0;k<8;k++){const z=-7.7+k*2.2;ribbon(-1,z-0.6,z+0.6,1,()=>[30.7,31.4],0.28,st?M.chrome:M.dark);}
+      badge(-1,0,33.3,0.7,2.4);
+      ribbon(-1,-17.6,-11.0,4,()=>[21.2,21.8],0.24,st?M.redL:M.chrome);
+      ribbon(-1,-4.6,4.6,6,()=>[42.6,43.1],0.24,M.led);                                  // high-mount stop lamp
+      // bumper: red reflectors, black lower bumper, silver diffuser, plate recess, exhaust tips
+      R(11.3,18.1,()=>[16.4,17.4],0.2,M.tail,4);
+      R(0,24.6,()=>[8.4,16.8],0.08,M.dark,14);
+      if(!xlt)R(0,19.8,()=>[10.9,14.1],0.16,plat?silver:M.gloss,10);
+      ribbon(-1,-5.4,5.4,6,()=>[12.0,16.9],0.14,M.gloss);ribbon(-1,-3.9,3.9,6,()=>[12.4,16.4],0.22,M.plate);
+      if(xlt)[1,-1].forEach(s=>tip(s*16.4,11.6,1.15));
+      else [1,-1].forEach(s=>{tip(s*13.9,12.0,1.25);tip(s*17.3,12.0,1.25);});
+      box(1.2,1.3,1.8,M.dark,-67.9,8.9,0);                                                // hitch receiver
+      // roof rails and liftgate spoiler
+      [1,-1].forEach(s=>{box(56,0.6,0.9,plat?silver:M.dark,-26,gTop(-26)+0.9,s*17.1);
+        [3,-55].forEach(x=>box(2.4,1.0,1.0,M.dark,x,gTop(x)+0.5,s*17.1));});
+      box(3.6,0.7,36,M.paint,-58.3,gTop(-58.3)+0.45,0,0.12);
+      box(3.0,0.25,34,M.dark,-58.8,gTop(-58.8)+0.05,0,0.12);
     }});
 }
 /* ---------- Dodge Charger (2011-14), from a scaled 2011 Charger blueprint ----------
@@ -10670,6 +10848,7 @@ function buildF1(colorHex,name){
 }
 
 function buildCarRaw(bodyKey,colorHex,carName){
+  if(explorerKind(carName))return buildExplorerBP(colorHex,carName);
   {const k6=bp6Kind(carName);if(k6)return buildBP6(k6,colorHex,carName);}
   {const k4=bp4Kind(carName);if(k4)return buildBP4(k4,colorHex,carName);}
   {const k5=bp5Kind(carName);if(k5)return buildBP5(k5,colorHex,carName);}
@@ -11674,7 +11853,7 @@ function suspProfile(c){
   else if(/formula 1|\bf1\b|c38/.test(n))k='formula';
   else if(/koenigsegg|jesko|agera|regera|mclaren p1|bugatti|veyron|chiron|venom|aventador|svj|zr1|gt3 rs|senna/.test(n))k='hyper';
   else if(/mclaren|720s|765|huracan|\br8\b|c8|z06|corvette|911|gt3|turbo s|viper|gt500|gt350|ford gt|nsx|gt-r|cayman/.test(n))k='supercar';
-  else if(/x[357] m\b|x3 m40|x5 m50|x7|urus|trackhawk|durango (srt|hellcat)|sq5|model x|model y|cayenne/.test(n))k=/durango|model y|sq5/.test(n)?'suv':'perfsuv';
+  else if(/x[357] m\b|x3 m40|x5 m50|x7|urus|trackhawk|durango (srt|hellcat)|explorer st|sq5|model x|model y|cayenne/.test(n))k=/durango|model y|sq5/.test(n)?'suv':'perfsuv';
   else if(/durango|explorer|tahoe|suv/.test(n)||body==='durango')k='suv';
   else if(/\bm[2-8]\b|rs ?7|amg|plaid|lucid|zl1|focus rs|golf r|elantra n|type r|supra|m340|m440|m550|m850|g70 3\.3|stinger/.test(n))k='sport';
   else if(/gti|mazda3|mx-5|miata|wrx|focus st|camaro|g70|model 3|s60/.test(n))k='hot';
@@ -13461,7 +13640,7 @@ function showSlip(rA,rB){
    host's presence carries the room settings, each player's carries their car.
    The physics are deterministic, so a race needs no streaming at all — every
    screen loads the same cars and conditions and computes the identical race. */
-const MP_PRICE={nascar18:400000,f1c38:15000000,camry13le:24000,camry13v6:30000,camry21le:26000,camry21le_awd:27500,camry21se:27500,camry21se_awd:29000,camry21xsev6:36000,ch26rt2:49995,ch26rt4:52995,ch26sp2:59995,ch26sp4:62995,gtr23prem:115000,gtr23tspec:140000,gtr23nismo:212000,r34gtr:180000,r34vspec:220000,r34vspec2:240000,r34mspec:230000,r34vnur:400000,r34mnur:380000,r34ztune:1000000,grs20_30:50000,grs20_le:56000,grs21_20:43000,grs21_30:51000,grs21_a91:56000,grs23_mt:54000,grs24_45:66000,supra4rz:90000,supra4rzs:75000,supra4szr:45000,supra4sz:35000,supra4us:110000,supra4usna:40000,f8trib:276000,f8spider:300000,f812sf:335000,f812gts:400000,f812comp:600000,f458:230000,f458spider:257000,f458spec:300000,huracanEvoRwd:208000,huracanEvoSpy:287000,huracanEvoRwdSpy:229000,huracanPerf:275000,huracanPerfSpy:308000,a7_30t:66000,a7_tdi:69000,s7_15:81000,rs7_15:105000,rs7p_16:129000,mustang25eco:32500,mustang18eco:26000,mustang25gt:43000,mustang09v6:21000,bmw230i:41000,bmwM2:63000,
+const MP_PRICE={explorer20xlt:39000,explorer20xlt4wd:41000,explorer20st:55000,explorer20plat:58000,nascar18:400000,f1c38:15000000,camry13le:24000,camry13v6:30000,camry21le:26000,camry21le_awd:27500,camry21se:27500,camry21se_awd:29000,camry21xsev6:36000,ch26rt2:49995,ch26rt4:52995,ch26sp2:59995,ch26sp4:62995,gtr23prem:115000,gtr23tspec:140000,gtr23nismo:212000,r34gtr:180000,r34vspec:220000,r34vspec2:240000,r34mspec:230000,r34vnur:400000,r34mnur:380000,r34ztune:1000000,grs20_30:50000,grs20_le:56000,grs21_20:43000,grs21_30:51000,grs21_a91:56000,grs23_mt:54000,grs24_45:66000,supra4rz:90000,supra4rzs:75000,supra4szr:45000,supra4sz:35000,supra4us:110000,supra4usna:40000,f8trib:276000,f8spider:300000,f812sf:335000,f812gts:400000,f812comp:600000,f458:230000,f458spider:257000,f458spec:300000,huracanEvoRwd:208000,huracanEvoSpy:287000,huracanEvoRwdSpy:229000,huracanPerf:275000,huracanPerfSpy:308000,a7_30t:66000,a7_tdi:69000,s7_15:81000,rs7_15:105000,rs7p_16:129000,mustang25eco:32500,mustang18eco:26000,mustang25gt:43000,mustang09v6:21000,bmw230i:41000,bmwM2:63000,
  challSXT11:25000,challRT23:39000,scatpack23:47000,hellcat23:67000,demon170:100000,z06:107000,porsche911:114000,
  camaro16v6:26700,elantraN:33000,sq5:54000,durangoHC:96000,mclaren720s:285000,mclaren765LT:358000,porscheGT3:162000,
  camaroSS19:37000,camaroZL1:62000,corvetteC7Z06:80000,corvetteC8:59000,shelbyGT350:60000,shelbyGT500:73000,
