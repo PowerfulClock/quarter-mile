@@ -7775,25 +7775,27 @@ function explorerKind(name){const n=(name||'').toLowerCase(),yr=parseInt(name,10
 function buildExplorerBP(colorHex,name){
   const n=(name||'').toLowerCase(),st=/\bst\b/.test(n),plat=/platinum/.test(n),xlt=!st&&!plat;
   const bright=plat?'chrome':st?'gloss':'satin';   // exterior accent finish: Platinum satin-chrome, ST gloss black, XLT silver
-  const dloTop=x=>x>-36?41.7:41.7-(-36-x)*0.11;
-  const slant=y=>-26.1-(41.7-y)*0.62;                       // rear edge of the rear-door glass
+  const dloTop=x=>x>-36?41.5:41.5-(-36-x)*0.11;
+  const slant=y=>-26.1-(41.5-y)*0.62;                       // rear edge of the rear-door glass
+  // greenhouse narrows toward the tail: the D-pillars lean in and the liftgate glass is much narrower than the body
+  const gb=x=>x>-46?22.4:22.4-Math.pow((-46-x)/18.6,1.6)*2.2,gt=x=>x>-44?17.9:17.9-Math.pow((-44-x)/20.6,1.6)*1.5;
   return bpCar(colorHex,name,{body:'explorer',NOSE:59.8,TAIL:-68.5,W:25.4,wx:38.4,wr:10.0,AR:11.6,
-    plan:[[59.8,7],[59.2,11],[58.3,14.4],[56.8,18.5],[55.4,21.0],[53.9,22.5],[52.4,23.6],[49.5,24.3],[45.1,25.0],[39.3,25.4],[-47,25.4],[-52.8,24.7],[-55.7,24.3],[-58.7,23.6],[-61.6,22.5],[-64.5,21.0],[-65.9,18.8],[-67.4,12.2],[-68.5,6]],
-    top:[[59.8,18],[59.5,21.5],[59.0,24.5],[58.3,27.0],[57.2,27.9],[54,28.6],[50,29.2],[45,29.9],[40,30.4],[35,30.9],[30,31.2],[27.6,31.3],[20,31.4],[10,31.5],[0,31.7],[-10,31.9],[-20,32.2],[-30,32.6],[-36,33.0],[-45,33.3],[-55,33.6],[-60,33.6],[-63.5,33.5],[-64.8,33.0],[-65.6,31.6],[-66.5,29.0],[-67.4,24.5],[-67.9,20.5],[-68.3,16.5],[-68.5,13.0]],
-    bot:[[59.8,14],[59.5,10],[58.8,7.6],[54,7.2],[50,7.6],[45,8.2],[30,8.6],[-30,8.6],[-47,9.2],[-52,9.6],[-58,9.9],[-63,10.2],[-66.5,11.0],[-68.5,12.6]],
-    crown:[56,28,1.0],tumbleY:25,tumble:0.7,
+    plan:[[59.8,7],[59.2,11],[58.3,14.4],[56.8,18.5],[55.4,21.0],[53.9,22.5],[52.4,23.6],[49.5,24.3],[45.1,25.0],[39.3,25.4],[-50,25.4],[-55,25.3],[-58.3,25.0],[-61,24.5],[-63,23.7],[-64.5,22.7],[-65.6,21.5],[-66.4,20.0],[-67.0,18.3],[-67.6,15.2],[-68.1,10.5],[-68.5,4]],
+    top:[[59.8,18],[59.5,21.5],[59.0,24.5],[58.3,27.0],[57.2,27.9],[54,28.6],[50,29.2],[45,29.9],[40,30.4],[35,30.9],[30,31.2],[27.6,31.3],[20,31.4],[10,31.5],[0,31.7],[-10,31.9],[-20,32.2],[-30,32.6],[-36,33.0],[-45,33.3],[-55,33.6],[-60,33.7],[-63.5,33.6],[-64.8,33.3],[-65.6,32.8],[-66.2,32.0],[-66.6,30.8],[-66.9,28.8],[-67.2,25.5],[-67.5,21.2],[-67.9,19.8],[-68.3,18.0],[-68.5,14.5],[-68.5,13.2]],
+    bot:[[59.8,14],[59.5,10],[58.8,7.6],[54,7.2],[50,7.6],[45,8.2],[30,8.6],[-30,8.6],[-47,9.2],[-52,9.6],[-58,9.9],[-63,10.2],[-66.5,10.8],[-68.2,11.6],[-68.5,12.4]],
+    crown:[56,28,1.0],tumbleY:25,tumble:0.8,
     flare:{r:1.2,t:1.3,arc:0.9,sz:0.45,in:0.35,dark:true},                   // black wheel-arch mouldings
-    creases:[{x0:-54,x1:43,y:x=>28.4+(-x)*0.012},{x0:-35,x1:23,y:x=>16.4+(23-x)*0.006}],
-    gh:{x0:-64.6,x1:27.6,GB:22.0,GT:18.4,rr:1.6,roof:[6,-57.5],rearSide:3.2,rearSideMat:2,
-      top:[[27.6,31.6],[25,33.3],[22,35.0],[19,36.7],[16,38.4],[13,40.0],[10,41.3],[7.5,42.3],[5,43.2],[2,43.8],[-2,44.2],[-10,44.4],[-30,44.5],[-45,44.4],[-52,44.1],[-56,43.6],[-58.6,42.8],[-60.3,41.4],[-61.8,39.2],[-63.2,36.8],[-64.6,34.4]],
+    creases:[{x0:-54,x1:43,y:x=>29.6+Math.max(0,-x)*0.014},{x0:-35,x1:23,y:x=>15.9+(23-x)*0.006}],
+    gh:{x0:-64.6,x1:27.6,GB:22.4,GT:17.9,gbF:gb,gtF:gt,rr:1.6,roof:[6,-56.5],rearSide:3.8,rearSideMat:2,
+      top:[[27.6,31.6],[25,33.3],[22,35.0],[19,36.7],[16,38.4],[13,40.0],[10,41.3],[7.5,42.3],[5,43.2],[2,43.8],[-2,44.2],[-10,44.4],[-30,44.5],[-45,44.4],[-52,44.1],[-55,43.7],[-57.4,42.9],[-59.4,41.6],[-61.2,39.6],[-62.9,37.2],[-64.6,34.2]],
       side:(x,y)=>{
-        if(x>12.5-(y-31.2)*0.56)return 2;                    // black A-pillar and mirror sail
+        if(x>12.6-(y-31.2)*0.43)return 2;                    // black A-pillar edge and mirror sail
         const top=dloTop(x);
         if(x>-37){
           if(y>top)return 0;                                  // body-colour roof side
           if(y>top-0.45)return 2;                             // black window frame
-          if(x<-5.7&&x>-9.9)return 2;                         // black B-pillar
-          if(x<=-9.9&&x>slant(y)){if(x<-25.3&&x>-25.9)return 2;return 1;}   // rear door glass + divider
+          if(x<-5.9&&x>-9.0)return 2;                         // black B-pillar
+          if(x<=-9.0&&x>slant(y)){if(x<-25.3&&x>-25.9)return 2;return 1;}   // rear door glass + divider
           if(x<=slant(y))return 0;                            // body-colour C-pillar
           return 1;}                                          // front door glass
         // quarter glass in a black surround, then the black D-pillar ("floating roof")
@@ -7801,28 +7803,32 @@ function buildExplorerBP(colorHex,name){
         if(y>33.9&&y<top-0.6&&x<-37.6&&x>qr)return 1;
         if(y>top+0.2)return 0;
         return 2;}},
-    mirror:[14.5,33.0,[4.6,3.0,3.8]],mirrorMat:st?'dark':'paint',
-    cuts:[[23.0,9,31.3],[-6.4,9,31.7],[-35.9,10,32.9]],
-    handles:[[-0.2,28.9],[-30.4,30.6]],handleMat:plat?'chrome':'paint',
+    mirror:[15.5,32.4,[5.6,3.6,3.9]],mirrorMat:st?'dark':'paint',
+    cuts:[[22.8,9,31.2],[-6.4,9,31.6],[-35.9,10,32.9]],
+    handles:[[-0.5,28.8],[-30.4,30.4]],handleMat:plat?'chrome':'paint',
     wheelOut:[24.8,24.8],
     trim:(c)=>{const {M,ribbon,disc,box,sideStrip,onHood,planW,gTop,yTop}=c;const {clear,F,R,quad,mesh,tip}=bp4Kit(c);
       const silver=new TH.MeshStandardMaterial({color:0xb4b9c0,roughness:0.32,metalness:0.75,emissive:0x1a1c20});
       const acc=bright==='chrome'?M.chrome:bright==='gloss'?M.gloss:silver;
+      const line=M.paintDk;                                   // panel shut lines and creases
+      M.glass.color.setHex(0x1b2633);M.glass.roughness=0.08;M.glass.metalness=0.5;   // tinted glass reads lighter than the black pillar trim
       // dark wheelhouse liners so the arches never show daylight through the body
       [38.4,-38.4].forEach(ax=>[1,-1].forEach(s=>{const d=new TH.Mesh(new TH.CircleGeometry(11.4,28),M.dark);d.position.set(ax,10.0,s*(25.4-7.2));d.rotation.y=s>0?0:Math.PI;c.shell.add(d);}));
       const oval=new TH.MeshStandardMaterial({color:0x1a3f9a,roughness:0.25,metalness:0.4,emissive:0x0a1a44,emissiveIntensity:0.6});
       const badge=(dir,z,y,r,sx)=>{const a=disc(dir,z,y,r*1.15,M.chrome,dir>0?0.32:0.3);a.scale.x=sx;const b=disc(dir,z,y,r,oval,dir>0?0.4:0.38);b.scale.x=sx;};
       /* ---- front ---- */
-      // headlamps: wide slab with an LED light-bar across the top that sweeps back along the fender,
-      // two rectangular LED projector modules inside, amber turn signal in the outer corner
+      // headlamps: clear lens over a chrome housing, LED light-bar across the top that sweeps back along the
+      // fender, two rectangular LED projectors, amber turn signal at the outer corner
       quad(1,11.2,23.7,[23.3,27.3],[24.1,28.1],0.12,M.gloss,14);
       quad(1,11.5,23.4,[23.6,27.0],[24.4,27.8],0.2,clear,14);
       F(11.8,23.2,a=>{const t=(a-11.8)/11.4;return[26.3+t*0.8,26.9+t*0.8];},0.3,M.drl,12);
       [[12.6,15.6],[16.2,19.2]].forEach(([a,b])=>{F(a-0.2,b+0.2,()=>[24.1,26.0],0.26,M.gloss,4);F(a,b,()=>[24.3,25.8],0.32,M.head,4);});
       F(20.0,22.8,a=>{const t=(a-20)/2.8;return[24.6+t*0.3,25.8+t*0.4];},0.3,M.amber,4);
-      sideStrip(42.6,55.4,x=>{const t=(55.4-x)/12.8;return[24.0+t*2.4,28.0-t*0.5];},0.12,M.gloss,0.4);    // lamp wrapping round the fender
-      sideStrip(43.2,55.0,x=>{const t=(55-x)/11.8;return[26.9+t*0.2,27.5-t*0.1];},0.2,M.drl,0.4);
-      sideStrip(52.0,54.8,()=>[24.4,25.4],0.2,M.amber,0.4);                                              // side marker / turn
+      // the lamp continues along the fender as a long tapering clear lens, amber marker at its tail
+      sideStrip(42.8,55.6,x=>{const t=(55.6-x)/12.8;return[23.6+t*3.6,28.1-t*0.3];},0.1,M.gloss,0.3);
+      sideStrip(43.4,55.2,x=>{const t=(55.2-x)/11.8;return[23.9+t*3.3,27.9-t*0.3];},0.16,clear,0.3);
+      sideStrip(44.0,54.8,x=>{const t=(54.8-x)/10.8;return[27.1+t*0.2,27.6-t*0.1];},0.22,M.drl,0.3);
+      sideStrip(44.2,48.4,x=>{const t=(48.4-x)/4.2;return[25.7+t*0.6,26.5];},0.22,M.amber,0.3);
       // grille: big hexagon of black-framed mesh, Ford oval in the middle
       const gy=a=>{const lo=a<11.9?19.6:19.6+(a-11.9)/3.5*4.4,hi=a<10.9?27.0:a<11.4?27.0-(a-10.9)/0.5*3.8:23.2-(a-11.4)/4.0*0.8;return[lo,Math.max(lo+0.1,hi)];};   // grille tucks under the lamp ends
       ribbon(1,-15.6,15.6,30,z=>{const r=gy(Math.min(15.4,Math.abs(z)));return[r[0]-0.35,r[1]+0.35];},0.12,acc);   // surround
@@ -7840,48 +7846,66 @@ function buildExplorerBP(colorHex,name){
       mesh(1,0,14.3,10.0,14.3,0.12,7,3,M.gloss);
       if(!xlt)F(0,13.3,()=>[6.4,9.2],0.22,plat?silver:M.gloss,8);
       if(plat)[2.2,6.6,10.8].forEach(z=>[1,-1].forEach(s=>ribbon(1,s*z-1.4,s*z+1.4,2,()=>[7.2,8.4],0.3,M.dark)));
-      // hood: two raised character lines running back from the grille corners
+      // hood: shut line round the front, two raised character lines running back from the grille corners
+      F(0,23.9,a=>{const y=28.35+Math.max(0,a-12)*0.02;return[y,y+0.14];},0.06,line,14);
       for(let x=33;x<56;x+=1.0)[1,-1].forEach(s=>onHood(1.0,0.1,0.28,M.paintDk,x,s*(6.2+(x-33)*0.12),0.03));
       onHood(20,0.05,0.4,M.paintLt,44,0,0.04);
       /* ---- sides ---- */
       sideStrip(48,59.4,()=>[7.4,10.4],0.08,M.dark,0.4);                                 // front bumper corner
-      sideStrip(-27,26.5,()=>[8.6,12.9],0.08,M.dark,0.5);                                // rocker cladding
-      if(!xlt)sideStrip(-24,24,()=>[11.5,12.0],0.16,acc,0.5);                            // bright rocker insert
-      sideStrip(-68.4,-50.5,x=>[9.4,13.6+Math.max(0,-62-x)*0.5],0.08,M.dark,0.4);       // rear bumper corner
-      sideStrip(-66.2,-63.8,()=>[15.4,16.1],0.16,M.tail,0.4);                            // rear side reflector
-      // tail lamp wraps forward onto the quarter panel as a wedge
-      sideStrip(-64.4,-54.6,x=>{const b=x>-58.9?31.0-(-54.6-x)/4.3*5.4:25.6;return[b,31.3];},0.12,M.gloss,0.3);
-      sideStrip(-64.2,-55.2,x=>{const b=x>-58.9?31.0-(-55.2-x)/3.7*5.2:25.9;return[b+0.15,31.1];},0.2,M.tail,0.3);
-      sideStrip(-64.0,-56.0,()=>[30.3,30.7],0.26,M.led,0.3);
+      sideStrip(-27,26.5,()=>[8.0,13.0],0.08,M.dark,0.5);                                // rocker cladding
+      if(!xlt)sideStrip(-24,24,()=>[12.1,12.6],0.16,acc,0.5);                            // bright rocker insert
+      sideStrip(-68.4,-50.5,x=>[9.4,13.8+Math.max(0,-60-x)*0.55],0.08,M.dark,0.4);      // rear bumper corner
+      sideStrip(-67.6,-65.6,()=>[16.0,16.6],0.16,M.tail,0.4);                            // rear side reflector
+      sideStrip(56.0,57.6,()=>[17.0,17.6],0.16,M.amber,0.4);                             // front side marker
+      // tail lamp on the quarter panel: a forward-pointing wedge with diagonal LED light-guides and the
+      // white reverse lamp showing at its back edge
+      const tb=(x,d)=>{const b=x>-62.7?30.9-(-54.2-d-x)/(8.5-d)*5.4:25.5;return Math.min(30.9,b);};
+      sideStrip(-64.6,-53.8,x=>[tb(x,-0.4)-0.2,31.3],0.1,M.gloss,0.25);
+      sideStrip(-64.3,-54.4,x=>[tb(x,0.2),31.0],0.18,M.tail,0.25);
+      [0,1,2,3].forEach(k=>sideStrip(-63.2,-55.6+k*0.1,x=>{const b=tb(x,0.4)+0.55+k*1.25;return b>30.6?[30.6,30.6]:[b,Math.min(30.7,b+0.28)];},0.24,M.led,0.25));
+      sideStrip(-64.3,-63.5,()=>[25.7,29.5],0.24,M.rev,0.2);
       // fuel door (driver's side)
       box(4.3,2.8,0.12,M.paintMid,-44.8,28.6,-(planW(-44.8)+0.02));
       // mirror turn-signal repeaters
-      [1,-1].forEach(s=>box(3.0,0.3,1.9,M.amber,14.6,31.6,s*27.6));
+      [1,-1].forEach(s=>box(3.6,0.3,2.0,M.amber,15.6,30.8,s*27.8));
       /* ---- rear ---- */
-      // tail lamps: red C-shape with a white reverse lamp up the inner edge
-      R(17.9,23.4,()=>[24.3,32.2],0.12,M.gloss,6);
-      R(18.1,23.2,()=>[24.5,32.0],0.2,M.tail,6);
-      R(18.4,20.6,()=>[25.3,30.0],0.28,M.rev,3);
-      R(20.9,22.8,()=>[30.7,31.4],0.3,M.led,3);R(22.3,22.9,()=>[25.2,31.2],0.3,M.led,2);
-      // liftgate: satin/chrome bar across with EXPLORER lettering, Ford oval above, trim badge
-      R(0,10.8,()=>[30.1,32.0],0.2,acc,10);
-      for(let k=0;k<8;k++){const z=-7.7+k*2.2;ribbon(-1,z-0.6,z+0.6,1,()=>[30.7,31.4],0.28,st?M.chrome:M.dark);}
-      badge(-1,0,33.3,0.7,2.4);
-      ribbon(-1,-17.6,-11.0,4,()=>[21.2,21.8],0.24,st?M.redL:M.chrome);
-      ribbon(-1,-4.6,4.6,6,()=>[42.6,43.1],0.24,M.led);                                  // high-mount stop lamp
-      // bumper: red reflectors, black lower bumper, silver diffuser, plate recess, exhaust tips
-      R(11.3,18.1,()=>[16.4,17.4],0.2,M.tail,4);
-      R(0,24.6,()=>[8.4,16.8],0.08,M.dark,14);
-      if(!xlt)R(0,19.8,()=>[10.9,14.1],0.16,plat?silver:M.gloss,10);
-      ribbon(-1,-5.4,5.4,6,()=>[12.0,16.9],0.14,M.gloss);ribbon(-1,-3.9,3.9,6,()=>[12.4,16.4],0.22,M.plate);
-      if(xlt)[1,-1].forEach(s=>tip(s*16.4,11.6,1.15));
-      else [1,-1].forEach(s=>{tip(s*13.9,12.0,1.25);tip(s*17.3,12.0,1.25);});
-      box(1.2,1.3,1.8,M.dark,-67.9,8.9,0);                                                // hitch receiver
-      // roof rails and liftgate spoiler
-      [1,-1].forEach(s=>{box(56,0.6,0.9,plat?silver:M.dark,-26,gTop(-26)+0.9,s*17.1);
-        [3,-55].forEach(x=>box(2.4,1.0,1.0,M.dark,x,gTop(x)+0.5,s*17.1));});
-      box(3.6,0.7,36,M.paint,-58.3,gTop(-58.3)+0.45,0,0.12);
-      box(3.0,0.25,34,M.dark,-58.8,gTop(-58.8)+0.05,0,0.12);
+      // tail lamps (on the body corners, outside the liftgate): tall rounded block, red top and outer side,
+      // white reverse lamp filling the lower inner part, a bright LED light-guide tracing the C
+      R(17.1,22.7,()=>[23.6,31.5],0.1,M.gloss,6);
+      R(17.3,22.5,()=>[23.8,31.3],0.18,M.tail,6);
+      R(17.6,20.1,()=>[24.4,28.9],0.26,M.rev,3);
+      R(20.1,20.35,()=>[24.4,29.1],0.27,M.gloss,1);
+      R(17.6,21.9,()=>[30.0,30.5],0.27,M.led,4);R(21.5,21.95,()=>[24.4,30.5],0.27,M.led,2);R(20.4,21.95,()=>[24.4,24.85],0.27,M.led,2);
+      // liftgate: shut lines, sculpted planes, satin/chrome EXPLORER bar, Ford oval, plate, trim badge
+      R(16.9,17.05,()=>[18.9,31.4],0.06,line,1);
+      ribbon(-1,-16.9,16.9,20,()=>[18.6,18.75],0.06,line);
+      [1,-1].forEach(s=>{for(let k=0;k<8;k++){const t0=k/8,t1=(k+1)/8;const z0=s*(10.6+3.0*t0),z1=s*(10.6+3.0*t1);
+          ribbon(-1,Math.min(z0,z1),Math.max(z0,z1),1,z=>{const t=(Math.abs(z)-10.6)/3.0;const y=29.2-t*5.1;return[y-0.07,y+0.07];},0.06,line);}
+        ribbon(-1,Math.min(s*13.6,s*16.9),Math.max(s*13.6,s*16.9),3,()=>[24.05,24.2],0.06,line);});
+      ribbon(-1,-10.6,10.6,16,z=>{const e=Math.max(0,Math.abs(z)-9.6);return[29.2+e*0.4,31.0-e*0.3];},0.2,acc);
+      for(let k=0;k<8;k++){const z=-7.7+k*2.2;ribbon(-1,z-0.6,z+0.6,1,()=>[29.8,30.4],0.28,st?M.chrome:M.dark);}
+      badge(-1,0,32.6,0.7,2.4);
+      ribbon(-1,-4.7,4.7,6,()=>[20.0,24.9],0.12,M.gloss);ribbon(-1,-3.9,3.9,6,()=>[20.4,24.4],0.2,M.plate);
+      ribbon(-1,-0.5,0.5,1,()=>[25.2,25.7],0.16,M.dark);                                 // backup camera
+      ribbon(-1,-17.0,-10.6,4,()=>[20.8,21.3],0.22,st?M.redL:M.chrome);                 // PLATINUM / ST badge
+      // bumper: red reflectors, black lower bumper with a curved top, silver diffuser framing the tips, hitch cover
+      R(0,24.6,a=>[8.6,17.2+Math.max(0,a-17)*0.12],0.08,M.dark,14);
+      R(10.8,17.8,()=>[16.1,16.7],0.18,M.tail,4);
+      if(!xlt){R(0,19.7,a=>a>11.6?[10.6,14.0]:[12.4,14.0],0.16,plat?silver:M.gloss,12);
+        R(11.8,18.0,()=>[10.0,12.6],0.2,M.gloss,4);}
+      ribbon(-1,-8.2,8.2,8,()=>[11.9,14.3],0.14,M.gloss);ribbon(-1,-1.2,1.2,2,()=>[12.4,13.6],0.2,M.dark);
+      if(xlt)[1,-1].forEach(s=>tip(s*15.0,11.4,1.15));
+      else [1,-1].forEach(s=>{tip(s*13.6,11.3,1.1);tip(s*16.2,11.3,1.1);});
+      box(1.2,1.0,1.8,M.dark,-67.5,10.9,0);                                                // hitch receiver
+      // roof rails and a liftgate spoiler that overhangs the glass, high-mount stop lamp under its lip
+      [1,-1].forEach(s=>{box(57,0.6,0.9,plat?silver:M.dark,-26,gTop(-26)+0.9,s*16.6);
+        [3,-54].forEach(x=>box(2.4,1.0,1.0,M.dark,x,gTop(x)+0.5,s*16.6));});
+      {const sp=new TH.Shape();sp.moveTo(-54,0);sp.lineTo(-60.6,-1.1);sp.lineTo(-60.6,-1.7);sp.lineTo(-57,-1.4);sp.lineTo(-54,-0.9);sp.lineTo(-54,0);
+       const g=new TH.ExtrudeGeometry(sp,{depth:31.6,bevelEnabled:false});g.translate(0,0,-15.8);
+       const m=new TH.Mesh(g,M.paint);m.position.y=44.3;c.shell.add(m);
+       const lip=new TH.Mesh(new TH.BoxGeometry(0.5,0.35,31),M.dark);lip.position.set(-60.4,44.3-1.6,0);c.shell.add(lip);
+       const ch=new TH.Mesh(new TH.BoxGeometry(0.3,0.3,9.6),M.led);ch.position.set(-60.5,44.3-1.85,0);c.shell.add(ch);
+       [1,-1].forEach(s=>{const w=new TH.Mesh(new TH.BoxGeometry(5.2,1.2,0.5),M.dark);w.position.set(-58.2,43.0,s*15.9);w.rotation.z=0.18;c.shell.add(w);});}
     }});
 }
 /* ---------- Dodge Charger (2011-14), from a scaled 2011 Charger blueprint ----------
