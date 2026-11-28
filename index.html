@@ -2931,7 +2931,6 @@ function peakPowerRpm(c){let best=c.hpRpm||c.redline*0.85,bp=0;
    for real and the quickest wins. */
 function pickRollGear(c){
   if(!c.startMph||c.gears.length<2||c.trans==='cvt'||c.trans==='ecvt')return null;
-  if(tcuActive(c))return null;        // the transmission computer picks its own kickdown in the race
   const r=(c.tireD*0.0254)/2,v=c.startMph/MPH_PER_MS;
   let best=null,bestEt=1e9;
   for(let g=0;g<c.gears.length;g++){
@@ -3187,7 +3186,7 @@ function simulate(c){
   const sysW=((c.sysHp||(c.hp+(c.hybHp||0)*0.65)))*745.7;
   let omega=rolling?v/r:0,tcCut=0;
   const TC=tcuActive(c),TP=TCU[c.mode]||TCU.normal;
-  let gear=rolling?(c.startGear!=null?c.startGear:TC?cruiseGearFor(c,c.startMph):bestGearFor(c,c.startMph)):0;
+  let gear=rolling?(c.startGear!=null?c.startGear:bestGearFor(c,c.startMph)):0;
   // TCU state: last shift time, the engine-speed rate it sees, the grip it believes in, a pending kickdown
   let tcLast=-9,tcRpmPrev=null,tcRate=0,tcN=m*G*(c.drive==='rwd'?rf:c.drive==='fwd'?ff:1),tcMu=mu,tcKd=0,tcKdG=-1;
   const upAt=[];
@@ -13496,7 +13495,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
         const rpmIn=g=>Math.min(c.redline,(v/(2*Math.PI*rTire))*60*c.gears[g]*c.fd);
         const isC=(c.trans==='cvt'||c.trans==='ecvt');
         const IcEV=(IND[c.ind]||IND.na).electric;
-        const tg=tcuActive(c)?cruiseGearFor(c,S):(c.startGear!=null)?c.startGear:bestGearFor(c,S);
+        const tg=(c.startGear!=null)?c.startGear:bestGearFor(c,S);
         const cg=(isC||IcEV)?tg:Math.max(tg,cruiseGearFor(c,S));
         /* Arrive cruising in the tallest gear for the speed, then work down one
            gear at a time to the chosen gear before the line. Each downshift sweeps
@@ -14236,7 +14235,7 @@ border:1px solid var(--amber);padding:10px 14px;font-family:'Roboto Mono',monosp
 <div id="qmUpd" hidden role="status"><span id="qmUpdMsg">A new version of the game is out.</span>
 <button type="button" class="go" id="qmUpdGo">Reload</button><button type="button" id="qmUpdLater">Later</button></div>
 <script>
-(function(){const V='104e7a833c';let dismissed=null;
+(function(){const V='ba4f29d89a';let dismissed=null;
   function show(v){if(dismissed===v)return;const b=document.getElementById('qmUpd');
     const inRace=window.MP&&MP.on;document.getElementById('qmUpdMsg').textContent=inRace?
       'A new version of the game is out. Reload after this session; everyone in a room should be on the same version.':'A new version of the game is out.';
