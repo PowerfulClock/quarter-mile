@@ -544,6 +544,7 @@ footer p{margin-bottom:10px}
 <footer>
   <p><b>The torque curve</b> is built through your four peak points, shaped by the induction type, and anchored so that power falls after its peak the way a real engine does. Boost is derived from the crank figure and displacement: a forced-induction engine's naturally aspirated baseline is calculated from its swept volume, and whatever pressure ratio is needed to reach your target output is reported as boost.</p>
   <p><b>Launch.</b> Launch control holds a chosen rpm and, on a boosted car, builds nearly full boost against the brakes by retarding ignition and running rich to drive the turbine. Brake boosting is the manual version — throttle against the brakes — and it is limited twice over: the brakes can only hold about 2,800&nbsp;rpm, and without the ignition trickery the turbos barely spool, which is why owners measure one or two psi doing it against fifteen or more on launch control. Off the line with no launch at all, a turbo car starts at idle with nothing in the manifold and has to wait for the exhaust to build.</p>
+  <p><b>Automatic gearboxes.</b> Torque-converter automatics, dual-clutches and automated manuals have a transmission computer. Every few milliseconds it compares the acceleration the car would get by staying in gear with what it would get in the next gear: it reads both off the engine's own torque curve (boost included), lands the next gear at the rpm the ratios dictate, adds the bigger rotating inertia of the lower gear, and caps both at the grip the tyres can use. It upshifts when the next gear pulls at least as hard, holds a gear while the tyres are saturated, and never plans past the rev limiter. Normal leaves a little more room below redline and waits longer between shifts; Sport, Track and Drag run right up to it. On a rolling start an automatic cruises in a tall gear (lower in Sport) and, at full pedal, kicks down after a short delay, straight to the gear that pulls hardest without over-revving: a torque-converter box can skip several gears at once, a dual-clutch needs two clutch swaps for a gear on the same shaft. A CVT holds the engine just under the real power peak (closer to it in Sport). Manuals use the shift points below.</p>
   <p><b>Shift points.</b> Fastest mode seeds from the crossover rule — shift when the next gear's wheel torque exceeds this gear's — then refines against the simulation itself, which catches things the rule misses, like short-shifting first on a car that is already spinning its tyres.</p>
   <p><b>Gear changes</b> follow the gearbox and drive mode. A torque-converter automatic in Normal slips its clutches on over about a third of a second: drive torque sags to roughly 60% and recovers smoothly, so the car keeps pulling and the body barely moves. Sport and Track fill the clutches harder and quicker, and Drag Strip holds nearly full torque through a sub-0.1 s change that slams the driveline. A dual-clutch box hands over from one clutch to the other with little torque gap. A manual or single-clutch automated manual has to open the clutch, so torque drops to zero, the car coasts briefly, and the nose dips before the clutch bites again.</p>
   <p><b>Two 0-60 figures</b> are reported. The first is a true standing start; the second applies the one-foot rollout that drag strips and virtually every published road test use, because the timer only starts once the car has already moved a foot. That is worth roughly three tenths, so it matters which one you are comparing against — most phone timers and magazine figures are rollout numbers.</p>
@@ -2894,19 +2895,43 @@ function bestGearFor(c,mph){
 /* The gear a car is cruising in at a steady speed before the hit: the tallest
    one that keeps the engine at a relaxed 1,300 rpm or more. */
 function cruiseGearFor(c,mph){
+  /* Light-throttle schedule: the tallest gear that keeps the engine above a floor. Normal is tuned for economy and
+     lugs down to ~1,300 rpm; Sport holds a gear or two lower so the engine sits nearer its torque, Track lower still. */
   const r=(c.tireD*0.0254)/2,v=mph/MPH_PER_MS;
+  const floor=({sport:1700,track:2100,corsa:2300,drag:2300})[c.mode]||1300;
   for(let g=c.gears.length-1;g>=0;g--){
     const rpm=(v/(2*Math.PI*r))*60*c.gears[g]*c.fd;
-    if(rpm>=1300&&rpm<=c.redline*0.6)return g;
+    if(rpm>=floor&&rpm<=c.redline*0.6)return g;
   }
   return 0;
 }
+/* ---------- transmission computer (TCU) for automatics, dual-clutches and automated manuals ----------
+   Instead of shifting at a fixed rpm, the TCU compares, every few milliseconds, the acceleration the car would
+   get if it stays in the current gear against the acceleration it would get in the next gear. Both use the
+   engine's own torque curve (boost and spool included), the real gear ratios, the rpm the engine will land at,
+   the extra rotating inertia of the lower gear, and the grip the tyres can actually use. The engine speed it
+   reasons about is predicted forward by how long the box takes to hand the torque over. */
+function tcuActive(c){return (c.trans==='auto'||c.trans==='dct'||c.trans==='amt')&&c.shiftMode==='fastest'&&
+  c.gears&&c.gears.length>1&&!(IND[c.ind]||IND.na).electric;}
+const TCU={
+  // k: next-gear acceleration needed (relative to staying) before an upshift; marg: closest approach to redline
+  // (as a fraction) the computer will plan for; down: highest landing rpm it accepts on a downshift;
+  // kd: seconds from full pedal to a kickdown starting (pedal-rate filter + clutch fill); gap: minimum time between shifts
+  normal:{k:0.99,marg:0.02,down:0.86,kd:{auto:0.32,dct:0.16,amt:0.26},gap:0.70},
+  sport: {k:1.000,marg:0.010,down:0.91,kd:{auto:0.20,dct:0.10,amt:0.18},gap:0.42},
+  track: {k:1.000,marg:0.006,down:0.94,kd:{auto:0.14,dct:0.07,amt:0.14},gap:0.32},
+  corsa: {k:1.000,marg:0.004,down:0.95,kd:{auto:0.12,dct:0.06,amt:0.12},gap:0.28},
+  drag:  {k:1.000,marg:0.004,down:0.95,kd:{auto:0.12,dct:0.06,amt:0.12},gap:0.28}};
+// the rpm of peak power read off the torque curve (not the brochure figure), for the CVT to aim at
+function peakPowerRpm(c){let best=c.hpRpm||c.redline*0.85,bp=0;
+  for(let R=Math.max(1000,c.redline*0.3);R<=c.redline;R+=50){const p=torqueAt(c,R)*R;if(p>bp){bp=p;best=R;}}return best;}
 /* The best gear for a rolling start is not simply the one with the most torque
    right now: a gear that leaves the engine just under its shift point makes the
    car upshift almost immediately, which costs time. So each candidate is raced
    for real and the quickest wins. */
 function pickRollGear(c){
   if(!c.startMph||c.gears.length<2||c.trans==='cvt'||c.trans==='ecvt')return null;
+  if(tcuActive(c))return null;        // the transmission computer picks its own kickdown in the race
   const r=(c.tireD*0.0254)/2,v=c.startMph/MPH_PER_MS;
   let best=null,bestEt=1e9;
   for(let g=0;g<c.gears.length;g++){
@@ -3153,7 +3178,7 @@ function simulate(c){
      or so (the "rubber band"), then holds a little under peak power. */
   const CVT_RATE=2600;                        // rpm per second the ratio controller can add
   // real calibrations hold a few hundred rpm under the power peak (belt life, noise)
-  const cvtTgt=Math.min(c.redline*0.95,c.hpRpm*0.92);
+  const cvtTgt=Math.min(c.redline*0.95,peakPowerRpm(c)*(({sport:0.97,track:0.99,corsa:0.99,drag:0.99})[c.mode]||0.92));
   let cvtCmd=rolling?Math.max(1600,Math.min(cvtTgt,2200)):(plainLaunch?850:stallRpm);
   /* eCVT: the engine is decoupled from the wheels, the generator spins it up to its
      working rpm (~half a second), and the output is capped at the system rating. */
@@ -3161,7 +3186,21 @@ function simulate(c){
   const cEng=Object.assign({},c,{hybHp:0,hybTq:0});   // engine-only torque for the eCVT
   const sysW=((c.sysHp||(c.hp+(c.hybHp||0)*0.65)))*745.7;
   let omega=rolling?v/r:0,tcCut=0;
-  let gear=rolling?(c.startGear!=null?c.startGear:bestGearFor(c,c.startMph)):0;
+  const TC=tcuActive(c),TP=TCU[c.mode]||TCU.normal;
+  let gear=rolling?(c.startGear!=null?c.startGear:TC?cruiseGearFor(c,c.startMph):bestGearFor(c,c.startMph)):0;
+  // TCU state: last shift time, the engine-speed rate it sees, the grip it believes in, a pending kickdown
+  let tcLast=-9,tcRpmPrev=null,tcRate=0,tcN=m*G*(c.drive==='rwd'?rf:c.drive==='fwd'?ff:1),tcMu=mu,tcKd=0,tcKdG=-1;
+  const upAt=[];
+  /* how far ahead the computer looks: sensing + decision + solenoid response before the ratio actually changes
+     (the sim swaps the ratio the instant the shift starts and plays the torque phase out afterwards) */
+  const tcLat=c.trans==='dct'?0.025:c.trans==='amt'?0.035:0.045;
+  // acceleration the car would have in gear g with the engine at rpm R (traction-capped, inertia of that gear included)
+  const tcAcc=(g,R,bst)=>{if(R>c.redline*1.001)return 0;
+    const full=torqueAt(c,Math.max(800,R)),na=c.naCurve?Math.min(full,naTorqueAt(c,Math.max(800,R))):full*bi.naFrac;
+    const gB=(c.gearBoost&&c.gearBoost[g]!=null)?c.gearBoost[g]:1;
+    let e=(na+(full-na)*Math.min(1,bst)*gB)*MD.powerMul;if(c.gearTq&&c.gearTq[g]!=null)e=Math.min(e,c.tq*c.gearTq[g]*MD.powerMul);
+    const ovg=c.gears[g]*c.fd,F=Math.min(e*pf*ovg*c.eff*1.35582/r,tcMu*tcN);
+    return F/(m+(IW+IE*ovg*ovg)/(r*r));};
   /* Rolling start: the downshifts happen on the approach, so the car reaches the
      line already in its chosen gear and pulls from the instant the light goes green. */
   let kickLeft=0;
@@ -3209,7 +3248,56 @@ function simulate(c){
       const lr=(c.launch==='none')?flareNow:ls.rpm;
       if(rpm<lr){rpm=lr;slip=true;}
     }
-    const trig=Math.min((c.shiftPoints&&c.shiftPoints[gear])||c.redline,c.redline);
+    let downNow=false;
+    const trig=TC?Infinity:Math.min((c.shiftPoints&&c.shiftPoints[gear])||c.redline,c.redline);
+    if(TC&&!coasting&&!isCVT){
+      const rpmW=wr*c.gears[gear]*c.fd;                       // output-shaft speed as the engine sees it
+      if(tcRpmPrev!==null&&shiftT<=0)tcRate+=(((rpmW-tcRpmPrev)/DT)-tcRate)*Math.min(1,DT/0.04);
+      tcRpmPrev=rpmW;
+      const since=t-tcLast,bNow=Math.min(1,boost);
+      /* ---- upshift: stay or go, judged on acceleration at the rpm the swap will actually happen ---- */
+      if(shiftT<=0&&gear<c.gears.length-1&&v>0.5){
+        const rpmP=rpmW+Math.max(0,tcRate)*tcLat;
+        const lim=c.redline*(1-TP.marg);
+        let go=rpmW>=c.redline*0.995||rpmP>=lim;               // rev protection always wins
+        if(!go&&since>=TP.gap&&rpmP>c.redline*0.45){
+          const aStay=tcAcc(gear,rpmP,bNow),aNext=tcAcc(gear+1,rpmP*c.gears[gear+1]/c.gears[gear],bNow);
+          // tyres already saturated in this gear: a shift buys nothing, so hold it
+          const engStay=torqueAt(c,rpmP)*c.gears[gear];
+          const tractionBound=tcAcc(gear,rpmP,bNow)>0&&engStay*pf*c.fd*c.eff*1.35582/r>tcMu*tcN*1.02;
+          go=!tractionBound&&aNext>=aStay*TP.k;}
+        if(go&&(since>=0.12||rpmW>=c.redline*0.995)){
+          shiftFrom=rpm;shiftT=shiftTime;shiftDur=shiftTime;gear++;lastUp=t;tcLast=t;upAt.push(Math.round(Math.min(rpm,c.redline)));
+          if(MD.shock>0){
+            const dW=(rpm-rpm*c.gears[gear]/c.gears[gear-1])*Math.PI/30;
+            const Tin0=Math.max(40,torqueAt(c,rpm)*1.35582),tEng=Math.max(0.06,SHOCK_T*0.55);
+            slamAmp=Math.min(2.2,(IE*SLAM_IE*dW/tEng)/Tin0)*MD.shock*(SPF?Math.min(1,0.25+harsh):1);
+            {const w1=rpm*Math.PI/30,w2=w1-dW;slamE=0.6*0.5*IE*(w1*w1-w2*w2)*Math.min(1,MD.shock)*(SPF?Math.min(1,0.25+harsh):1);}
+            shockT=SHOCK_T;hopT=SHOCK_T;}
+          ov=c.gears[gear]*c.fd;rpm=Math.max(rpm*c.gears[gear]/c.gears[gear-1],wr*ov);tcRpmPrev=wr*ov;
+        }
+      }
+      /* ---- kickdown: full pedal and a lower gear would pull meaningfully harder without over-revving ---- */
+      if(shiftT<=0&&gear>0&&since>=Math.max(1.0,TP.gap*2)&&(tcKdG>=0||((t/DT)|0)%25===0)){   // checked every 25 ms
+        const roadR=(v/r)*60/(2*Math.PI);
+        const aCur=tcAcc(gear,roadR*c.gears[gear]*c.fd,bNow);let best=gear,aBest=aCur;
+        for(let g=gear-1;g>=0;g--){const R=roadR*c.gears[g]*c.fd;if(R>c.redline*TP.down)break;
+          const aG=tcAcc(g,R,bNow);if(aG>aBest*1.03){aBest=aG;best=g;}}
+        if(best<gear&&aBest>=aCur*1.12){
+          if(tcKdG!==best){tcKdG=best;tcKd=TP.kd[c.trans]||0.25;}
+          tcKd-=DT;
+          if(tcKd<=0){
+            const steps=gear-best;
+            // a torque-converter auto can skip straight down; a DCT swaps clutches (two swaps if the gear is on the
+            // same shaft); an automated manual has to go through neutral each time
+            const d=c.trans==='auto'?shiftTime*(1.25+0.18*(steps-1))+0.06:c.trans==='dct'?shiftTime*(steps%2?1.2:2.0):shiftTime*steps*0.85;
+            shiftFrom=rpm;gear=best;shiftT=d;shiftDur=d;tcLast=t;tcKdG=-1;kickLeft=c.trans==='amt'?0:d;downNow=true;
+            ov=c.gears[gear]*c.fd;rpm=wr*ov;tcRpmPrev=rpm;
+          }
+        }else tcKdG=-1;
+      }
+      if(gear<c.gears.length-1&&shiftT<=0&&rpm>c.redline)rpm=c.redline;   // bouncing off the limiter if it ever gets there
+    }
     if(!isCVT&&rpm>trig&&!coasting){
       if(gear<c.gears.length-1&&shiftT<=0){shiftFrom=rpm;shiftT=shiftTime;shiftDur=shiftTime;
         gear++;lastUp=t;
@@ -3231,7 +3319,6 @@ function simulate(c){
     }
     /* Braking after the stripe: the gearbox steps down as the revs fall, like a
        real car coming to a stop. Each downshift blips the engine back up. */
-    let downNow=false;
     if(coasting&&!isCVT&&!isEV&&gear>0&&shiftT<=0){
       // economy-minded in Normal; the sport modes drop gears earlier and keep the revs up
       const dFrac=({normal:0.26,sport:0.36})[c.mode]||0.45;
@@ -3273,7 +3360,7 @@ function simulate(c){
     // judged on road speed plus a normal 1% of tyre slip, so wheelspin cannot
     // trip it early at high speed
     const roadRpm=(v*1.01/r)*60/(2*Math.PI)*ov;
-    if(!isECVT&&gear>=c.gears.length-1&&shiftT<=0&&roadRpm>c.redline)driveF=Math.min(driveF,0);
+    if(!isECVT&&(gear>=c.gears.length-1||TC)&&shiftT<=0&&roadRpm>c.redline)driveF=Math.min(driveF,0);
     // electronic top-speed limiter, for cars that have one
     if(c.vmax&&v*2.23694>=c.vmax)driveF=Math.min(driveF,0);
     if(coasting)driveF=-0.10*Math.abs(driveF);      // throttle lifted: light engine braking
@@ -3332,6 +3419,7 @@ function simulate(c){
     let muEff=muX*f;
     muEff=Math.max(-muX,Math.min(muX,muEff));
     let Ftire=muEff*N;
+    tcN=N;tcMu=muX;
     let Tin=Tdrive;
     /* Traction control does not merely stop the wheel accelerating — it drives
        the slip back down to target. Torque is therefore the amount the tyre is
@@ -3419,7 +3507,7 @@ function simulate(c){
   const etFinal=etDone!==null?etDone:t;
   const trapV=trace.length?trace.find(s=>s.x*FT_PER_M>=(c.raceFt||1320))||trace[trace.length-1]:{v};
   return{et:etFinal,trap:(trapV.v||v)*MPH_PER_MS,sixty,sixtyRoll:(sixty!==null&&tRoll!==null)?sixty-tRoll:null,
-    trace,car:c,tlTime:tl,mu:mu*prepAt(c,0)*tyreGripFactor(c.tire,(c.tireTemp0!=null?c.tireTemp0:tBase),c.temp),
+    trace,car:c,tlTime:tl,tcu:TC,upAt,mu:mu*prepAt(c,0)*tyreGripFactor(c.tire,(c.tireTemp0!=null?c.tireTemp0:tBase),c.temp),
     tyre0:(c.tireTemp0!=null?c.tireTemp0:tBase),boostPsi:bi.psi,rho,aero:trapAero||{drag:aeroDrag,down:aeroDown,roll:aeroRoll,v},aeroCla:AD.cla,
     idealEt:5.825*Math.pow(c.weight/c.hp,1/3)};
 }
@@ -3466,6 +3554,7 @@ function* spSearch(c){
   if(SP_CACHE.size>200)SP_CACHE.clear();SP_CACHE.set(key,out);return out;
 }
 function resolveShiftPoints(c){
+  if(tcuActive(c))return crossoverPoints(c);   // only a preview: the TCU decides each shift live in the race
   if(c.shiftMode==='redline')return c.gears.map(()=>c.redline);
   if(c.shiftMode==='peak')return c.gears.map(()=>Math.min(c.redline,Math.round(c.hpRpm)));
   if(c.shiftMode==='custom')return c.gears.map(()=>Math.min(c.redline,c.shiftRpm||c.redline));
@@ -5689,7 +5778,7 @@ function precomputeShift(lane){clearTimeout(SP_PRE[lane]);const tok=SP_TOK[lane]
     if(typeof laneEmpty==='function'&&laneEmpty(lane))return;
     const c=readCar(lane);if(validate(c).length)return;
     c.raceFt=raceDist();c.startMph=startMph();if(c.startMph>0)return;
-    if(['redline','peak','custom'].indexOf(c.shiftMode)>=0||SP_CACHE.has(spKey(c)))return;
+    if(['redline','peak','custom'].indexOf(c.shiftMode)>=0||tcuActive(c)||SP_CACHE.has(spKey(c)))return;
     const key=spKey(c),g=SP_GEN.get(key)||spSearch(c);SP_GEN.set(key,g);
     // one trial race per slice, paused while a race is playing; dropped if the car changes again
     const step=()=>{if(SP_TOK[lane]!==tok)return;if(window.__racing){setTimeout(step,400);return;}
@@ -5754,7 +5843,8 @@ function refresh(lane){
     (c.venue==='strip'?' (prepped strip, +'+Math.round((prepAt(c,0)-1)*100)+'%)':'');
   const sp=document.getElementById('spNote'+lane);
   if(sp&&c.gears.length&&!isNaN(c.redline)){
-    if(c.shiftMode==='fastest')sp.textContent='Fastest shift points are computed when you run the race.';
+    if(tcuActive(c))sp.textContent='The transmission computer picks every shift live: it compares the acceleration in this gear with the next one, using the power curve, the ratios, the rpm it will land at and the grip available. Drive mode changes how it plans.';
+    else if(c.shiftMode==='fastest')sp.textContent='Fastest shift points are computed when you run the race.';
     else if(c.shiftMode==='redline')sp.textContent='Holding every gear to '+c.redline+' rpm.';
     else if(c.shiftMode==='peak')sp.textContent='Shifting at peak power ('+Math.round(c.hpRpm)+' rpm).';
     else sp.textContent='Shifting every gear at '+Math.min(c.redline,c.shiftRpm||c.redline)+' rpm.';
@@ -13321,7 +13411,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
   const D=raceDist(),S=startMph();
   lanes.forEach(l=>{cars[l].raceFt=D;cars[l].startMph=S;});
   document.getElementById('treeMsg').textContent='Computing shift points…';
-  if(!window.__spReady){const need=lanes.some(l=>{const c=Object.assign({},cars[l]);return c.shiftMode!=='redline'&&c.shiftMode!=='peak'&&c.shiftMode!=='custom'&&!SP_CACHE.has(spKey(c));});
+  if(!window.__spReady){const need=lanes.some(l=>{const c=Object.assign({},cars[l]);return c.shiftMode!=='redline'&&c.shiftMode!=='peak'&&c.shiftMode!=='custom'&&!tcuActive(c)&&!SP_CACHE.has(spKey(c));});
     if(need){window.__spReady=true;const btn=document.getElementById('runBtn'),was=btn.disabled;btn.disabled=true;
       setTimeout(()=>{btn.disabled=false;btn.click();btn.disabled=was;window.__spReady=false;},30);return;}}
   window.__spReady=false;
@@ -13340,7 +13430,9 @@ document.getElementById('runBtn').addEventListener('click',()=>{
     }
     res[l]=simulate(c);});
   lanes.forEach(l=>{const el=document.getElementById('cl-sp-'+l);
-    if(el)el.textContent='SHIFT AT '+cars[l].shiftPoints.slice(0,Math.max(1,cars[l].gears.length-1)).join(' / ')+' RPM';});
+    if(!el)return;
+    if(res[l]&&res[l].tcu){const u=res[l].upAt||[];el.textContent=u.length?'TCU SHIFTS '+u.join(' / ')+' RPM':'TCU';}
+    else el.textContent='SHIFT AT '+cars[l].shiftPoints.slice(0,Math.max(1,cars[l].gears.length-1)).join(' / ')+' RPM';});
   resetLanes();
   const stage={};lanes.forEach(l=>stage[l]=launchState(cars[l]));
   const dig=(S===0);
@@ -13404,7 +13496,7 @@ document.getElementById('runBtn').addEventListener('click',()=>{
         const rpmIn=g=>Math.min(c.redline,(v/(2*Math.PI*rTire))*60*c.gears[g]*c.fd);
         const isC=(c.trans==='cvt'||c.trans==='ecvt');
         const IcEV=(IND[c.ind]||IND.na).electric;
-        const tg=(c.startGear!=null)?c.startGear:bestGearFor(c,S);
+        const tg=tcuActive(c)?cruiseGearFor(c,S):(c.startGear!=null)?c.startGear:bestGearFor(c,S);
         const cg=(isC||IcEV)?tg:Math.max(tg,cruiseGearFor(c,S));
         /* Arrive cruising in the tallest gear for the speed, then work down one
            gear at a time to the chosen gear before the line. Each downshift sweeps
@@ -13604,8 +13696,9 @@ function slipHtml(r){
    '<div class="slip-row"><span>Tyres at launch'+(c.burnout&&!c.startMph?' (after burnout)':'')+'</span><span>'+Math.round(r.tyre0)+'°F</span></div>'+
    '<div class="slip-row"><span>Tyre grip (μ)'+(c.venue==='strip'?' — prepped':'')+'</span><span>'+r.mu.toFixed(2)+'</span></div>'+
    '<div class="slip-row"><span>Traction limited</span><span>'+(r.tlTime/r.et*100).toFixed(0)+'%</span></div>'+
+   (r.tcu?'<div class="slip-row"><span>Shifts (transmission computer)</span><span>'+((r.upAt&&r.upAt.length)?r.upAt.join(' / ')+' rpm':'—')+'</span></div>':
    '<div class="slip-row"><span>Shift points</span><span>'+
-     (c.shiftPoints?c.shiftPoints.slice(0,Math.max(1,c.gears.length-1)).join(' / '):'—')+'</span></div>';
+     (c.shiftPoints?c.shiftPoints.slice(0,Math.max(1,c.gears.length-1)).join(' / '):'—')+'</span></div>');
   return h;
 }
 function showSlipN(res,lanes){
